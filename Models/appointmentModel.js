@@ -17,4 +17,4 @@ const appointmentSchema = new mongoose.Schema({
 
 appointmentSchema.plugin(AutoIncreament , {_id:'appointmentCounter'});
 
-mongoose.model('appointment' , appointmentSchema);
+mongoose.model('appointments' , appointmentSchema);
