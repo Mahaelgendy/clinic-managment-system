@@ -15,7 +15,7 @@ const invoiceSchema = new mongoose.Schema({
     
 }, { _id: false }
 )
-medicineSchema.plugin(AutoIncreament);
+invoiceSchema.plugin(AutoIncreament);
 
 mongoose.model('invoices', invoiceSchema)
 
