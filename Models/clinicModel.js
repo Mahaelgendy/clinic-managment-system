@@ -3,12 +3,17 @@ const AutoIncreament = require('mongoose-sequence')(mongoose);
 
 const addres = require('./adressModel') 
 
+const service = new mongoose.Schema({
+    name:{type:String , required:true},
+    salay:{type:Number, required:true},
+    doctor_id:{type:Number, required:true , ref:'doctor'}
+})
+
 const clinicSchema = new mongoose.Schema({
     _id:{type:Number},
-    doctor_id : {type:Number , ref:'doctors'}, 
     clinic_location : addres.adressSchema,
-    service_names:{type: Array , required:true}
-    }, 
+    service:[service]
+    },
     {_id:false}
 );
 

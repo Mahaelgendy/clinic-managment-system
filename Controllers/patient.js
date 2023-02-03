@@ -2,6 +2,7 @@ const {request,response} = require("express");
 const { Result } = require("express-validator");
 const mongoose = require ("mongoose");
 require ("../Models/patientModel");
+
 const patientSchema =mongoose.model("patients");
 
 module.exports.getAllPatients = (request, response,next)=>{
@@ -20,6 +21,7 @@ module.exports.addPatient = (request, response, next)=>{
         weight:request.body.patientWeight,
         hasInsurance:request.body.patientHasInsurance,
         phone:request.body.patientPhone,
+        patientData
     });
     newPatient.save()
     .then(result=>{
@@ -30,7 +32,7 @@ module.exports.addPatient = (request, response, next)=>{
 
 module.exports.updatePatient = (request, response, next)=>{
     patientSchema.findByIdAndUpdate({
-        _patientId:request.body.id
+        _patientId:request.params.id
     },
     {
         $set:{
@@ -48,7 +50,7 @@ module.exports.updatePatient = (request, response, next)=>{
 };
 
 module.exports.deletePatientById = (request, response, next)=>{
-    patientSchema.findByIdAndDelete({_patientId:request.body.id})
+    patientSchema.findByIdAndDelete({_patientId:request.params.id})
         .then((data)=>{
             response.status(200).json({message:"deleted"+request.params.id});
         })
@@ -64,7 +66,7 @@ module.exports.deletePatients = (request, response, next)=>{
 };
 
 module.exports.getPatientByID = (request, response, next)=>{
-    patientSchema.findOne({_patientId:request.body.id})
+    patientSchema.findOne({_patientId:request.params.id})
                     .populate({path:"patientData"})
                     .then((data)=>{
                         response.status(200).json(data);

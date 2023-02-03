@@ -3,20 +3,29 @@ const mongoose = require('mongoose');
 
 const AutoIncreament = require('mongoose-sequence')(mongoose)
 
-const schedule = new mongoose.Schema({
+const scheduleSchema = new mongoose.Schema({
+    _id:{type:Number},
     clinic_id:{type:Number , ref:'clinics' , required:true},
+    doc_id:{type:Number , ref:'doctors' , required:true},
     date:{type:Date , required:true},
     from:{type:Date , required:true},
     to :{type:Date , required:true},
-    duration:{type:Date , required:true}
-},{_id:false}
+    duration_in_minutes:{type:Date , required:true , default:'00:30:00'}
+},{ _id:false}
 );
+
+scheduleSchema.plugin(AutoIncreament,{id:'schedulaCounter'});
+mongoose.model('schedules' , scheduleSchema);
+
+//--------------------------------------------------------------------------------------//
+//--------------------------------------------------------------------------------------//
+
 const doctorSchema = new mongoose.Schema({
     _id:{type:Number},
-    ownData:{type:mongoose.Types.ObjectId , ref:'users'},
+    userData:{type:mongoose.Types.ObjectId , ref:'users'},
     specialization:{type:String, required:true},
     price:{type:Number},
-    schedules:[schedule]
+    doc_schedules:[{type:Number , ref:'schedules'}]
 },{ _id:false}
 );
 
