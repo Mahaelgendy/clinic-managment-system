@@ -6,8 +6,6 @@ const appointmentRoutes = require("./Routes/appointment");
 const doctorRoute = require('./Routes/doctor');
 
 
-
-
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
