@@ -1,6 +1,6 @@
 
 const express = require('express');
-const controller = require('./../Controllers/doctorController')
+const controller = require('./../Controllers/doctor')
 const router = express.Router()
 
 router.route('/doctor/:id')

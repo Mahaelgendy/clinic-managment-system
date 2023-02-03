@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const addressSchema = require('./adressModel');
 // const adressSchema= new mongoose.Schema({
 //         city: String,
 //         street:String,
@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     email:{ type: String, unique: true, required:true, match:/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/},
     age :{type : Number , required:true },
     gender:{type: String, enum: ['Femele','Male']},
-    address: addres.adressSchema,
+    address: {type:addressSchema},
     role:{type: String, required: true, enum: ["admin", "doctor", "patient" , "employee"], default:'patient'},
     image:String,
 });
