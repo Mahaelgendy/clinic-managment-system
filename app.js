@@ -3,9 +3,6 @@ const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const server=express();
 
-// adding routers
-const clinicRouter = require('./Routes/clinic')
-
 let port=process.env.PORT||8080;
 mongoose.set('strictQuery', true);
 
@@ -21,13 +18,6 @@ mongoose.connect("mongodb://127.0.0.1:27017/clinicSystemDB")
     });
 
 server.use(morgan('combined'));
-
-server.use(express.json());
-
-// Routes
-
-server.use(clinicRouter)
-
 
 //Not Found MW
 server.use((request ,response, next)=>{

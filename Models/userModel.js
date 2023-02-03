@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-const addres = require('./adressModel') 
-
 // const adressSchema= new mongoose.Schema({
 //         city: String,
 //         street:String,
