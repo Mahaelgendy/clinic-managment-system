@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
+require("./../Models/doctorModel");
 const appointmentSchema = mongoose.model("appointments");
 const doctorSchema = mongoose.model("doctors")
 const dateTimeMW = require("./../middlewares/dateTimeMW")
@@ -66,7 +67,10 @@ module.exports.deleteAppointment = (request , respose , next)=>{
         .catch((error)=>next(error));
 };
 
-getEndOfAppointment=(doctorId , )=>{
-
+getEndOfAppointment=(doctorId,appointmentDate,startofAppointment)=>{
+    let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': { $eq: appointmentDate }}).populate({ path: "schedules"});
+    let appointmentDurationInMinutes = doctor.schedules.duration;
+    let startOfAppintmentAsDateTime = dateTimeMW.getDateTimeForSpecificDay(startofAppointment,appointmentDate)
+    startOfAppintmentAsDateTime.setMinutes(date.getMinutes() + appointmentDurationInMinutes);
 }
 

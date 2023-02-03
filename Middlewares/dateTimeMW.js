@@ -23,3 +23,8 @@ module.exports.getTime=(timeAsSting)=>{
     date.setHours(hours, minuts, seconds);
     return date;
 }
+module.exports.getDateTimeForSpecificDay=(timeAsSting , dateAsString)=>{
+    time = timeAsSting.split(':');
+    let day = new Date(dateAsString);
+    return new Date(day.getFullYear(), day.getMonth(), day.getDate(), ...time);
+}
