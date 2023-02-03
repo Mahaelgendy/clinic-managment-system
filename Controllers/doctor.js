@@ -82,7 +82,7 @@ exports.deleteDoctor = async (request , response , next)=>{
         
         const doctor = await DoctorSchema.findById({_id:doctorId});
         const user = await doctor.findById({userData:doctor.userData});
-        const schedule = await doctor.findById({doc_schedules:doctor.doc_schedules});
+        const schedule = await doctor.findById({doc_id:doctorId});
         await DoctorSchema.findByIdAndDelete({_id:doctorId});
         await UserSchema.findByIdAndDelete({_id:user._id});
         await SchedulaSchema.findByIdAndDelete({_id:schedule._id});
