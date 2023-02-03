@@ -12,7 +12,7 @@ module.exports.getTime= (time)=>{
     return timeNow;
 }
 
-module.exports.getTime=(timeAsSting)=>{
+module.exports.getTimeFromString=(timeAsSting)=>{
     //hh:mm:ss as string
     let timeAsArr = timeAsSting.split(':');
     let hours = timeAsArr[0];
