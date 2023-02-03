@@ -18,14 +18,17 @@ module.exports.getAllAppointments = (request , response , next)=>{
 
 module.exports.addAppointment=(request , response , next)=>{
     
+    let today = dateTimeMW.getDateFormat(new Date())
+    let endOfAppintment = getEndOfAppointment(request.body.doctorId,today,request.body.from);
+
     let newAppointment = new appointmentSchema({
         clinic_id: request.body.clinicId,
         doctor_id:request.body.doctorId,
         patient_id: request.body.patientId,
         employee_id: request.body.employeeId,
-        date: dateTimeMW.getDateFormat(new Date()),
-        from: dateTimeMW.getTime(new Date()) ,
-        to :  dateTimeMW.getTime(new Date()) ,
+        date: today,
+        from: request.body.from,
+        to : endOfAppintment,
         status: request.body.status,
         reservation_method:request.body.reservationMethod
         }
@@ -68,9 +71,17 @@ module.exports.deleteAppointment = (request , respose , next)=>{
 };
 
 getEndOfAppointment=(doctorId,appointmentDate,startofAppointment)=>{
+
     let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': { $eq: appointmentDate }}).populate({ path: "schedules"});
     let appointmentDurationInMinutes = doctor.schedules.duration;
-    let startOfAppintmentAsDateTime = dateTimeMW.getDateTimeForSpecificDay(startofAppointment,appointmentDate)
+
+    let startOfAppintmentAsDateTime= dateTimeMW.getTime(startofAppointment);
     startOfAppintmentAsDateTime.setMinutes(date.getMinutes() + appointmentDurationInMinutes);
+    let endOfAppintment = dateTimeMW.getTime(startOfAppintmentAsDateTime);
+    return endOfAppintment;
 }
 
+function checkIfThisTimeSlotIsFree()
+{
+    
+}
