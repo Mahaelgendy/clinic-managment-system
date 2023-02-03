@@ -12,6 +12,20 @@ const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
 const dateTimeMW = require("../middlewares/dateTimeMW");
 
+exports.getAllDoctors=(request , response , next)=>{
+    DoctorSchema.find()
+    .populate({path:'userData'})
+    .populate({path:'doc_schedules'})
+    .then(data=>{
+        if(data!=null){
+            response.status(200).json(data);
+        }else{
+            next(new Error({message:"Id is not exist"}))
+        }
+    })
+    .catch(error=>next(error));
+}
+
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
@@ -82,11 +96,13 @@ exports.deleteDoctor = async (request , response , next)=>{
         
         const doctor = await DoctorSchema.findById({_id:doctorId});
         const user = await doctor.findById({userData:doctor.userData});
-        const schedule = await doctor.findById({doc_id:doctorId});
+
         await DoctorSchema.findByIdAndDelete({_id:doctorId});
         await UserSchema.findByIdAndDelete({_id:user._id});
-        await SchedulaSchema.findByIdAndDelete({_id:schedule._id});
+        await SchedulaSchema.deleteMany({doc_id:doctorId});
+
         response.status(200).json({message:"Doctor deleted"});
+
     }catch(error){
         next(error)
     }
@@ -140,3 +156,4 @@ exports.updateSchedule =(request , response , next)=>{
         next(error)
     }
 }
+

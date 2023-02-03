@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const server=express();
 const appointmentRoutes = require("./Routes/appointment");
+const doctorRoute = require('./Routes/doctor');
 
 
 
 
 let port=process.env.PORT||8080;
+
 mongoose.set('strictQuery', true);
 
 mongoose.connect("mongodb://127.0.0.1:27017/clinicSystemDB")
@@ -28,6 +30,8 @@ server.use(express.json());
 
 //routes
 server.use(appointmentRoutes);
+server.use(doctorRoute);
+
 
 //Not Found MW
 server.use((request ,response, next)=>{
