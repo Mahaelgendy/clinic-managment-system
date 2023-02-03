@@ -9,7 +9,7 @@ const schedule = new mongoose.Schema({
     from:{type:Date , required:true},
     to :{type:Date , required:true},
     duration:{type:Date , required:true}
-},{_id:fales}
+},{_id:false}
 );
 const doctorSchema = new mongoose.Schema({
     _id:{type:Number},

@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
+require("./../Models/doctorModel");
 const appointmentSchema = mongoose.model("appointments");
+const doctorSchema = mongoose.model("doctors")
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 
 module.exports.getAllAppointments = (request , response , next)=>{
@@ -22,7 +24,8 @@ module.exports.addAppointment=(request , response , next)=>{
         patient_id: request.body.patientId,
         employee_id: request.body.employeeId,
         date: dateTimeMW.getDateFormat(new Date()),
-        time: dateTimeMW.getTime(new Date()) ,
+        from: dateTimeMW.getTime(new Date()) ,
+        to :  dateTimeMW.getTime(new Date()) ,
         status: request.body.status,
         reservation_method:request.body.reservationMethod
         }
@@ -45,7 +48,8 @@ module.exports.updateAppointment=(request , response , next)=>{
             patient_id: request.body.patientId,
             employee_id: request.body.employeeId,
             date: request.body.date,
-            time: request.body.time,
+            from: request.body.from,
+            to: request.body.to,
             status: request.body.status,
             reservation_method:request.body.reservationMethod
         }
@@ -56,11 +60,17 @@ module.exports.updateAppointment=(request , response , next)=>{
 };
 
 module.exports.deleteAppointment = (request , respose , next)=>{
-    AppointmentSchema.deleteOne({_id : request.body.id})
+    appointmentSchema.deleteOne({_id : request.body.id})
         .then((data)=>{
             respose.status(200).json(data);
         })
         .catch((error)=>next(error));
 };
 
+getEndOfAppointment=(doctorId,appointmentDate,startofAppointment)=>{
+    let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': { $eq: appointmentDate }}).populate({ path: "schedules"});
+    let appointmentDurationInMinutes = doctor.schedules.duration;
+    let startOfAppintmentAsDateTime = dateTimeMW.getDateTimeForSpecificDay(startofAppointment,appointmentDate)
+    startOfAppintmentAsDateTime.setMinutes(date.getMinutes() + appointmentDurationInMinutes);
+}
 

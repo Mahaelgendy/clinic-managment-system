@@ -1,18 +1,19 @@
 
 const mongoose = require ('mongoose');
 
+const AutoIncreament = require ('mongoose-sequence')(mongoose);
 const patientSchema= new mongoose.Schema({
     
     _patientId:{type:Number},
-    _patientName:{type:String ,length:{max:10,min:3}},
-    _status:{type:String,Enumerator:['First Time','fllow Up'],required:true},
-    _history:{type:String},
-    _height:{type:Number},
-    _weight:{type:Number},
-    _hasInsurance:{type:Boolean},
-    _phone:{type:Number ,required:true ,match:/^01[0-2,5]\d{8}$/},
-    _patientData:{type:mongoose.Types.ObjectId,ref:'users'},
-
+    status:{type:String,Enumerator:['First Time','fllow Up'],required:true},
+    history:{type:String},
+    height:{type:Number},
+    weight:{type:Number},
+    hasInsurance:{type:Boolean,default:false},
+    phone:{type:Number ,required:true ,match:/^01[0-2,5]\d{8}$/},
+    patientData:{type:mongoose.Types.ObjectId,ref:'users'},
+    
 });
 
-mongoose.model('patients',patientSchema)
+patientSchema.plugin(AutoIncreament,{id:'patientCounter'});
+mongoose.model('patients',patientSchema);
