@@ -54,7 +54,7 @@ exports.addDoctor = async (request , response , next)=>{
         date:dateTimeMW.getDateFormat(new Date()),
         from:startTime,
         to: endTime,
-        duration:duration
+        duration_in_minutes:duration
     });
 
     if(role ==='doctor'){
@@ -79,6 +79,7 @@ exports.addDoctor = async (request , response , next)=>{
 exports.deleteDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
+        
         const doctor = await DoctorSchema.findById({_id:doctorId});
         const user = await doctor.findById({userData:doctor.userData});
         const schedule = await doctor.findById({doc_schedules:doctor.doc_schedules});
@@ -102,8 +103,7 @@ exports.updateDoctor = async (request , response , next)=>{
         const doctor = await DoctorSchema.findByIdAndUpdate({_id:doctorId},
             {$set:{
                 specialization:specialization,
-                price:price,
-                schedules:schedules,
+                price:price
             }});
             
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
@@ -129,9 +129,9 @@ exports.updateSchedule =(request , response , next)=>{
             {$set:{
                 clinic_id:clinic_id,
                 date:dateTimeMW.getDateFormat(new Date()),
-                from:startTime,
+                from:dateTimeMW.getTimeFromString(startTime),
                 to: endTime,
-                duration:duration
+                duration_in_minutes:duration
             }});
         
         response.status(200).json({message:"Schedule updated"});

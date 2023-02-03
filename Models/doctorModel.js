@@ -8,9 +8,9 @@ const scheduleSchema = new mongoose.Schema({
     clinic_id:{type:Number , ref:'clinics' , required:true},
     doc_id:{type:Number , ref:'doctors' , required:true},
     date:{type:Date , required:true},
-    from:{type:String , required:true},
-    to :{type:String , required:true},
-    duration:{type:String , required:true}
+    from:{type:Date , required:true},
+    to :{type:Date , required:true},
+    duration_in_minutes:{type:Date , required:true , default:'00:30:00'}
 },{ _id:false}
 );
 
