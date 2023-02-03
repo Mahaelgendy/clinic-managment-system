@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 require("../Models/clinicModel");
 const clinicSchema =  mongoose.model("clinics");
 exports.getAllClinics = (request , response, next)=>{
-    clinicSchema.find().populate({path:'doctors'})
+    clinicSchema.find()
     .then(data=>{
         console.log(data)
         response.status(201).json(data)
@@ -27,9 +27,8 @@ exports.getClinicById = (request, response ,next)=>{
 
 exports.addClinic =(request, response, next)=>{
     let newClinic = new clinicSchema({
-        doctor_id :request.body.doctor_id,
         clinic_location:request.body.clinic_location,
-        service_names:request.body.service_names 
+        service:request.body.service 
     });
     console.log(newClinic)
     newClinic.save()
@@ -53,9 +52,8 @@ exports.updateClinic = (request,response , next)=>
     clinicSchema.updateOne(
         {_id: request.params.id},
         {$set:{
-            doctor_id :request.body.doctor_id,
             clinic_location:request.body.clinic_location,
-            service_names:request.body.service_names 
+            service:request.body.service 
         }})
         .then(result=>{
             response.status(200).json({message:"updated"});
