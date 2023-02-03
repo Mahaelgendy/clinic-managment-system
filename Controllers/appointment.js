@@ -56,7 +56,7 @@ module.exports.updateAppointment=(request , response , next)=>{
 };
 
 module.exports.deleteAppointment = (request , respose , next)=>{
-    AppointmentSchema.deleteOne({_id : request.body.id})
+    appointmentSchema.deleteOne({_id : request.body.id})
         .then((data)=>{
             respose.status(200).json(data);
         })
