@@ -1,17 +1,21 @@
 
 const bcrypt = require('bcrypt');
+const { request, response } = require('express');
 const saltRounds = 10;
 const mongoose = require('mongoose');
 
-require('./../Models/userModel');
-require('./../Models/doctorModel');
+require('../Models/userModel');
+require('../Models/doctorModel');
 
 const UserSchema = mongoose.model('users');
-const DoctorSchema = mongoose.model('doctors')
+const DoctorSchema = mongoose.model('doctors');
+const SchedulaSchema= mongoose.model('schedules');
+const dateTimeMW = require("../middlewares/dateTimeMW");
 
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
+    .populate({path:'doc_schedules'})
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);
@@ -29,7 +33,8 @@ exports.addDoctor = async (request , response , next)=>{
         return response.status(400).json({message:"User is already exist"});
     }
 
-    const {fullName,password,email,age,gender,address,role, specialization , price , schedules} = request.body;
+    const {fullName,password,email,age,gender,address,role, specialization , price , 
+        clinic_id ,startTime,endTime,duration} = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -44,11 +49,19 @@ exports.addDoctor = async (request , response , next)=>{
         role:role
     });
 
+    const schedule = new SchedulaSchema({
+        clinic_id:clinic_id,
+        date:dateTimeMW.getDateFormat(new Date()),
+        from:startTime,
+        to: endTime,
+        duration:duration
+    });
+
     if(role ==='doctor'){
         const doctor = new DoctorSchema({
             specialization:specialization,
             price:price,
-            schedules:schedules,
+            doc_schedules:schedule._id,
             userData:user._id
         });
 
@@ -67,9 +80,11 @@ exports.deleteDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
         const doctor = await DoctorSchema.findById({_id:doctorId});
-        const user = await doctor.findById(doctor.userData);
-        await DoctorSchema.findByIdAndDelete({_id:doctorId})
+        const user = await doctor.findById({userData:doctor.userData});
+        const schedule = await doctor.findById({doc_schedules:doctor.doc_schedules});
+        await DoctorSchema.findByIdAndDelete({_id:doctorId});
         await UserSchema.findByIdAndDelete({_id:user._id});
+        await SchedulaSchema.findByIdAndDelete({_id:schedule._id});
         response.status(200).json({message:"Doctor deleted"});
     }catch(error){
         next(error)
@@ -79,7 +94,7 @@ exports.deleteDoctor = async (request , response , next)=>{
 exports.updateDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
-        const {fullName,password,email,age,address, specialization,price,schedules} = request.body;
+        const {fullName,password,email,age,address, specialization,price} = request.body;
 
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
@@ -90,6 +105,7 @@ exports.updateDoctor = async (request , response , next)=>{
                 price:price,
                 schedules:schedules,
             }});
+            
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
             {$set:{
                 fullName:fullName,
@@ -98,9 +114,29 @@ exports.updateDoctor = async (request , response , next)=>{
                 age:age,
                 address:address,
             }});
+
             response.status(200).json({message:"Doctor apdated"})
     }catch(error){
         next(error)
     }
 }
 
+exports.updateSchedule =(request , response , next)=>{
+    try{
+        const {docId,scheduleId,clinic_id ,startTime,endTime,duration} = request.body;
+
+        SchedulaSchema.findOneAndUpdate({_id:scheduleId,doc_id:docId},
+            {$set:{
+                clinic_id:clinic_id,
+                date:dateTimeMW.getDateFormat(new Date()),
+                from:startTime,
+                to: endTime,
+                duration:duration
+            }});
+        
+        response.status(200).json({message:"Schedule updated"});
+
+    }catch(error){
+        next(error)
+    }
+}

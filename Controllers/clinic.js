@@ -2,6 +2,7 @@ const {request , response} = require("express");
 const mongoose = require("mongoose");
 require("../Models/clinicModel");
 const clinicSchema =  mongoose.model("clinics");
+
 exports.getAllClinics = (request , response, next)=>{
     clinicSchema.find().populate({path:'doctors'})
     .then(data=>{
