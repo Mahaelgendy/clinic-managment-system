@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     age :{type : Number , required:true },
     gender:{type: String, enum: ['Femele','Male']},
     address: adressSchema,
+    role:{type: String, required: true, enum: ["admin", "doctor", "patient" , "employee"],},
     image:String,
 });
 

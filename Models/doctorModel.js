@@ -13,7 +13,7 @@ const schedule = new mongoose.Schema({
 );
 const doctorSchema = new mongoose.Schema({
     _id:{type:Number},
-    ownData:{type:mongoose.Types.ObjectId , ref:'users'},
+    userData:{type:mongoose.Types.ObjectId , ref:'users'},
     specialization:{type:String, required:true},
     price:{type:Number},
     schedules:[schedule]
