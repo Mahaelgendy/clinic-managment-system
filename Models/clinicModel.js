@@ -1,17 +1,19 @@
 const mongoose = require('mongoose')
-require('./location') 
+const AutoIncreament = require('mongoose-sequence')(mongoose);
 
-require('mongoose-sequence')
+const addres = require('./adressModel') 
 
 const clinicSchema = new mongoose.Schema({
     _id:{type:Number},
-    doctor_id : {type:mongoose.Types.ObjectId, required:true , ref:'doctors'}, 
-    clinic_location : AddressSchema,
+    doctor_id : {type:Number , ref:'doctors'}, 
+    clinic_location : addres.adressSchema,
     service_names:{type: Array , required:true}
-}, {_id:false});
+    }, 
+    {_id:false}
+);
 
 
-clinicSchema.plugin(AutoIncreament,{id:'clinicConter'})
+clinicSchema.plugin(AutoIncreament,{ _id:'clinicConter'})
 mongoose.model('clinics' , clinicSchema)
 
 

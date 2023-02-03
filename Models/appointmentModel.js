@@ -8,8 +8,8 @@ const appointmentSchema = new mongoose.Schema({
     doctor_id:{type:Number , ref:'doctors' , required:true},
     patient_id:{type:Number , ref:'patients', required:true},
     employee_id:{type:Number , ref:'employees' , require:true},
-    date:{type:date , required:true},
-    time:{type:date , required:true},
+    date:{type:String , required:true},
+    time:{type:Date , required:true},
     status:{type:String , enum:['First Time' , 'Follow Up'] , required:true},
     reservation_method:{type:String , enum:['Online' , 'Offline']}
 },{_id:false}
