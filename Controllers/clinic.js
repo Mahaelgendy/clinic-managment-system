@@ -4,10 +4,7 @@ require("../Models/clinicModel");
 const clinicSchema =  mongoose.model("clinics");
 
 exports.getAllClinics = (request , response, next)=>{
-<<<<<<< HEAD
 
-=======
->>>>>>> feb9adbe8a330721e5806de11106580a1082a41d
     clinicSchema.find()
     .then(data=>{
         console.log(data)
