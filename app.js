@@ -5,6 +5,7 @@ const server=express();
 const appointmentRoutes = require("./Routes/appointment");
 const clinicRoutes = require("./Routes/clinic");
 const serviceRoutes = require("./Routes/service");
+const invoiceRoutes = require("./Routes/invoice");
 
 const patientRoutes = require ("./Routes/patient");
 const doctorRoutes = require("./Routes/doctor")
@@ -32,7 +33,7 @@ server.use(express.json());
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
-
+server.use(invoiceRoutes);
 server.use(patientRoutes);
 server.use(doctorRoutes)
 //Not Found MW
