@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
 require("./../Models/doctorModel");
 const appointmentSchema = mongoose.model("appointments");
-const doctorSchema = mongoose.model("doctors")
+const schedulesSchema = mongoose.model("schedules")
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 
 module.exports.getAllAppointments = (request , response , next)=>{
@@ -83,9 +83,9 @@ module.exports.deleteAppointment = (request , respose , next)=>{
 async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
 
     console.log(appointmentDate,doctorId)
-    let doctor = await doctorSchema.findOne({_id : doctorId, 'schedules.date': appointmentDate }).populate({ path: "doc_schedules"});
-    console.log(doctor);
-    let appointmentDurationInMinutes = doctor.doc_schedules.duration_in_minutes;
+    let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId, date: appointmentDate })
+    console.log(doctorSchedule);
+    let appointmentDurationInMinutes = doctorSchedule.duration_in_minutes;
 
     let startOfAppintmentAsDateTime= dateTimeMW.getTimeFromString(startofAppointment);
     startOfAppintmentAsDateTime.setMinutes(startOfAppintmentAsDateTime.getMinutes() + appointmentDurationInMinutes);
@@ -93,10 +93,10 @@ async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
     return endOfAppintment;
 }
 
-function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
-    let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': appointmentDate }).populate({ path: "schedules"});
-    let startOfShift = dateTimeMW.getDateTimeForSpecificDay(doctor.schedules.from , appointmentDate);
-    let endOfShift = dateTimeMW.getDateTimeForSpecificDay(doctor.schedules.to , appointmentDate);
+async function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
+    let doctorSchedule =await schedulesSchema.findOne({_id : doctorId , date: appointmentDate })
+    let startOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.from , appointmentDate);
+    let endOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.to , appointmentDate);
 
     let startOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(getTimeFromString(startOfAppointment), appointmentDate);
     let endOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(getTimeFromString(endOfAppointment), appointmentDate);
