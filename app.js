@@ -3,14 +3,11 @@ const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const server=express();
 const appointmentRoutes = require("./Routes/appointment");
-<<<<<<< HEAD
 const clinicRoutes = require("./Routes/clinic");
 const serviceRoutes = require("./Routes/service");
 
-=======
 const patientRoutes = require ("./Routes/patient");
 const doctorRoutes = require("./Routes/doctor")
->>>>>>> feb9adbe8a330721e5806de11106580a1082a41d
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
@@ -33,14 +30,11 @@ server.use(express.json());
 
 //routes
 server.use(appointmentRoutes);
-<<<<<<< HEAD
 server.use(clinicRoutes);
 server.use(serviceRoutes)
 
-=======
 server.use(patientRoutes);
 server.use(doctorRoutes)
->>>>>>> feb9adbe8a330721e5806de11106580a1082a41d
 //Not Found MW
 server.use((request ,response, next)=>{
     response.status(404).json({data:"Not Fount"});
