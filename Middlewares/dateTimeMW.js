@@ -14,6 +14,7 @@ module.exports.getTime= (time)=>{
 
 module.exports.getTimeFromString=(timeAsSting)=>{
     //hh:mm:ss as string
+    console.log(timeAsSting);
     let timeAsArr = timeAsSting.split(':');
     let hours = timeAsArr[0];
     let minuts = timeAsArr[1];
@@ -23,8 +24,7 @@ module.exports.getTimeFromString=(timeAsSting)=>{
     date.setHours(hours, minuts, seconds);
     return date;
 }
-module.exports.getDateTimeForSpecificDay=(timeAsSting , dateAsString)=>{
-    time = timeAsSting.split(':');
+module.exports.getDateTimeForSpecificDay=(time , dateAsString)=>{
     let day = new Date(dateAsString);
-    return new Date(day.getFullYear(), day.getMonth(), day.getDate(), ...time);
+    return new Date(day.getFullYear(), day.getMonth(), day.getDate(),time.getHours(),time.getMinutes(),time.getSeconds());
 }
