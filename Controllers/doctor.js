@@ -28,7 +28,6 @@ exports.getAllDoctors=(request , response , next)=>{
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
-    .populate({path:'doc_schedules'})
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);
@@ -100,11 +99,14 @@ exports.deleteDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
         
-        const doctor = await DoctorSchema.findById({_id:doctorId});
-        const user = await doctor.findById({userData:doctor.userData});
+        const doctor = await DoctorSchema.find({_id:doctorId});
+        console.log(doctor)
+        // const user = await doctor.find({},{userData:1 , _id:0});
+        // // const user = doctor.userData
+        // console.log(user);
 
         await DoctorSchema.findByIdAndDelete({_id:doctorId});
-        await UserSchema.findByIdAndDelete({_id:user._id});
+        await UserSchema.findByIdAndDelete({_id:doctor.userData});
         await SchedulaSchema.deleteMany({doc_id:doctorId});
 
         response.status(200).json({message:"Doctor deleted"});
@@ -128,6 +130,7 @@ exports.updateDoctor = async (request , response , next)=>{
                 price:price
             }});
             
+
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
             {$set:{
                 fullName:fullName,
@@ -137,7 +140,7 @@ exports.updateDoctor = async (request , response , next)=>{
                 address:address,
             }});
 
-            response.status(200).json({message:"Doctor apdated"})
+            response.status(200).json({message:"Doctor Updated"})
     }catch(error){
         next(error)
     }
