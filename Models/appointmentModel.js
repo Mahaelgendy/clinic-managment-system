@@ -4,7 +4,7 @@ const AutoIncreament = require('mongoose-sequence')(mongoose);
 
 const appointmentSchema = new mongoose.Schema({
     _id:{type:Number},
-    clinic_id:{type:Number , ref:'clinics' },
+    clinic_id:{type:Number , ref:'clinics', required:true },
     doctor_id:{type:Number , ref:'doctors' , required:true},
     patient_id:{type:Number , ref:'patients'},
     employee_id:{type:Number , ref:'employees'},

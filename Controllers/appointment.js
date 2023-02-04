@@ -16,20 +16,21 @@ module.exports.getAllAppointments = (request , response , next)=>{
                             .catch((error)=>next(error));
 };
 
-module.exports.addAppointment=async (request , response , next)=>{
+module.exports.addAppointment=async(request , response , next)=>{
     
     let appointmentDate = request.body.date;
     let startOfAppointment = request.body.from;
     let doctorId =request.body.doctorId;
-    let endOfAppointment = await getEndOfAppointment(doctorId,appointmentDate,startOfAppointment);
+    let clinicId = request.body.clinicId;
+    let endOfAppointment = await getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
     
     if (endOfAppointment != null){
         console.log(endOfAppointment);
-        let isFree = await checkIfThisTimeSlotIsFree(doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+        let isFree = await checkIfThisTimeSlotIsFree(clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
         console.log('isfree',isFree)
         if(isFree){
             let newAppointment = new appointmentSchema({
-                clinic_id: request.body.clinicId,
+                clinic_id: clinicId,
                 doctor_id:request.body.doctorId,
                 patient_id: request.body.patientId,
                 employee_id: request.body.employeeId,
@@ -89,9 +90,9 @@ module.exports.deleteAppointment = (request , respose , next)=>{
         .catch((error)=>next(error));
 };
 
-async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){ 
+async function getEndOfAppointment(clinicId,doctorId,appointmentDate,startofAppointment){ 
     try {
-        let doctorSchedule=await schedulesSchema.findOne({doc_id : doctorId, date: appointmentDate })
+        let doctorSchedule=await schedulesSchema.findOne({doc_id : doctorId, date: appointmentDate, clinic_id:clinicId })
         if(doctorSchedule != null){
 
             let appointmentDurationInMinutes = doctorSchedule.duration_in_minutes;
@@ -112,9 +113,9 @@ async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
       }
 }
 
-async function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
+async function checkIfThisTimeSlotIsFree(clinicId,doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
     try {
-        let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId , date: appointmentDate })
+        let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId , date: appointmentDate,clinic_id:clinicId })
         if(doctorSchedule != null){
 
             console.log(doctorSchedule);
@@ -127,7 +128,7 @@ async function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppoint
             if (checkIsTimeInEmployeeShift(startOfAppointmentAsDatetime , endOfAppointmentAsDatetime , startOfShift , endOfShift))
             {
                 console.log("here");
-                let isNotOverlapped = await checkIfTimeOverLapWithAnotherAppointmentInSameDay(doctorId, startOfAppointmentAsDatetime, endOfAppointmentAsDatetime, appointmentDate);
+                let isNotOverlapped = await checkIfTimeOverLapWithAnotherAppointmentInSameDay(clinicId,doctorId, startOfAppointmentAsDatetime, endOfAppointmentAsDatetime, appointmentDate);
                 console.log("overlap", isNotOverlapped);
                 return isNotOverlapped;
             }
@@ -146,9 +147,9 @@ async function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppoint
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
-async function checkIfTimeOverLapWithAnotherAppointmentInSameDay(doctorId,startOfAppointment, endOfAppintment,appointmentDate){
+async function checkIfTimeOverLapWithAnotherAppointmentInSameDay(clinicId,doctorId,startOfAppointment, endOfAppintment,appointmentDate){
     try{
-        let allAppointments= await appointmentSchema.find({doctor_id : doctorId , date:appointmentDate })
+        let allAppointments= await appointmentSchema.find({doctor_id : doctorId , date:appointmentDate , clinic_id:clinicId})
         for(let i=0 ; i < allAppointments.length ; i++)
         {
             let from= allAppointments[i].from;
