@@ -10,7 +10,6 @@ exports.getAllServices= (request , response, next)=>{
     .populate({path:"doctor_id"})
     .populate({path:"clinic_id"})
     .then(data=>{
-        console.log(data)
         response.status(201).json(data)
     })
     .catch(error=>next(error));
@@ -24,7 +23,6 @@ exports.getServiceById = (request, response ,next)=>{
             response.status(201).json({data})
         }else {
             response.status(404).json({message:"Id is not exist"})
-            // next(new Error({message:"Id is not exist"}));
         }
     })
     .catch(error => next(error));
