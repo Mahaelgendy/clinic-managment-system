@@ -11,11 +11,12 @@ const employeeSchema = mongoose.model("employees");
 const clinicSchema = mongoose.model("clinics");
 
 module.exports.getAllEmployees =  (request,response,next)=>{
-     employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1}})
-                          .then((data)=>{
-                            response.status(200).json(data);
-                          }) 
-                          .catch((error)=>next(error));
+     employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1}})
+                            .populate({path:"clinicId"})
+                            .then((data)=>{
+                                response.status(200).json(data);
+                            }) 
+                            .catch((error)=>next(error));
 };
 
 module.exports.addEmployee = (request, response, next)=>{
@@ -51,26 +52,7 @@ module.exports.deleteEmployees = (request, response, next)=>{
         .catch((error)=>next(error));
 }
 
-// module.exports.deleteEmployeeByID = (request, response, next)=>{
-//         try{
-//             const employeeToBeRemoved = request.params.id;
 
-//             employeeSchema.findOne({_id:employeeToBeRemoved})
-//                             .then((data)=>{
-//                                 userSchema.findByIdAndDelete({_id:data.employeeData})
-//                                 .then(()=>{
-//                                     employeeSchema.findByIdAndDelete({_id:employeeToBeRemoved})
-//                                     .then(()=>{
-//                                         response.status(200).json({message:`Employee with Id ${employeeToBeRemoved} deleted`});
-//                                     })
-//                                 })
-//                             })
-//                             .catch((error)=>next(error));
-//         } 
-//         catch (error){
-//             next(error)
-//         }   
-// };
 module.exports.deleteEmployeeByID = (request, response, next)=>{
     employeeSchema.findByIdAndDelete({_id:request.params.id})
     .then(()=>{
@@ -78,8 +60,6 @@ module.exports.deleteEmployeeByID = (request, response, next)=>{
     })
     .catch((error)=>next(error));
 }
-
-
 
 
 module.exports.getEmployeeByID = (request, response, next)=>{

@@ -9,7 +9,7 @@ const userSchema = mongoose.model("users");
 const patientSchema = mongoose.model("patients");
 
 module.exports.getAllPatients = (request, response, next)=>{
-    patientSchema.find().populate({path:'patientData'})
+    patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}})
                         .then((data)=>{
                             response.status(200).json(data);
                         })
