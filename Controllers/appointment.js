@@ -80,10 +80,12 @@ module.exports.deleteAppointment = (request , respose , next)=>{
         .catch((error)=>next(error));
 };
 
-function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
+async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
 
-    let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': { $eq: appointmentDate }}).populate({ path: "schedules"});
-    let appointmentDurationInMinutes = doctor.schedules.duration_in_minutes;
+    console.log(appointmentDate,doctorId)
+    let doctor = await doctorSchema.findOne({_id : doctorId, 'schedules.date': appointmentDate }).populate({ path: "doc_schedules"});
+    console.log(doctor);
+    let appointmentDurationInMinutes = doctor.doc_schedules.duration_in_minutes;
 
     let startOfAppintmentAsDateTime= dateTimeMW.getTimeFromString(startofAppointment);
     startOfAppintmentAsDateTime.setMinutes(startOfAppintmentAsDateTime.getMinutes() + appointmentDurationInMinutes);
@@ -92,7 +94,7 @@ function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
 }
 
 function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
-    let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': { $eq: appointmentDate }}).populate({ path: "schedules"});
+    let doctor =doctorSchema.findOne({_id : doctorId , 'schedules.date': appointmentDate }).populate({ path: "schedules"});
     let startOfShift = dateTimeMW.getDateTimeForSpecificDay(doctor.schedules.from , appointmentDate);
     let endOfShift = dateTimeMW.getDateTimeForSpecificDay(doctor.schedules.to , appointmentDate);
 
