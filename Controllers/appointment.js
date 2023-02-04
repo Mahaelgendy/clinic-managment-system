@@ -16,38 +16,47 @@ module.exports.getAllAppointments = (request , response , next)=>{
                             .catch((error)=>next(error));
 };
 
-module.exports.addAppointment=(request , response , next)=>{
+module.exports.addAppointment=async (request , response , next)=>{
     
     let appointmentDate = request.body.date;
     let startOfAppointment = request.body.from;
     let doctorId =request.body.doctorId;
-    let endOfAppintment = getEndOfAppointment(doctorId,appointmentDate,startOfAppointment);
-
-    if(checkIfThisTimeSlotIsFree(doctorId, today , startOfAppointment, endOfAppintment)){
-
-        let newAppointment = new appointmentSchema({
-            clinic_id: request.body.clinicId,
-            doctor_id:request.body.doctorId,
-            patient_id: request.body.patientId,
-            employee_id: request.body.employeeId,
-            date: appointmentDate,
-            from: startOfAppointment,
-            to : endOfAppintment,
-            status: request.body.status,
-            reservation_method:request.body.reservationMethod
-            }
-        );
-        newAppointment.save()
-        .then(result=>{
-            response.status(201).json(result);
-        })
-        .catch(error => next(error));
-    }
+    let endOfAppointment = await getEndOfAppointment(doctorId,appointmentDate,startOfAppointment);
+    
+    if (endOfAppointment != null){
+        console.log(endOfAppointment);
+        let isFree = await checkIfThisTimeSlotIsFree(doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+        console.log('isfree',isFree)
+        if(isFree){
+            let newAppointment = new appointmentSchema({
+                clinic_id: request.body.clinicId,
+                doctor_id:request.body.doctorId,
+                patient_id: request.body.patientId,
+                employee_id: request.body.employeeId,
+                date: appointmentDate,
+                from: dateTimeMW.getTimeFromString(startOfAppointment),
+                to : dateTimeMW.getTimeFromString(endOfAppointment),
+                status: request.body.status,
+                reservation_method:request.body.reservationMethod
+                }
+            );
+            newAppointment.save()
+            .then(result=>{
+                response.status(201).json(result);
+            })
+            .catch(error => next(error));
+        }
+        else{
+            let error = new Error("this time is ovelapped with another one please select another time ");
+            error.status=401;
+            next(error);
+        }
+    } 
     else{
-        let error = new Error("Please Check the time with doctor shift");
-        error.status(401);
-        next(error);
-    }
+        let error = new Error("There is No shift in this Day for that Doctor ");
+            error.status=401;
+            next(error);
+    } 
 };
 
 module.exports.updateAppointment=(request , response , next)=>{
@@ -80,47 +89,80 @@ module.exports.deleteAppointment = (request , respose , next)=>{
         .catch((error)=>next(error));
 };
 
-async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){
+async function getEndOfAppointment(doctorId,appointmentDate,startofAppointment){ 
+    try {
+        let doctorSchedule=await schedulesSchema.findOne({doc_id : doctorId, date: appointmentDate })
+        if(doctorSchedule != null){
 
-    console.log(appointmentDate,doctorId)
-    let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId, date: appointmentDate })
-    console.log(doctorSchedule);
-    let appointmentDurationInMinutes = doctorSchedule.duration_in_minutes;
+            let appointmentDurationInMinutes = doctorSchedule.duration_in_minutes;
 
-    let startOfAppintmentAsDateTime= dateTimeMW.getTimeFromString(startofAppointment);
-    startOfAppintmentAsDateTime.setMinutes(startOfAppintmentAsDateTime.getMinutes() + appointmentDurationInMinutes);
-    let endOfAppintment = dateTimeMW.getTime(startOfAppintmentAsDateTime);
-    return endOfAppintment;
+            let startOfAppintmentAsDateTime= dateTimeMW.getTimeFromString(startofAppointment);
+
+            startOfAppintmentAsDateTime.setMinutes(startOfAppintmentAsDateTime.getMinutes() + appointmentDurationInMinutes -1);
+            let endOfAppintment = dateTimeMW.getTime(startOfAppintmentAsDateTime);
+            return endOfAppintment;
+        }
+        else{
+            return null;
+        }
+    }
+    catch (error) {
+        console.log(error);
+        return null;
+      }
 }
 
 async function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
-    let doctorSchedule =await schedulesSchema.findOne({_id : doctorId , date: appointmentDate })
-    let startOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.from , appointmentDate);
-    let endOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.to , appointmentDate);
+    try {
+        let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId , date: appointmentDate })
+        if(doctorSchedule != null){
 
-    let startOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(getTimeFromString(startOfAppointment), appointmentDate);
-    let endOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(getTimeFromString(endOfAppointment), appointmentDate);
-    
-    if (checkIsTimeInEmployeeShift(startOfAppointmentAsDatetime , endOfAppointmentAsDatetime , startOfShift , endOfShift) && checkIfTimeOverLapWithAnotherAppointmentInSameDay(doctorId,startOfAppointmentAsDatetime , endOfAppointmentAsDatetime,appointmentDate))
-    {
-        return true;
+            console.log(doctorSchedule);
+            let startOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.from , appointmentDate);
+            let endOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.to , appointmentDate);
+        
+            let startOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(dateTimeMW.getTimeFromString(startOfAppointment), appointmentDate);
+            let endOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(dateTimeMW.getTimeFromString(endOfAppointment), appointmentDate);
+            
+            if (checkIsTimeInEmployeeShift(startOfAppointmentAsDatetime , endOfAppointmentAsDatetime , startOfShift , endOfShift))
+            {
+                console.log("here");
+                let isNotOverlapped = await checkIfTimeOverLapWithAnotherAppointmentInSameDay(doctorId, startOfAppointmentAsDatetime, endOfAppointmentAsDatetime, appointmentDate);
+                console.log("overlap", isNotOverlapped);
+                return isNotOverlapped;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
     }
-    return false;
+    catch (error) {
+        console.log(error);
+        return null;
+      }
 }
+
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
-function checkIfTimeOverLapWithAnotherAppointmentInSameDay(doctorId,startOfAppointment, endOfAppintment,appointmentDate){
-    let allAppointments = appointmentSchema.find({_id : doctorId , date:appointmentDate }); 
-    for(let i=0 ; i < allAppointments.length ; i++)
-    {
-        let from= allAppointments[i].from;
-        let to = allAppointments[i].to;
+async function checkIfTimeOverLapWithAnotherAppointmentInSameDay(doctorId,startOfAppointment, endOfAppintment,appointmentDate){
+    try{
+        let allAppointments= await appointmentSchema.find({doctor_id : doctorId , date:appointmentDate })
+        for(let i=0 ; i < allAppointments.length ; i++)
+        {
+            let from= allAppointments[i].from;
+            let to = allAppointments[i].to;
 
-        let currentFrom = dateTimeMW.getDateTimeForSpecificDay(from , appointmentDate);
-        let currentTo = dateTimeMW.getDateTimeForSpecificDay(to , appointmentDate);
-        if (startOfAppointment <= currentFrom && endOfAppintment >= currentFrom || startOfAppointment <= currentTo &&  endOfAppintment >= currentTo || startOfAppointment <= currentFrom && endOfAppintment >= currentTo || startOfAppointment >= currentFrom && endOfAppintment <= currentTo)
-            return false;
+            let currentFrom = dateTimeMW.getDateTimeForSpecificDay(from , appointmentDate);
+            let currentTo = dateTimeMW.getDateTimeForSpecificDay(to , appointmentDate);
+            if (startOfAppointment <= currentFrom && endOfAppintment >= currentFrom || startOfAppointment <= currentTo &&  endOfAppintment >= currentTo || startOfAppointment <= currentFrom && endOfAppintment >= currentTo || startOfAppointment >= currentFrom && endOfAppintment <= currentTo)
+                return false;
+        }
+        return true;
     }
-    return true;
+    catch (error) {
+        console.log(error);
+        return null;
+      }
 }
