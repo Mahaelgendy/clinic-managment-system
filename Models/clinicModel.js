@@ -23,7 +23,7 @@ const clinicSchema = new mongoose.Schema({
 );
 
 
-clinicSchema.plugin(AutoIncreament,{id:'clinicConter'})
+clinicSchema.plugin(AutoIncreament,{ _id:'clinicConter'})
 mongoose.model('clinics' , clinicSchema)
 
 

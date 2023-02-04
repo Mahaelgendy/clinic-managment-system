@@ -1,14 +1,18 @@
 
 const express = require('express');
 const controller = require('./../Controllers/doctor')
-const router = express.Router()
+const router = express.Router();
 
-router.route('/doctor/:id')
+router.route("/doctor/:id")
     .get(controller.getDoctorById)
     .delete(controller.deleteDoctor)
-    .patch(controller.updateDoctor);
+    .patch(controller.updateDoctor)
 
-router.post('/doctor' , controller.addDoctor)
+
+router.route('/doctor')
+      .get(controller.getAllDoctors)
+      .post(controller.addDoctor)
+
 
 module.exports = router
 
