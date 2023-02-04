@@ -62,15 +62,15 @@ exports.addDoctor = async (request , response , next)=>{
         address:address,
         role:role
     });
-
     const schedule = new SchedulaSchema({
         clinic_id:clinic_id,
+        doc_id:doctor._id,
         date:dateTimeMW.getDateFormat(new Date()),
         from:startTime,
         to: endTime,
         duration_in_minutes:duration
     });
-
+   
     if(role ==='doctor'){
         const doctor = new DoctorSchema({
             specialization:specialization,
@@ -84,6 +84,9 @@ exports.addDoctor = async (request , response , next)=>{
             user.save()
                 .then()
                 .catch(err=>next(err));
+            schedule.save()
+                    .then()
+                    .catch(error=>next(err));
             response.status(200).json({message:"Docor added"});
         })
         .catch(error=>next(error));
