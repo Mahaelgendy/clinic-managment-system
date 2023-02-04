@@ -1,9 +1,12 @@
 const {request,response} = require("express");
 const { Result } = require("express-validator");
 const mongoose = require ("mongoose");
+
+require("../Models/userModel");
 require ("../Models/patientModel");
 
-const patientSchema =mongoose.model("patients");
+const patientSchema = mongoose.model("patients");
+const userSchema = mongoose.model("users");
 
 module.exports.getAllPatients = (request, response,next)=>{
     patientSchema.find().populate({path:"patientData"})
@@ -14,25 +17,34 @@ module.exports.getAllPatients = (request, response,next)=>{
 };
 
 module.exports.addPatient = (request, response, next)=>{
+  const resultOfFoundUserEmail = userSchema.findOne({email:request.body.email});                       
+  if(resultOfFoundUserEmail)
+  {
     let newPatient=new patientSchema({
         status:request.body.patientStatus,
         history:request.body.patientHistory,
         height:request.body.patientHeight,
         weight:request.body.patientWeight,
         hasInsurance:request.body.patientHasInsurance,
-        phone:request.body.patientPhone,
-        patientData
+        phone:request.body.patientPhone
+
     });
     newPatient.save()
     .then(result=>{
         response.status(201).json({message:"added new patient is done"});
     })
     .catch(error=>next(error))
+  }
+  else
+  {
+    response.status(404).json({message:"This Email does not exsists"})
+  }
+  
 };
 
 module.exports.updatePatient = (request, response, next)=>{
     patientSchema.findByIdAndUpdate({
-        _patientId:request.params.id
+        _id:request.params.id
     },
     {
         $set:{
@@ -50,7 +62,7 @@ module.exports.updatePatient = (request, response, next)=>{
 };
 
 module.exports.deletePatientById = (request, response, next)=>{
-    patientSchema.findByIdAndDelete({_patientId:request.params.id})
+    patientSchema.findByIdAndDelete({_id:request.params.id})
         .then((data)=>{
             response.status(200).json({message:"deleted"+request.params.id});
         })
@@ -66,7 +78,7 @@ module.exports.deletePatients = (request, response, next)=>{
 };
 
 module.exports.getPatientByID = (request, response, next)=>{
-    patientSchema.findOne({_patientId:request.params.id})
+    patientSchema.findOne({_id:request.params.id})
                     .populate({path:"patientData"})
                     .then((data)=>{
                         response.status(200).json(data);
