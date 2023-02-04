@@ -62,6 +62,7 @@ exports.addDoctor = async (request , response , next)=>{
         address:address,
         role:role
     });
+    
     // const schedule = new SchedulaSchema({
     //     clinic_id:clinic_id,
     //     doc_id:doctor._id,
@@ -72,6 +73,8 @@ exports.addDoctor = async (request , response , next)=>{
     // });
    
     if(role ==='doctor'){
+
+        
         const doctor = new DoctorSchema({
             specialization:specialization,
             price:price,
