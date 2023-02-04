@@ -15,13 +15,8 @@ const dateTimeMW = require("../middlewares/dateTimeMW");
 exports.getAllDoctors=(request , response , next)=>{
     DoctorSchema.find()
     .populate({path:'userData'})
-    .populate({path:'doc_schedules'})
     .then(data=>{
-        if(data!=null){
-            response.status(200).json(data);
-        }else{
-            next(new Error({message:"Id is not exist"}))
-        }
+        response.status(200).json(data);
     })
     .catch(error=>next(error));
 }
@@ -29,12 +24,11 @@ exports.getAllDoctors=(request , response , next)=>{
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
-    .populate({path:'doc_schedules'})
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);
         }else{
-            next(new Error({message:"Id is not exist"}))
+            response.json({message:"Id not Found"});
         }
     })
     .catch(error=>next(error));
@@ -63,52 +57,59 @@ exports.addDoctor = async (request , response , next)=>{
         role:role
     });
     
-    // const schedule = new SchedulaSchema({
-    //     clinic_id:clinic_id,
-    //     doc_id:doctor._id,
-    //     date:dateTimeMW.getDateFormat(new Date()),
-    //     from:startTime,
-    //     to: endTime,
-    //     duration_in_minutes:duration
-    // });
    
     if(role ==='doctor'){
 
+        user.save()
+            .then(result=>{
+                const doctor = new DoctorSchema({
+                    specialization:specialization,
+                    price:price,
+                    userData:result._id
+                });
+                
+                doctor.save()
+                    .then(res=>{
+                        const schedule = new SchedulaSchema({
+                            clinic_id:clinic_id,
+                            doc_id:res._id,
+                            date:dateTimeMW.getDateFormat(new Date()),
+                            from:dateTimeMW.getTimeFromString(startTime),
+                            to: dateTimeMW.getTimeFromString(endTime),
+                            duration_in_minutes:duration
+                        });
+                        
+                        schedule.save()
+                        .then(resu=>{
+                            response.status(200).json({message:"Docor added"});
+                        })
+                        .catch(err=>next(err))
+                    })
+                    .catch(err=>next(err))
+            }).catch(err=>next(err))
         
-        const doctor = new DoctorSchema({
-            specialization:specialization,
-            price:price,
-            // doc_schedules:schedule._id,
-            userData:user._id
-        });
-
-        doctor.save()
-        .then(result=>{
-            user.save()
-                .then()
-                .catch(err=>next(err));
-            // schedule.save()
-            //         .then()
-            //         .catch(error=>next(err));
-            response.status(200).json({message:"Docor added"});
-        })
-        .catch(error=>next(error));
     }
 }
 
-exports.deleteDoctor = async (request , response , next)=>{
+exports.deleteDoctor = (request , response , next)=>{
     try{
         const doctorId = request.params.id;
         
-        const doctor = await DoctorSchema.findById({_id:doctorId});
-        const user = await doctor.findById({userData:doctor.userData});
-
-        await DoctorSchema.findByIdAndDelete({_id:doctorId});
-        await UserSchema.findByIdAndDelete({_id:user._id});
-        await SchedulaSchema.deleteMany({doc_id:doctorId});
-
-        response.status(200).json({message:"Doctor deleted"});
-
+        DoctorSchema.findById({_id:doctorId})
+        .then(data=>{
+            UserSchema.findByIdAndDelete({_id:data.userData})
+            .then(()=>{
+                SchedulaSchema.deleteMany({doc_id:doctorId})
+                .then(()=>{
+                    DoctorSchema.findByIdAndDelete({_id:doctorId})
+                    .then(()=>{
+                        response.status(200).json({message:"Doctor deleted"});
+                    })
+                })
+                
+            })
+        }).catch(err=>next(err))
+     
     }catch(error){
         next(error)
     }
@@ -128,6 +129,7 @@ exports.updateDoctor = async (request , response , next)=>{
                 price:price
             }});
             
+
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
             {$set:{
                 fullName:fullName,
@@ -137,7 +139,7 @@ exports.updateDoctor = async (request , response , next)=>{
                 address:address,
             }});
 
-            response.status(200).json({message:"Doctor apdated"})
+            response.status(200).json({message:"Doctor Updated"})
     }catch(error){
         next(error)
     }
@@ -162,4 +164,3 @@ exports.updateSchedule =(request , response , next)=>{
         next(error)
     }
 }
-

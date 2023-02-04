@@ -3,22 +3,27 @@ const AutoIncreament = require('mongoose-sequence')(mongoose);
 
 const addres = require('./adressModel') 
 
-const service = new mongoose.Schema({
+const serviceSchema = new mongoose.Schema({
     name:{type:String , required:true},
-    salay:{type:Number, required:true},
-    doctor_id:{type:Number, required:true , ref:'doctor'}
-})
+    salary:{type:Number, required:true},
+    doctor_id:{type:Number, required:true , ref:'doctors'},
+    clinic_id: {type:Number, required:true , ref:'clinics'}
+},{_id:false})
+
+serviceSchema.plugin(AutoIncreament,{id:'serviceConter'})
+mongoose.model('services' , serviceSchema)
+
+/////////////////////////////////////
 
 const clinicSchema = new mongoose.Schema({
     _id:{type:Number},
-    clinic_location : addres.adressSchema,
-    service:[service]
+    clinic_location : addres.adressSchema
     },
     {_id:false}
 );
 
 
-clinicSchema.plugin(AutoIncreament,{ _id:'clinicConter'})
+clinicSchema.plugin(AutoIncreament,{ id:'clinicConter'})
 mongoose.model('clinics' , clinicSchema)
 
 

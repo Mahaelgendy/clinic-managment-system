@@ -4,6 +4,7 @@ require("../Models/clinicModel");
 const clinicSchema =  mongoose.model("clinics");
 
 exports.getAllClinics = (request , response, next)=>{
+
     clinicSchema.find()
     .then(data=>{
         console.log(data)
@@ -29,7 +30,6 @@ exports.getClinicById = (request, response ,next)=>{
 exports.addClinic =(request, response, next)=>{
     let newClinic = new clinicSchema({
         clinic_location:request.body.clinic_location,
-        service:request.body.service 
     });
     console.log(newClinic)
     newClinic.save()
@@ -54,7 +54,6 @@ exports.updateClinic = (request,response , next)=>
         {_id: request.params.id},
         {$set:{
             clinic_location:request.body.clinic_location,
-            service:request.body.service 
         }})
         .then(result=>{
             response.status(200).json({message:"updated"});

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
 require("./../Models/doctorModel");
 const appointmentSchema = mongoose.model("appointments");
-const schedulesSchema = mongoose.model("schedules")
+const doctorSchema = mongoose.model("doctors")
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 
 module.exports.getAllAppointments = (request , response , next)=>{

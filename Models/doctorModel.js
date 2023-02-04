@@ -10,7 +10,7 @@ const scheduleSchema = new mongoose.Schema({
     date:{type:String , required:true},
     from:{type:Date , required:true},
     to :{type:Date , required:true},
-    duration_in_minutes:{type:Number , required:true , default:'30'}
+    duration_in_minutes:{type:Number , required:true , default:30}
 },{ _id:false}
 );
 
@@ -24,7 +24,7 @@ const doctorSchema = new mongoose.Schema({
     _id:{type:Number},
     userData:{type:mongoose.Types.ObjectId , ref:'users'},
     specialization:{type:String, required:true},
-    price:{type:Number}
+    price:{type:Number},
 },{ _id:false}
 );
 
