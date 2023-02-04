@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     password: {type:String , required:true},
     email:{ type: String, unique: true, required:true, match:/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/},
     age :{type : Number , required:true },
-    gender:{type: String, enum: ['Femele','Male']},
+    gender:{type: String, enum: ['Female','Male']},
     address: {type:addressSchema},
     role:{type: String, required: true, enum: ["admin", "doctor", "patient" , "employee"], default:'patient'},
     image:String,
