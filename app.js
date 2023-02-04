@@ -37,10 +37,6 @@ server.use(serviceRoutes)
 server.use(invoiceRoutes);
 server.use(patientRoutes);
 server.use(doctorRoutes);
-<<<<<<< HEAD
-
-=======
->>>>>>> 26989d5efb2d8739bd2a414fee6c4a7342bf3f1c
 //Not Found MW
 server.use((request ,response, next)=>{
     response.status(404).json({data:"Not Fount"});
