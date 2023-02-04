@@ -99,11 +99,21 @@ exports.deleteDoctor = async (request , response , next)=>{
         // // const user = doctor.userData
         // console.log(user);
 
-        await DoctorSchema.findByIdAndDelete({_id:doctorId});
-        await UserSchema.findByIdAndDelete({_id:doctor.userData});
-        await SchedulaSchema.deleteMany({doc_id:doctorId});
+       
+        UserSchema.findByIdAndDelete({_id:doctor.userData})
+        .then(res=>{
+            SchedulaSchema.deleteMany({doc_id:doctorId})
+            .then(result=>{
+                DoctorSchema.findByIdAndDelete({_id:doctorId})
+                .then(result=>{
+                    response.status(200).json({message:"Doctor deleted"});
+                })
+            })
+            
+        })
+       
 
-        response.status(200).json({message:"Doctor deleted"});
+       
 
     }catch(error){
         next(error)
