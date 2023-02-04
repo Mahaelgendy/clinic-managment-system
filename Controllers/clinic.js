@@ -4,8 +4,7 @@ require("../Models/clinicModel");
 const clinicSchema =  mongoose.model("clinics");
 
 exports.getAllClinics = (request , response, next)=>{
-
-    clinicSchema.find().populate({path :"doctor_id"})
+    clinicSchema.find()
     .then(data=>{
         console.log(data)
         response.status(201).json(data)

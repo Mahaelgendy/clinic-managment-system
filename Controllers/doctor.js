@@ -15,6 +15,7 @@ const dateTimeMW = require("../middlewares/dateTimeMW");
 exports.getAllDoctors=(request , response , next)=>{
     DoctorSchema.find()
     .populate({path:'userData'})
+    .populate({path:'doc_schedules'})
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);
@@ -60,38 +61,31 @@ exports.addDoctor = async (request , response , next)=>{
         address:address,
         role:role
     });
-    
-   
-    if(role ==='doctor'){
 
-        user.save()
-            .then(result=>{
-                const doctor = new DoctorSchema({
-                    specialization:specialization,
-                    price:price,
-                    userData:result._id
-                });
-                
-                doctor.save()
-                    .then(res=>{
-                        const schedule = new SchedulaSchema({
-                            clinic_id:clinic_id,
-                            doc_id:res._id,
-                            date:dateTimeMW.getDateFormat(new Date()),
-                            from:dateTimeMW.getTimeFromString(startTime),
-                            to: dateTimeMW.getTimeFromString(endTime),
-                            duration_in_minutes:duration
-                        });
-                        
-                        schedule.save()
-                        .then(resu=>{
-                            response.status(200).json({message:"Docor added"});
-                        })
-                        .catch(err=>next(err))
-                    })
-                    .catch(err=>next(err))
-            }).catch(err=>next(err))
-        
+    const schedule = new SchedulaSchema({
+        clinic_id:clinic_id,
+        date:dateTimeMW.getDateFormat(new Date()),
+        from:startTime,
+        to: endTime,
+        duration_in_minutes:duration
+    });
+
+    if(role ==='doctor'){
+        const doctor = new DoctorSchema({
+            specialization:specialization,
+            price:price,
+            doc_schedules:schedule._id,
+            userData:user._id
+        });
+
+        doctor.save()
+        .then(result=>{
+            user.save()
+                .then()
+                .catch(err=>next(err));
+            response.status(200).json({message:"Docor added"});
+        })
+        .catch(error=>next(error));
     }
 }
 

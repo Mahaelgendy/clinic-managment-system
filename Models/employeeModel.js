@@ -5,11 +5,12 @@ const AutoIncreament = require('mongoose-sequence')(mongoose);
 
 const employeeSchema= new mongoose.Schema({
 
-    _employeeId:{type:Number},
+    _id:{type:Number},
     employeeData:{type:mongoose.Types.ObjectId,ref:'users'},
     clinicId:{type:Number,ref:'clinics'}
 
-});
+},{_id:false}
+);
 
-employeeSchema.plugin(AutoIncreament,{id:'employeeCounter'});
+employeeSchema.plugin(AutoIncreament);
 mongoose.model('employees',employeeSchema);

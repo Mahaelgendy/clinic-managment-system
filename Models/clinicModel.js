@@ -5,9 +5,9 @@ const addres = require('./adressModel')
 
 const service = new mongoose.Schema({
     name:{type:String , required:true},
-    salary:{type:Number, required:true},
+    salay:{type:Number, required:true},
     doctor_id:{type:Number, required:true , ref:'doctor'}
-},{_id:false})
+})
 
 const clinicSchema = new mongoose.Schema({
     _id:{type:Number},
@@ -18,7 +18,7 @@ const clinicSchema = new mongoose.Schema({
 );
 
 
-clinicSchema.plugin(AutoIncreament,{id:'clinicConter'})
+clinicSchema.plugin(AutoIncreament,{ _id:'clinicConter'})
 mongoose.model('clinics' , clinicSchema)
 
 
