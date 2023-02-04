@@ -24,8 +24,7 @@ const doctorSchema = new mongoose.Schema({
     _id:{type:Number},
     userData:{type:mongoose.Types.ObjectId , ref:'users'},
     specialization:{type:String, required:true},
-    price:{type:Number},
-    doc_schedules:[{type:Number , ref:'schedules'}]
+    price:{type:Number}
 },{ _id:false}
 );
 
