@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const server=express();
 const appointmentRoutes = require("./Routes/appointment");
-
+const clinicRoutes = require("./Routes/clinic");
+const serviceRoutes = require("./Routes/service");
 
 let port=process.env.PORT||8080;
 
@@ -27,6 +28,8 @@ server.use(express.json());
 
 //routes
 server.use(appointmentRoutes);
+server.use(clinicRoutes);
+server.use(serviceRoutes)
 
 //Not Found MW
 server.use((request ,response, next)=>{
