@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
 require("./../Models/doctorModel");
 const appointmentSchema = mongoose.model("appointments");
-const doctorSchema = mongoose.model("doctors")
+const schedulesSchema = mongoose.model("schedules")
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 
 module.exports.getAllAppointments = (request , response , next)=>{
@@ -120,7 +120,7 @@ async function checkIfThisTimeSlotIsFree(doctorId,appointmentDate,startOfAppoint
             console.log(doctorSchedule);
             let startOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.from , appointmentDate);
             let endOfShift = dateTimeMW.getDateTimeForSpecificDay(doctorSchedule.to , appointmentDate);
-        
+            
             let startOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(dateTimeMW.getTimeFromString(startOfAppointment), appointmentDate);
             let endOfAppointmentAsDatetime = dateTimeMW.getDateTimeForSpecificDay(dateTimeMW.getTimeFromString(endOfAppointment), appointmentDate);
             
