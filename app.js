@@ -26,9 +26,11 @@ server.use(morgan('combined'));
 server.use(express.json());
 
 //routes
+
 server.use(appointmentRoutes);
 server.use(patientRoutes);
-server.use(doctorRoutes)
+server.use(doctorRoutes);
+
 //Not Found MW
 server.use((request ,response, next)=>{
     response.status(404).json({data:"Not Fount"});

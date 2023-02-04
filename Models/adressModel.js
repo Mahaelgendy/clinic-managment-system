@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const adressSchema= new mongoose.Schema({
     city: String,
     street:String,
-    building: String
+    building: Number
 } ,{_id:false}
 );
 
