@@ -12,6 +12,20 @@ const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
 const dateTimeMW = require("../middlewares/dateTimeMW");
 
+exports.getAllDoctors=(request , response , next)=>{
+    DoctorSchema.find()
+    .populate({path:'userData'})
+    .populate({path:'doc_schedules'})
+    .then(data=>{
+        if(data!=null){
+            response.status(200).json(data);
+        }else{
+            next(new Error({message:"Id is not exist"}))
+        }
+    })
+    .catch(error=>next(error));
+}
+
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
@@ -48,20 +62,23 @@ exports.addDoctor = async (request , response , next)=>{
         address:address,
         role:role
     });
-
-    const schedule = new SchedulaSchema({
-        clinic_id:clinic_id,
-        date:dateTimeMW.getDateFormat(new Date()),
-        from:startTime,
-        to: endTime,
-        duration_in_minutes:duration
-    });
-
+    
+    // const schedule = new SchedulaSchema({
+    //     clinic_id:clinic_id,
+    //     doc_id:doctor._id,
+    //     date:dateTimeMW.getDateFormat(new Date()),
+    //     from:startTime,
+    //     to: endTime,
+    //     duration_in_minutes:duration
+    // });
+   
     if(role ==='doctor'){
+
+        
         const doctor = new DoctorSchema({
             specialization:specialization,
             price:price,
-            doc_schedules:schedule._id,
+            // doc_schedules:schedule._id,
             userData:user._id
         });
 
@@ -70,6 +87,9 @@ exports.addDoctor = async (request , response , next)=>{
             user.save()
                 .then()
                 .catch(err=>next(err));
+            // schedule.save()
+            //         .then()
+            //         .catch(error=>next(err));
             response.status(200).json({message:"Docor added"});
         })
         .catch(error=>next(error));
@@ -82,11 +102,13 @@ exports.deleteDoctor = async (request , response , next)=>{
         
         const doctor = await DoctorSchema.findById({_id:doctorId});
         const user = await doctor.findById({userData:doctor.userData});
-        const schedule = await doctor.findById({doc_schedules:doctor.doc_schedules});
+
         await DoctorSchema.findByIdAndDelete({_id:doctorId});
         await UserSchema.findByIdAndDelete({_id:user._id});
-        await SchedulaSchema.findByIdAndDelete({_id:schedule._id});
+        await SchedulaSchema.deleteMany({doc_id:doctorId});
+
         response.status(200).json({message:"Doctor deleted"});
+
     }catch(error){
         next(error)
     }
@@ -140,3 +162,4 @@ exports.updateSchedule =(request , response , next)=>{
         next(error)
     }
 }
+
