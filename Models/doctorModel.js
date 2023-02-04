@@ -10,7 +10,7 @@ const scheduleSchema = new mongoose.Schema({
     date:{type:Date , required:true},
     from:{type:Date , required:true},
     to :{type:Date , required:true},
-    duration_in_minutes:{type:Date , required:true , default:'00:30:00'}
+    duration_in_minutes:{type:Number , required:true , default:'00:30:00'}
 },{ _id:false}
 );
 
