@@ -16,6 +16,52 @@ module.exports.getAllAppointments = (request , response , next)=>{
                             .catch((error)=>next(error));
 };
 
+module.exports.getAppointmentbyId = (request , response , next)=>{
+    appointmentSchema.findById({_id : request.params.id})
+        .populate({ path: "clinic_id"})
+        .populate({ path: "doctor_id"})
+        .populate({ path: "patient_id"})
+        .populate({path: "employee_id"})
+        .then(data=>{
+            if(data!=null){
+                response.status(200).json(data);
+            }else{
+                response.json({message:"Id not Found"});
+            }
+        })
+        .catch((error)=>next(error));
+};
+module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
+    appointmentSchema.find({doctor_id : request.params.doctorId})
+        .populate({ path: "clinic_id"})
+        .populate({ path: "doctor_id"})
+        .populate({ path: "patient_id"})
+        .populate({path: "employee_id"})
+        .then(data=>{
+            if(data!=null){
+                response.status(200).json(data);
+            }else{
+                response.json({message:"Id not Found"});
+            }
+        })
+        .catch((error)=>next(error));
+};
+module.exports.getAppointmentbyClinicId = (request , response , next)=>{
+    appointmentSchema.find({clinic_id : request.params.clinicId})
+        .populate({ path: "clinic_id"})
+        .populate({ path: "doctor_id"})
+        .populate({ path: "patient_id"})
+        .populate({path: "employee_id"})
+        .then(data=>{
+            if(data!=null){
+                response.status(200).json(data);
+            }else{
+                response.json({message:"Id not Found"});
+            }
+        })
+        .catch((error)=>next(error));
+};
+
 module.exports.addAppointment=async(request , response , next)=>{
     
     let appointmentDate = request.body.date;
@@ -25,9 +71,10 @@ module.exports.addAppointment=async(request , response , next)=>{
     let endOfAppointment = await getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
     
     if (endOfAppointment != null){
-        console.log(endOfAppointment);
-        let isFree = await checkIfThisTimeSlotIsFree(clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+
+        let isFree = await checkIfThisTimeSlotIsFree(null,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
         console.log('isfree',isFree)
+
         if(isFree){
             let newAppointment = new appointmentSchema({
                 clinic_id: clinicId,
@@ -60,30 +107,55 @@ module.exports.addAppointment=async(request , response , next)=>{
     } 
 };
 
-module.exports.updateAppointment=(request , response , next)=>{
-    appointmentSchema.updateOne({
-        _id : request.body.id
-    },
-    {
-        $set:{ fullName: request.body.fullName,
-            clinic_id: request.body.clinicId,
-            doctor_id:request.body.doctorId,
-            patient_id: request.body.patientId,
-            employee_id: request.body.employeeId,
-            date: request.body.date,
-            from: request.body.from,
-            to: request.body.to,
-            status: request.body.status,
-            reservation_method:request.body.reservationMethod
+module.exports.updateAppointment=async (request , response , next)=>{
+
+    let appointmentDate = request.body.date;
+    let startOfAppointment = request.body.from;
+    let doctorId =request.body.doctorId;
+    let clinicId = request.body.clinicId;
+    let appointmentId = request.params.id;
+
+    let endOfAppointment = await getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
+    if (endOfAppointment != null){
+
+        let isFree = await checkIfThisTimeSlotIsFree(appointmentId,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+        console.log('isfree',isFree)
+        if(isFree){
+            appointmentSchema.updateOne({
+                _id : appointmentId
+            },
+            {
+                $set:{ 
+                    clinic_id: clinicId,
+                    doctor_id:doctorId,
+                    patient_id: request.body.patientId,
+                    employee_id: request.body.employeeId,
+                    date: appointmentDate,
+                    From:dateTimeMW.getTimeFromString(startOfAppointment),
+                    to : dateTimeMW.getTimeFromString(endOfAppointment),
+                    status: request.body.status,
+                    reservation_method:request.body.reservationMethod
+                }
+            }).then(result=>{
+                response.status(201).json(result);
+            })
+            .catch(error => next(error));
         }
-    }).then(result=>{
-        respose.status(201).json(result);
-    })
-    .catch(error => next(error));
+        else{
+            let error = new Error("this time is ovelapped with another one please select another time ");
+            error.status=401;
+            next(error);
+        }
+    }
+    else{
+        let error = new Error("There is No shift in this Day for that Doctor ");
+            error.status=401;
+            next(error);
+    } 
 };
 
-module.exports.deleteAppointment = (request , respose , next)=>{
-    appointmentSchema.deleteOne({_id : request.body.id})
+module.exports.deleteAppointmentById = (request , respose , next)=>{
+    appointmentSchema.deleteOne({_id : request.params.id})
         .then((data)=>{
             respose.status(200).json(data);
         })
@@ -113,9 +185,9 @@ async function getEndOfAppointment(clinicId,doctorId,appointmentDate,startofAppo
       }
 }
 
-async function checkIfThisTimeSlotIsFree(clinicId,doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
+async function checkIfThisTimeSlotIsFree(appointmentId,clinicId,doctorId,appointmentDate,startOfAppointment ,endOfAppointment){
     try {
-        let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId , date: appointmentDate,clinic_id:clinicId })
+        let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId , date: appointmentDate, clinic_id : clinicId })
         if(doctorSchedule != null){
 
             console.log(doctorSchedule);
@@ -128,7 +200,7 @@ async function checkIfThisTimeSlotIsFree(clinicId,doctorId,appointmentDate,start
             if (checkIsTimeInEmployeeShift(startOfAppointmentAsDatetime , endOfAppointmentAsDatetime , startOfShift , endOfShift))
             {
                 console.log("here");
-                let isNotOverlapped = await checkIfTimeOverLapWithAnotherAppointmentInSameDay(clinicId,doctorId, startOfAppointmentAsDatetime, endOfAppointmentAsDatetime, appointmentDate);
+                let isNotOverlapped = await checkIfTimeOverLapWithAnotherAppointmentInSameDay(appointmentId,clinicId,doctorId, startOfAppointmentAsDatetime, endOfAppointmentAsDatetime, appointmentDate);
                 console.log("overlap", isNotOverlapped);
                 return isNotOverlapped;
             }
@@ -147,9 +219,9 @@ async function checkIfThisTimeSlotIsFree(clinicId,doctorId,appointmentDate,start
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
-async function checkIfTimeOverLapWithAnotherAppointmentInSameDay(clinicId,doctorId,startOfAppointment, endOfAppintment,appointmentDate){
+async function checkIfTimeOverLapWithAnotherAppointmentInSameDay(appointmentId,clinicId,doctorId,startOfAppointment, endOfAppintment,appointmentDate){
     try{
-        let allAppointments= await appointmentSchema.find({doctor_id : doctorId , date:appointmentDate , clinic_id:clinicId})
+        let allAppointments= await appointmentSchema.find({doctor_id : doctorId , date:appointmentDate , clinic_id:clinicId , _id: {$ne: appointmentId}})
         for(let i=0 ; i < allAppointments.length ; i++)
         {
             let from= allAppointments[i].from;
