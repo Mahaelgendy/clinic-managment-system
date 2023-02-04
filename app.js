@@ -5,9 +5,10 @@ const server=express();
 const appointmentRoutes = require("./Routes/appointment");
 const clinicRoutes = require("./Routes/clinic");
 const serviceRoutes = require("./Routes/service");
-
 const patientRoutes = require ("./Routes/patient");
-const doctorRoutes = require("./Routes/doctor")
+const doctorRoutes = require("./Routes/doctor");
+const prescriptionRoutes = require("./Routes/prespiction");
+
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
@@ -32,7 +33,7 @@ server.use(express.json());
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
-
+server.use(prescriptionRoutes);
 server.use(patientRoutes);
 server.use(doctorRoutes)
 //Not Found MW
