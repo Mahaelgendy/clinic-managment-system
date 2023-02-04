@@ -9,7 +9,7 @@ const prespictionSchema = new mongoose.Schema({
     nextExamination:{type:Date, required:true},
     doctor_id : {type:Number, required:true , ref:'doctors'}, 
     patient_id :{type: Number , required:true , ref :'patients'},
-    medicine_id :{type :Array , required:true}//, ref: 'medicines'}
+    medicine_id :{type :Array , required:true, ref: 'medicines'}
 }, {_id:false});
 
 

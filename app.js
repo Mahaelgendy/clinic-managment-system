@@ -9,9 +9,6 @@ const patientRoutes = require ("./Routes/patient");
 const doctorRoutes = require("./Routes/doctor");
 const prescriptionRoutes = require("./Routes/prespiction");
 const invoiceRoutes = require("./Routes/invoice");
-
-const patientRoutes = require ("./Routes/patient");
-const doctorRoutes = require("./Routes/doctor");
 const medicineRoutes = require("./Routes/medicine");
 
 let port=process.env.PORT||8080;
