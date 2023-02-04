@@ -17,29 +17,35 @@ module.exports.getAllPatients = (request, response,next)=>{
 };
 
 module.exports.addPatient = (request, response, next)=>{
-  const resultOfFoundUserEmail = userSchema.findOne({email:request.body.email});                       
-  if(resultOfFoundUserEmail)
-  {
-    let newPatient=new patientSchema({
-        status:request.body.patientStatus,
-        history:request.body.patientHistory,
-        height:request.body.patientHeight,
-        weight:request.body.patientWeight,
-        hasInsurance:request.body.patientHasInsurance,
-        phone:request.body.patientPhone
+ userSchema.findOne({email:request.body.email})
+            .then((data)=>{
+                // console.log(data)
+                if(data!=null)
+                {
+                    // console.log("from if")
+                    let newPatient=new patientSchema({
+                        status:request.body.patientStatus,
+                        history:request.body.patientHistory,
+                        height:request.body.patientHeight,
+                        weight:request.body.patientWeight,
+                        hasInsurance:request.body.patientHasInsurance,
+                        phone:request.body.patientPhone
+                
+                    });
+                    newPatient.save()
+                    .then(result=>{
+                        response.status(201).json({message:"added new patient is done"});
+                    })
+                    .catch(error=>next(error))
+                }
+                else
+                {
+                    // console.log("from else")
+                    response.status(404).json({message:"This Email does not exsist"})
+                }
 
-    });
-    newPatient.save()
-    .then(result=>{
-        response.status(201).json({message:"added new patient is done"});
-    })
-    .catch(error=>next(error))
-  }
-  else
-  {
-    response.status(404).json({message:"This Email does not exsists"})
-  }
-  
+            })
+            .catch(error=>next(error))
 };
 
 module.exports.updatePatient = (request, response, next)=>{
