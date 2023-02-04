@@ -63,29 +63,34 @@ exports.addDoctor = async (request , response , next)=>{
         role:role
     });
     
-    // const schedule = new SchedulaSchema({
-    //     clinic_id:clinic_id,
-    //     doc_id:doctor._id,
-    //     date:dateTimeMW.getDateFormat(new Date()),
-    //     from:startTime,
-    //     to: endTime,
-    //     duration_in_minutes:duration
-    // });
+    const schedule = new SchedulaSchema({
+        clinic_id:clinic_id,
+        doc_id:doctor._id,
+        date:dateTimeMW.getDateFormat(new Date()),
+        from:startTime,
+        to: endTime,
+        duration_in_minutes:duration
+    });
    
     if(role ==='doctor'){
 
+        user.save()
+            .then(result=>{
+                const doctor = new DoctorSchema({
+                    specialization:specialization,
+                    price:price,
+                    userData:result._id
+                });
+
+                doctor.save()
+                    .then()
+            })
         
-        const doctor = new DoctorSchema({
-            specialization:specialization,
-            price:price,
-            // doc_schedules:schedule._id,
-            userData:user._id
-        });
 
         doctor.save()
         .then(result=>{
             user.save()
-                .then()
+                .then(result)
                 .catch(err=>next(err));
             // schedule.save()
             //         .then()
