@@ -3,7 +3,7 @@ const express = require("express");
 
 const router= express.Router();
 
-router.route("/patiets")
+router.route("/patients")
         .get(controller.getAllPatients)
         .post(controller.addPatient)
         .delete(controller.deletePatients);

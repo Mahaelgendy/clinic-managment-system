@@ -9,13 +9,15 @@ const invoiceSchema = new mongoose.Schema({
     appointment_id: { type: Number, required: true, ref: 'appointments' },
     clinic_id: { type: Number, ref: 'clinics', required: true },
     paymentMethod: { type: String, enum: ['Cash', 'Credit Card'], required: true },
-    paymentStatus: { type: String, enum: ['Total amount', 'Part with insurance'], required: true },
+    paymentStatus: { type: String, enum: ['Total amount', 'Partial with insurance'], required: true },
     totalCost: { type: Number, required: true },
     actualPaid: { type: Number, required: true },
-    
+    date:{type:String , required:true},
+    time:{type:String , required:true},
+
 }, { _id: false }
 )
-invoiceSchema.plugin(AutoIncreament);
+invoiceSchema.plugin(AutoIncreament,{id: 'id_counter', inc_field: '_id'});
 
 mongoose.model('invoices', invoiceSchema)
 

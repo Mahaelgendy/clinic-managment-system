@@ -8,6 +8,11 @@ const serviceRoutes = require("./Routes/service");
 const patientRoutes = require ("./Routes/patient");
 const doctorRoutes = require("./Routes/doctor");
 const prescriptionRoutes = require("./Routes/prespiction");
+const invoiceRoutes = require("./Routes/invoice");
+
+const patientRoutes = require ("./Routes/patient");
+const doctorRoutes = require("./Routes/doctor");
+const medicineRoutes = require("./Routes/medicine");
 
 let port=process.env.PORT||8080;
 
@@ -30,12 +35,15 @@ server.use(morgan('combined'));
 server.use(express.json());
 
 //routes
+
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
 server.use(prescriptionRoutes);
+server.use(invoiceRoutes);
 server.use(patientRoutes);
-server.use(doctorRoutes)
+server.use(doctorRoutes);
+server.use(medicineRoutes);
 //Not Found MW
 server.use((request ,response, next)=>{
     response.status(404).json({data:"Not Fount"});
