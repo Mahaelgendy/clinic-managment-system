@@ -110,16 +110,16 @@ exports.deleteDoctor = async (request , response , next)=>{
         .then(res=>{
             SchedulaSchema.deleteMany({doc_id:doctorId})
             .then(result=>{
-                
+                DoctorSchema.findByIdAndDelete({_id:doctorId})
+                .then(result=>{
+                    response.status(200).json({message:"Doctor deleted"});
+                })
             })
-            DoctorSchema.findByIdAndDelete({_id:doctorId})
-            .then(result=>{
-    
-            })
+            
         })
        
 
-        response.status(200).json({message:"Doctor deleted"});
+       
 
     }catch(error){
         next(error)
