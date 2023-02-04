@@ -8,7 +8,10 @@ router.route('/doctor/:id')
     .delete(controller.deleteDoctor)
     .patch(controller.updateDoctor);
 
-router.post('/doctor' , controller.addDoctor)
+
+router.route('/doctor')
+      .get(controller.getAllDoctors)
+      .post(controller.addDoctor);
 
 module.exports = router
 
