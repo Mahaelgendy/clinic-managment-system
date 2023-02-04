@@ -13,9 +13,8 @@ const patientSchema= new mongoose.Schema({
     phone:{type:Number ,required:true ,match:/^01[0-2,5]\d{8}$/},
     patientData:{type:mongoose.Types.ObjectId,ref:'users'},
     
-}
+},{_id:false}
 );
-// ,{_id:false}
-// patientSchema.plugin(AutoIncreament);
+patientSchema.plugin(AutoIncreament);
 
 mongoose.model("patients",patientSchema);
