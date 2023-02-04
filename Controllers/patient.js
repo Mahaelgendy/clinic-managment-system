@@ -19,10 +19,10 @@ module.exports.getAllPatients = (request, response,next)=>{
 module.exports.addPatient = (request, response, next)=>{
  userSchema.findOne({email:request.body.email})
             .then((data)=>{
-                console.log(data)
+                // console.log(data)
                 if(data!=null)
                 {
-                    console.log("from if")
+                    // console.log("from if")
                     let newPatient=new patientSchema({
                         status:request.body.patientStatus,
                         history:request.body.patientHistory,
@@ -40,7 +40,7 @@ module.exports.addPatient = (request, response, next)=>{
                 }
                 else
                 {
-                    console.log("from else")
+                    // console.log("from else")
                     response.status(404).json({message:"This Email does not exsist"})
                 }
 
