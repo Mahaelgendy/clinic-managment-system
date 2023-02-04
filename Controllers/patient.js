@@ -5,11 +5,11 @@ const mongoose = require ("mongoose");
 require("../Models/userModel");
 require ("../Models/patientModel");
 
-const patientSchema = mongoose.model("patients");
 const userSchema = mongoose.model("users");
+const patientSchema = mongoose.model("patients");
 
-module.exports.getAllPatients = (request, response,next)=>{
-    patientSchema.find().populate({path:"patientData"})
+module.exports.getAllPatients = (request, response, next)=>{
+    patientSchema.find().populate({path:'patientData'})
                         .then((data)=>{
                             response.status(200).json(data);
                         })
@@ -19,10 +19,8 @@ module.exports.getAllPatients = (request, response,next)=>{
 module.exports.addPatient = (request, response, next)=>{
  userSchema.findOne({email:request.body.email})
             .then((data)=>{
-                // console.log(data)
                 if(data!=null)
                 {
-                    // console.log("from if")
                     let newPatient=new patientSchema({
                         status:request.body.patientStatus,
                         history:request.body.patientHistory,
@@ -40,7 +38,6 @@ module.exports.addPatient = (request, response, next)=>{
                 }
                 else
                 {
-                    // console.log("from else")
                     response.status(404).json({message:"This Email does not exsist"})
                 }
 
@@ -69,7 +66,7 @@ module.exports.updatePatient = (request, response, next)=>{
 
 module.exports.deletePatientById = (request, response, next)=>{
     patientSchema.findByIdAndDelete({_id:request.params.id})
-        .then((data)=>{
+        .then(()=>{
             response.status(200).json({message:"deleted"+request.params.id});
         })
         .catch((error)=>next(error));
