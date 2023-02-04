@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const server=express();
 const appointmentRoutes = require("./Routes/appointment");
+const clinicRoutes = require("./Routes/clinic");
+const serviceRoutes = require("./Routes/service");
+
 const patientRoutes = require ("./Routes/patient");
 const doctorRoutes = require("./Routes/doctor");
 let port=process.env.PORT||8080;
@@ -27,6 +30,9 @@ server.use(express.json());
 
 //routes
 server.use(appointmentRoutes);
+server.use(clinicRoutes);
+server.use(serviceRoutes)
+
 server.use(patientRoutes);
 server.use(doctorRoutes);
 //Not Found MW
