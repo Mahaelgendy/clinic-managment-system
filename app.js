@@ -30,6 +30,7 @@ server.use(morgan('combined'));
 server.use(express.json());
 
 //routes
+
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
