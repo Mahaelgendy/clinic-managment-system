@@ -12,7 +12,7 @@ const invoiceRoutes = require("./Routes/invoice");
 const medicineRoutes = require("./Routes/medicine");
 const employeeRoutes = require("./Routes/employee");
 const scheduleRoutes = require("./Routes/schedule");
-
+const userRoutes = require("./Routes/user");
 
 let port=process.env.PORT||8080;
 
@@ -45,6 +45,7 @@ server.use(doctorRoutes);
 server.use(medicineRoutes);
 server.use(employeeRoutes);
 server.use(scheduleRoutes);
+server.use(userRoutes)
 
 //Not Found MW
 server.use((request ,response, next)=>{

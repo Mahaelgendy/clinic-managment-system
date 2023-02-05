@@ -115,6 +115,7 @@ exports.deleteDoctor = (request , response , next)=>{
     }
 }
 
+//Update Doctor by id
 exports.updateDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
