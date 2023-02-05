@@ -31,7 +31,7 @@ module.exports.getAppointmentbyId = (request , response , next)=>{
         .catch((error)=>next(error));
 };
 module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
-    appointmentSchema.find({doctor_id : request.params.doctorId})
+    appointmentSchema.find({doctor_id : request.params.id})
         .populate({ path: "clinic_id"})
         .populate({ path: "doctor_id"})
         .populate({ path: "patient_id"})
@@ -46,7 +46,7 @@ module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
         .catch((error)=>next(error));
 };
 module.exports.getAppointmentbyClinicId = (request , response , next)=>{
-    appointmentSchema.find({clinic_id : request.params.clinicId})
+    appointmentSchema.find({clinic_id : request.params.id})
         .populate({ path: "clinic_id"})
         .populate({ path: "doctor_id"})
         .populate({ path: "patient_id"})
