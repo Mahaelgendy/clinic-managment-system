@@ -19,7 +19,7 @@ router.route("/doctors/:id")
     .patch(
         doctorValidation.paramValidation,
         doctorValidation.doctorValidataion,
-        userValidation.userValidation,
+        userValidation.userbodyValidation,
         validator,
         controller.updateDoctor)
 
@@ -27,7 +27,7 @@ router.route("/doctors/:id")
 router.route('/doctors')
       .get(controller.getAllDoctors)
       .post(
-        userValidation.userValidation,
+        userValidation.userbodyValidation,
         doctorValidation.doctorValidataion,
         scheduleValidation.scheduleValidation,
         validator,

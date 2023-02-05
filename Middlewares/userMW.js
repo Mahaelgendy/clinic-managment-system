@@ -1,6 +1,6 @@
 
 const {body, param} = require('express-validator')
-exports.userValidation = [
+exports.userbodyValidation = [
     body('fullName').isString().withMessage("Name should be String"),
     body('password').not().isEmpty().isLength({min: 6}).withMessage("Password must be at least 6 char long"),
     body('email').isEmail().withMessage("Email is invalid"),
@@ -10,4 +10,15 @@ exports.userValidation = [
     body('address.street').isString().withMessage("Invalid street"),
     body('address.building').isInt().withMessage("Invalid building"),
     body('role').isIn(['admin','doctor', 'patient', 'employee']).withMessage("Role is invalid")
+]
+
+exports.useridValidaion = [
+    param('id').isMongoId().withMessage("Id is invalid"),
+]
+
+exports.userNameValidation = [
+    param('name').isString().withMessage("Name should be String")
+]
+exports.userEmailValidation = [
+    param('email').isEmail().withMessage("Email is invalid")
 ]
