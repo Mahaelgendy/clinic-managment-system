@@ -5,7 +5,9 @@ module.exports.getDateFormat=(date)=>{
     let currentDate = `${year}-${month}-${day}`;
     return currentDate;
 }
-
+module.exports.getDateFromString=(stringdate)=>{
+    
+}
 module.exports.getTime= (time)=>{
     let day = new Date(time); 
     let timeNow= day.getHours().toString() + ":" +  day.getMinutes().toString() + ":"  +  day.getSeconds().toString();
