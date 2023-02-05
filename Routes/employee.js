@@ -1,16 +1,40 @@
-const controller = require ("../Controllers/employee");
+
 const express = require("express");
+const controller = require ("../Controllers/employee");
+const employeeValidation = require("./../Middlewares/employeeMW");
+const validator = require("./../Middlewares/errorValidation");
 
 const router = express.Router();
 
 router.route("/employees")
-       .get(controller.getAllEmployees)
-       .post(controller.addEmployee)
-       .delete(controller.deleteEmployees)
+       .get(
+            employeeValidation.employeevalidation,
+            validator,
+            controller.getAllEmployees)
+       .post(  
+            employeeValidation.employeevalidation,
+            validator,
+            controller.addEmployee)
+       .delete( 
+            employeeValidation.employeevalidation,
+            validator,
+            controller.deleteEmployees)
 
 
-router.get("/employees/:id",controller.getEmployeeByID);
-router.delete("/employees/:id",controller.deleteEmployeeByID);
-router.patch("/employees/:id",controller.updateEmployee);
+
+router.route("/employees/:id")
+        .get(
+            employeeValidation.paramvalidation,
+            validator,
+            controller.getEmployeeByID)
+        .delete( 
+            employeeValidation.paramvalidation,
+            validator,
+            controller.deleteEmployeeByID)
+        .patch(  
+            employeeValidation.paramvalidation,
+            validator,
+            controller.updateEmployee)
+
 
 module.exports = router;
