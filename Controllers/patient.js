@@ -9,6 +9,14 @@ const userSchema = mongoose.model("users");
 const patientSchema = mongoose.model("patients");
 
 module.exports.getAllPatients = (request, response, next)=>{
+
+    const query = {};
+    if(request.query.status) query.status = request.query.status;
+    if(request.query.height) query.height = Number(request.query.height);
+    if(request.query.hasInsurance) query.hasInsurance = request.query.hasInsurance;
+    if(request.query.patientId) query._id = Number(request.query.patientId);
+    if(request.query.weight) query.weight = Number(request.query.weight);
+
     patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}})
                         .then((data)=>{
                             response.status(200).json(data);
