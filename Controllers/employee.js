@@ -79,7 +79,7 @@ module.exports.deleteEmployeeByID =  (request, response, next)=>{
                         .catch((error)=>next(error));
             
         })
-     
+        .catch((error)=>next(error));
     }catch(error){
         next(error)
     }

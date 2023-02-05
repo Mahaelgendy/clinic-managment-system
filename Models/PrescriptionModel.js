@@ -5,8 +5,8 @@ const AutoIncreament = require('mongoose-sequence')(mongoose);
 const prespictionSchema = new mongoose.Schema({
     _id:{type:Number},
     diagnosis:{type:String },
-    currentExamination:{type:Date , required:true},
-    nextExamination:{type:Date, required:true},
+    currentExamination:{type:String , required:true},
+    nextExamination:{type:String, required:true},
     doctor_id : {type:Number, required:true , ref:'doctors'}, 
     patient_id :{type: Number , required:true , ref :'patients'},
     medicine_id :{type :Array , required:true, ref: 'medicines'}
