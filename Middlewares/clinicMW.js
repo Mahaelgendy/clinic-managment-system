@@ -6,7 +6,6 @@ exports.clinicValidation=[
 
 ]
 
-
 exports.serviceValidation=[ 
     body("name").isString().withMessage("service name in this clinic"),
     body("salary").isInt().withMessage("service salary in this clinic"),

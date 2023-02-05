@@ -1,5 +1,6 @@
 const controller = require('../Controllers/Prescription');
-const validator = require("../Middlewares/PrescriptionMW")
+const validator = require("../Middlewares/PrescriptionMW");
+const errorValidation = require("../Middlewares/errorValidation")
 const express = require('express');
 
 // const validator = require("../Middlewares/")
@@ -9,14 +10,27 @@ router.route("/prescription")
     .get(controller.getAllPrescriptions)
     .post(
         validator.prescriptionValidation,
-        controller.addPrescription);
-    
+        errorValidation,
+        controller.addPrescription)
+    .delete(controller.deleteAllPrescription)
+ 
 router.route("/prescription/:id")
     .get(controller.getPrescriptionById)
-    .delete(controller.deletePrescriptionById)
     .patch(
         validator.prescriptionValidation,
-        controller.updatePrescription)
+        errorValidation,
+        controller.updatePrescription
+    )
+
+router.route("/prescription/name/:name")
+    .get(controller.getAllPrescriptionsForPatient)
+
+
+router.route("/prescription/dname/:name/pname/:pname")
+    .post(
+        validator.prescriptionValidation,
+        errorValidation,
+        controller.addPrescriptionByPatient)
 
 module.exports = router;
 

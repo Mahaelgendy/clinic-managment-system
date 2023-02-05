@@ -68,5 +68,3 @@ exports.updateClinic = (request,response , next)=>
 
 
 
-
-

@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 
 const AutoIncreament = require('mongoose-sequence')(mongoose)
 
+
+
 const scheduleSchema = new mongoose.Schema({
     _id:{type:Number},
     clinic_id:{type:Number , ref:'clinics' , required:false},
