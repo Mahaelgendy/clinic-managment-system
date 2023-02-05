@@ -6,7 +6,6 @@ const mongoose = require('mongoose');
 
 require('../Models/userModel');
 require('../Models/doctorModel');
-require("./../Models/scheduleModel");
 
 const UserSchema = mongoose.model('users');
 const DoctorSchema = mongoose.model('doctors');
