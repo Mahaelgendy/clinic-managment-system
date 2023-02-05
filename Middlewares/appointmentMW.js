@@ -80,14 +80,14 @@ module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
     doctorsSchema.findById({_id: doctorId}).populate({path:'userData'})
     .then(doctor=>{
         let doctorMail= doctor.userData.email;
-        console.log(doctorMail);
+        console.log(doctorMail)
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
+            host: '0.0.0.0',
+            port: 1025,
             secure: false,
             auth: {
-              user: 'clinicsystem82@gmail.com',
-              pass: 'clinicsys82#'
+                user: 'clinicsystem82@gmail.com',
+                pass: 'clinicsys82#'
             }
           });
         const mailOptions = {
