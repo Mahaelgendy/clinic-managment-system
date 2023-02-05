@@ -9,6 +9,16 @@ const dateTimeMW = require("../Middlewares/dateTimeMW")
 
 exports.getAllPrescriptions = (request , response, next)=>{
 
+    const query ={};
+    if(request.query.diagnosis)
+        query.diagnosis = request.query.diagnosis
+    if(request.query.currentExamination)
+        query.currentExamination = request.query.currentExamination
+    if(request.query.doctor_id)
+        query.doctor_id = request.query.doctor_id
+    if(request.query.patient_id)
+        query.patient_id = request.query.patient_id
+
     prescriptionSchema.find()
     .populate({path:"doctor_id" })
     .populate({path:"patient_id"})
@@ -18,6 +28,7 @@ exports.getAllPrescriptions = (request , response, next)=>{
     })
     .catch(error=>next(error));
 }
+
 
 exports.getPrescriptionById = (request, response ,next)=>{
     
