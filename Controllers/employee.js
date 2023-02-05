@@ -30,7 +30,7 @@ module.exports.getAllEmployees =  (request,response,next)=>{
 module.exports.addEmployee = (request, response, next)=>{
     userSchema.findOne({email:request.body.email})
               .then((data)=>{
-                if(data!=null)
+                if(data!=null&& data.role ==="employee")
                 {
                     let newEmployee=new employeeSchema({
                         salary:request.body.employeeSalary,
