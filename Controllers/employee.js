@@ -19,6 +19,7 @@ module.exports.getAllEmployees =  (request,response,next)=>{
                             .catch((error)=>next(error));
 };
 
+
 module.exports.addEmployee = (request, response, next)=>{
     userSchema.findOne({email:request.body.email})
               .then((data)=>{
@@ -45,52 +46,46 @@ module.exports.addEmployee = (request, response, next)=>{
               .catch(error=>next(error))
 };
 
+
 module.exports.deleteEmployees = (request, response, next)=>{
     employeeSchema.deleteMany({})
         .then((data)=>{
             response.status(200).json({message:"delete all employees"})
         })
         .catch((error)=>next(error));
-}
+};
 
 
-module.exports.deleteEmployeeByID = async (request, response, next)=>{
+module.exports.deleteEmployeeByID =  (request, response, next)=>{
 
     try{
 
-        const employeeToBeRemoved = await employeeSchema.findById(request.params.recepId)
-        // res.json(recepToBeRemoved)
+        const employeeToBeRemoved = request.params.id;
 
-        const userToBeRemoved = await employeeSchema.findById({_id:employeeToBeRemoved})
-        const deletedRecep = await employeeSchema.findByIdAndDelete(request.params._id)
-        const deletedUser = await userSchema.findByIdAndDelete(userToBeRemoved._id)
-        response.status(200).json({message:"employee deleted"});
-        // const employeeToBeRemoved = request.params.id;
-        
-        // employeeSchema.findById({_id:employeeToBeRemoved})
-        // .then(data=>{
-        //     userSchema.findByIdAndDelete({_id:data.employeeData})
-        //     .then(()=>{
-        //         employeeSchema.findByIdAndDelete({_id:employeeToBeRemoved})
-        //         .then(()=>{
-        //             response.status(200).json({message:"employee deleted"});
-        //         })
+        employeeSchema.findById({_id:employeeToBeRemoved})
+        .then((data)=>{
+            console.log(employeeToBeRemoved)
+            console.log(data.employeeData)
+            userSchema.findByIdAndDelete({_id:data.employeeData})
+                        .then((data)=>{
+                            console.log(data)
+                            employeeSchema.findByIdAndDelete({_id:employeeToBeRemoved})
+                            .then((data)=>{
+                                console.log(data)
+                                response.status(200).json({message: "Employee deleted successfully"});
 
-        //     })
-        // }).catch(err=>next(err))
+                            })
+                        })
+                        .catch((error)=>next(error));
+            
+        })
      
     }catch(error){
         next(error)
     }
 
+};
 
-    // employeeSchema.findByIdAndDelete({_id:request.params.id})
-    // .then(()=>{
-    //     response.status(200).json({message:"deleted"+request.params.id});
-    // })
-    
-    // .catch((error)=>next(error));
-}
 
 module.exports.getEmployeeByID = (request, response, next)=>{
     employeeSchema.findOne({_id:request.params.id}).populate({path:"employeeData",select:{fullName:1}})
