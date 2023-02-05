@@ -5,7 +5,16 @@ const dateTimeMW = require("./../middlewares/dateTimeMW")
 const appointmentMW = require("./../middlewares/appointmentMW")
 
 module.exports.getAllAppointments = (request , response , next)=>{
-    appointmentSchema.find().populate({ path: "clinic_id"})
+    const query = {};
+    if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
+    if (request.query.doctorId) query.doctor_id = Number(request.query.doctorId);
+    if (request.query.patientId) query.patient_id = Number(requesteq.query.patientId);
+    if (request.query.employeeId) query.employee_id = Number(request.query.employeeId);
+    if (request.query.date) query.date = request.query.date;
+    if (request.query.status) query.status = request.query.status;
+    if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
+
+    appointmentSchema.find(query).populate({ path: "clinic_id"})
                             .populate({ path: "doctor_id"})
                             .populate({ path: "patient_id"})
                             .populate({path: "employee_id"})
@@ -77,7 +86,7 @@ module.exports.addAppointment=async(request , response , next)=>{
         if(isFree){
             let newAppointment = new appointmentSchema({
                 clinic_id: clinicId,
-                doctor_id:request.body.doctorId,
+                doctor_id:doctorId,
                 patient_id: request.body.patientId,
                 employee_id: request.body.employeeId,
                 date: appointmentDate,
@@ -90,6 +99,7 @@ module.exports.addAppointment=async(request , response , next)=>{
             newAppointment.save()
             .then(result=>{
                 response.status(201).json(result);
+                appointmentMW.sendMailToTheDoctor(doctorId,appointmentDate,startOfAppointment);
             })
             .catch(error => next(error));
         }

@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
+const nodemailer = require('nodemailer');
 require("./../Models/doctorModel");
 require("./../Models/appointmentModel");
 const appointmentSchema = mongoose.model("appointments");
 const schedulesSchema = mongoose.model("schedules");
+const doctorsSchema = mongoose.model("doctors");
 const dateTimeMW = require("./../middlewares/dateTimeMW");
 const {body , param} = require("express-validator");
 
@@ -11,7 +13,7 @@ exports.appointmentBodyValidation = [
     body("doctorId").isInt().notEmpty().withMessage("Doctor ID must be Numeric and required"),
     body("clinicId").isInt().notEmpty().withMessage("ClinicID must be Numeric and required"),
     body("patientId").isInt().notEmpty().withMessage("Patient ID must be Numeric and required"),
-    body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
+    // body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
     body("status").isIn(['First Time' , 'Follow Up']).notEmpty().withMessage("Status should be First Time or Follow Up"),
     body("reservationMethod").isIn(['Online' , 'Offline']).notEmpty().withMessage("Reservation method should be Either Online or Offline"),
     body("date").isString().notEmpty().matches(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/).withMessage("Date must be string in format YYYY-MM-DD"),
@@ -72,6 +74,39 @@ module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,
         console.log(error);
         return null;
       }
+}
+module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
+    console.log("send MAil")
+    doctorsSchema.findById({_id: doctorId}).populate({path:'userData'})
+    .then(doctor=>{
+        let doctorMail= doctor.userData.email;
+        console.log(doctorMail);
+        const transporter = nodemailer.createTransport({
+            host: '0.0.0.0',
+            port: 1025,
+            secure: false,
+            auth: {
+              user: 'mahaelgende@gmail.com',
+              pass: 'mahaelgendy96#'
+            }
+          });
+        const mailOptions = {
+            from: 'sender@example.com',
+            to: doctorMail,
+            subject: 'New appointment added to your schedule',
+            text: `A new appointment has been added to your schedule on ${appointmentDate} at ${appointmentTime}.`
+          };
+          
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+    })
+    .catch(error=>next(error));
+    
 }
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
