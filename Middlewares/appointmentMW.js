@@ -82,16 +82,16 @@ module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
         let doctorMail= doctor.userData.email;
         console.log(doctorMail);
         const transporter = nodemailer.createTransport({
-            host: '0.0.0.0',
-            port: 1025,
+            host: 'smtp.gmail.com',
+            port: 587,
             secure: false,
             auth: {
-              user: 'mahaelgende@gmail.com',
-              pass: 'mahaelgendy96#'
+              user: 'clinicsystem82@gmail.com',
+              pass: 'clinicsys82#'
             }
           });
         const mailOptions = {
-            from: 'sender@example.com',
+            from: 'clinicsystem82@gmail.com',
             to: doctorMail,
             subject: 'New appointment added to your schedule',
             text: `A new appointment has been added to your schedule on ${appointmentDate} at ${appointmentTime}.`
