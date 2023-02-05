@@ -2,7 +2,7 @@
 const {body,param} = require('express-validator');
 
 exports.patientvalidation = [
-    body('patientStatus').isString().isIn(['Female', 'Male']).withMessage("status shoud be string and 'Female' or 'Male' "),
+    body('patientStatus').isString().isIn(['First Time', 'follow Up']).withMessage("status shoud be string and 'Female' or 'Male' "),
     body('patientHistory').isString().withMessage("History should be string"),
     body('patientHeight').isInt().withMessage("height shouls be integer"),
     body('patientWeight').isInt().withMessage("weight should be integer"),
