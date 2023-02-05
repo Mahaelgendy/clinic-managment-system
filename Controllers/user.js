@@ -88,7 +88,8 @@ exports.updateUser = (request,response,next)=>{
                 age:age,
                 gender:gender,
                 address:address,
-                role:role
+                role:role,
+                // image:request.file.path
             }})
             .then(res=>{
                 response.status(200).json({message:"User Updated"})

@@ -14,6 +14,9 @@ const employeeRoutes = require("./Routes/employee");
 const scheduleRoutes = require("./Routes/schedule");
 const userRoutes = require("./Routes/user");
 
+
+// require("dotenv").config();
+
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
