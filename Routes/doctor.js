@@ -29,7 +29,7 @@ router.route('/doctors')
       .post(
         userValidation.userValidation,
         doctorValidation.doctorValidataion,
-        scheduleValidation.scheduleValidation,
+        scheduleValidation.bodyValidation,
         validator,
         controller.addDoctor)
 
