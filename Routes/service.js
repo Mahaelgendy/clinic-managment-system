@@ -5,7 +5,7 @@ const validator = require("../Middlewares/clinicMW")
 const router = express.Router();
 
 router.route("/service")
-    .get(controller.getAllServices)
+    .get(controller.agetAllServices)
     .post(
         validator.serviceValidation,
         controller.addservice);

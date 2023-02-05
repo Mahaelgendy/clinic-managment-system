@@ -9,28 +9,28 @@ module.exports.getAllAppointments = (request , response , next)=>{
     const query = {};
     if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
     if (request.query.doctorId) query.doctor_id = Number(request.query.doctorId);
-    if (request.query.patientId) query.patient_id = Number(requesteq.query.patientId);
+    if (request.query.patientId) query.patient_id = Number(request.query.patientId);
     if (request.query.employeeId) query.employee_id = Number(request.query.employeeId);
     if (request.query.date) query.date = request.query.date;
     if (request.query.status) query.status = request.query.status;
     if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
 
     appointmentSchema.find(query).populate({ path: "clinic_id"})
-                            .populate({ path: "doctor_id"})
-                            .populate({ path: "patient_id"})
-                            .populate({path: "employee_id"})
-                            .then((data)=>{
-                                response.status(200).json(data);
-                            })
-                            .catch((error)=>next(error));
+        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
+        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
+        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
+        .then((data)=>{
+            response.status(200).json(data);
+        })
+        .catch((error)=>next(error));
 };
 
 module.exports.getAppointmentbyId = (request , response , next)=>{
     appointmentSchema.findById({_id : request.params.id})
         .populate({ path: "clinic_id"})
-        .populate({ path: "doctor_id"})
-        .populate({ path: "patient_id"})
-        .populate({path: "employee_id"})
+        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
+        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
+        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
         .then(data=>{
             if(data!=null){
                 response.status(200).json(data);
@@ -43,9 +43,9 @@ module.exports.getAppointmentbyId = (request , response , next)=>{
 module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
     appointmentSchema.find({doctor_id : request.params.id})
         .populate({ path: "clinic_id"})
-        .populate({ path: "doctor_id"})
-        .populate({ path: "patient_id"})
-        .populate({path: "employee_id"})
+        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
+        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
+        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
         .then(data=>{
             if(data!=null){
                 response.status(200).json(data);
@@ -58,9 +58,9 @@ module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
 module.exports.getAppointmentbyClinicId = (request , response , next)=>{
     appointmentSchema.find({clinic_id : request.params.id})
         .populate({ path: "clinic_id"})
-        .populate({ path: "doctor_id"})
-        .populate({ path: "patient_id"})
-        .populate({path: "employee_id"})
+        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
+        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
+        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
         .then(data=>{
             if(data!=null){
                 response.status(200).json(data);

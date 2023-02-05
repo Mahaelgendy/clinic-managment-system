@@ -9,9 +9,19 @@ const dateTimeMW = require("../Middlewares/dateTimeMW")
 
 exports.getAllPrescriptions = (request , response, next)=>{
 
+    const query ={};
+    if(request.query.diagnosis)
+        query.diagnosis = request.query.diagnosis
+    if(request.query.currentExamination)
+        query.currentExamination = request.query.currentExamination
+    if(request.query.doctor_id)
+        query.doctor_id = request.query.doctor_id
+    if(request.query.patient_id)
+        query.patient_id = request.query.patient_id
+
     prescriptionSchema.find()
-    .populate({path:"doctor_id" })
-    .populate({path:"patient_id"})
+    .populate({path:"doctor_id", select:{"_id":0,"specialization":1, "price":1} ,populate:{path:"userData",select:{"_id":0,"fullName":1}}})
+    .populate({path:"patient_id" ,populate:{path:"patientData", select:{"_id":0,"fullName":1}}})
     .populate({path:"medicine_id"})
     .then(data=>{
         response.status(201).json(data)
@@ -19,11 +29,12 @@ exports.getAllPrescriptions = (request , response, next)=>{
     .catch(error=>next(error));
 }
 
+
 exports.getPrescriptionById = (request, response ,next)=>{
     
     prescriptionSchema.findOne({_id:request.params.id})
-    .populate({path:"doctor_id"})
-    .populate({path:"patient_id"})
+    .populate({path:"doctor_id", select:{"_id":0,"specialization":1, "price":1} ,populate:{path:"userData",select:{"_id":0,"fullName":1}}})
+    .populate({path:"patient_id" ,populate:{path:"patientData", select:{"_id":0,"fullName":1}}})
     .populate({path:"medicine_id"})
     .then(data => {
         if(data != null){
@@ -52,7 +63,7 @@ exports.addPrescription =(request, response, next)=>{
 }
 
 exports.deleteAllPrescription = (request , response ) =>{
-    prescriptionSchema.find()
+    prescriptionSchema.deleteMany()
     .then(result=>{
         response.status(200).json({message:"Delete all prescription"});
     })

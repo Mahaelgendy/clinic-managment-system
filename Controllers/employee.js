@@ -29,7 +29,7 @@ module.exports.addEmployee = (request, response, next)=>{
                         salary:request.body.employeeSalary,
                         phone:request.body.employeePhone,
                         position:request.body.employeePosition,
-                        employeeData:request.body.employeeID,
+                        employeeData:data._id,
                         clinicId:request.body.clinic_Id
                     });
                     newEmployee.save()
@@ -79,7 +79,7 @@ module.exports.deleteEmployeeByID =  (request, response, next)=>{
                         .catch((error)=>next(error));
             
         })
-     
+        .catch((error)=>next(error));
     }catch(error){
         next(error)
     }
@@ -111,7 +111,6 @@ module.exports.updateEmployee = (request, response, next)=>{
                 salary:request.body.employeeSalary,
                 phone:request.body.employeePhone,
                 position:request.body.employeePosition,
-                employeeData:request.body.employeeID,
                 clinicId:request.body.clinic_Id
             }
         }).then(result=>{

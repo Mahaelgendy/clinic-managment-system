@@ -28,7 +28,7 @@ module.exports.addPatient = (request, response, next)=>{
                         weight:request.body.patientWeight,
                         hasInsurance:request.body.patientHasInsurance,
                         phone:request.body.patientPhone,
-                        patientData:request.body.patientID
+                        patientData:data._id
                     });
                     newPatient.save()
                     .then(result=>{
@@ -57,7 +57,6 @@ module.exports.updatePatient = (request, response, next)=>{
             weight:request.body.patientWeight,
             hasInsurance:request.body.patientHasInsurance,
             phone:request.body.patientPhone,
-            patientData:request.body.patientID
         }
     }).then(result=>{
         response.status(200).json({message:"updated"});
