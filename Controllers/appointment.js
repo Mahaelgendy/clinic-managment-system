@@ -4,6 +4,7 @@ const appointmentSchema = mongoose.model("appointments");
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const appointmentMW = require("./../middlewares/appointmentMW")
 
+
 module.exports.getAllAppointments = (request , response , next)=>{
     const query = {};
     if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);

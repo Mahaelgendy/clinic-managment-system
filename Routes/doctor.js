@@ -2,6 +2,8 @@
 const express = require('express');
 const controller = require('./../Controllers/doctor');
 const doctorValidation = require('./../Middlewares/doctorMW');
+const scheduleValidation = require("./../Middlewares/scheduleMW");
+const userValidation = require("./../Middlewares/userMW");
 const validator = require("./../Middlewares/errorValidation");
 const router = express.Router();
 
@@ -16,6 +18,8 @@ router.route("/doctors/:id")
         controller.deleteDoctor)
     .patch(
         doctorValidation.paramValidation,
+        doctorValidation.doctorValidataion,
+        userValidation.userValidation,
         validator,
         controller.updateDoctor)
 
@@ -23,7 +27,9 @@ router.route("/doctors/:id")
 router.route('/doctors')
       .get(controller.getAllDoctors)
       .post(
-        doctorValidation.doctorValidator,
+        userValidation.userValidation,
+        doctorValidation.doctorValidataion,
+        scheduleValidation.scheduleValidation,
         validator,
         controller.addDoctor)
 

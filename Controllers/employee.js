@@ -19,6 +19,7 @@ module.exports.getAllEmployees =  (request,response,next)=>{
                             .catch((error)=>next(error));
 };
 
+
 module.exports.addEmployee = (request, response, next)=>{
     userSchema.findOne({email:request.body.email})
               .then((data)=>{
@@ -27,7 +28,9 @@ module.exports.addEmployee = (request, response, next)=>{
                     let newEmployee=new employeeSchema({
                         salary:request.body.employeeSalary,
                         phone:request.body.employeePhone,
-                        position:request.body.employeePosition
+                        position:request.body.employeePosition,
+                        employeeData:request.body.employeeID,
+                        clinicId:request.body.clinic_Id
                     });
                     newEmployee.save()
                     .then(result=>{
@@ -50,16 +53,38 @@ module.exports.deleteEmployees = (request, response, next)=>{
             response.status(200).json({message:"delete all employees"})
         })
         .catch((error)=>next(error));
-}
+};
 
 
-module.exports.deleteEmployeeByID = (request, response, next)=>{
-    employeeSchema.findByIdAndDelete({_id:request.params.id})
-    .then(()=>{
-        response.status(200).json({message:"deleted"+request.params.id});
-    })
-    .catch((error)=>next(error));
-}
+module.exports.deleteEmployeeByID =  (request, response, next)=>{
+
+    try{
+
+        const employeeToBeRemoved = request.params.id;
+
+        employeeSchema.findById({_id:employeeToBeRemoved})
+        .then((data)=>{
+            console.log(employeeToBeRemoved)
+            console.log(data.employeeData)
+            userSchema.findByIdAndDelete({_id:data.employeeData})
+                        .then((data)=>{
+                            console.log(data)
+                            employeeSchema.findByIdAndDelete({_id:employeeToBeRemoved})
+                            .then((data)=>{
+                                console.log(data)
+                                response.status(200).json({message: "Employee deleted successfully"});
+
+                            })
+                        })
+                        .catch((error)=>next(error));
+            
+        })
+     
+    }catch(error){
+        next(error)
+    }
+
+};
 
 
 module.exports.getEmployeeByID = (request, response, next)=>{
@@ -85,7 +110,9 @@ module.exports.updateEmployee = (request, response, next)=>{
             $set:{
                 salary:request.body.employeeSalary,
                 phone:request.body.employeePhone,
-                position:request.body.employeePosition
+                position:request.body.employeePosition,
+                employeeData:request.body.employeeID,
+                clinicId:request.body.clinic_Id
             }
         }).then(result=>{
             response.status(200).json({message:"updated"});
