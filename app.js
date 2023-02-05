@@ -11,6 +11,9 @@ const prescriptionRoutes = require("./Routes/prespiction");
 const invoiceRoutes = require("./Routes/invoice");
 const medicineRoutes = require("./Routes/medicine");
 const employeeRoutes = require("./Routes/employee");
+const scheduleRoutes = require("./Routes/schedule");
+
+
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
@@ -41,6 +44,8 @@ server.use(patientRoutes);
 server.use(doctorRoutes);
 server.use(medicineRoutes);
 server.use(employeeRoutes);
+server.use(scheduleRoutes);
+
 //Not Found MW
 server.use((request ,response, next)=>{
     response.status(404).json({data:"Not Fount"});
