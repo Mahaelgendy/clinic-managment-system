@@ -10,7 +10,7 @@ const doctorRoutes = require("./Routes/doctor");
 const prescriptionRoutes = require("./Routes/prespiction");
 const invoiceRoutes = require("./Routes/invoice");
 const medicineRoutes = require("./Routes/medicine");
-
+const employeeRoutes = require("./Routes/employee");
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
@@ -32,7 +32,6 @@ server.use(morgan('combined'));
 server.use(express.json());
 
 //routes
-
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
@@ -41,6 +40,7 @@ server.use(invoiceRoutes);
 server.use(patientRoutes);
 server.use(doctorRoutes);
 server.use(medicineRoutes);
+server.use(employeeRoutes);
 //Not Found MW
 server.use((request ,response, next)=>{
     response.status(404).json({data:"Not Fount"});

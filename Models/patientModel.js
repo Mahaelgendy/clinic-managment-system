@@ -5,7 +5,7 @@ const AutoIncreament = require ('mongoose-sequence')(mongoose);
 const patientSchema= new mongoose.Schema({
     
     _id:{type:Number},
-    status:{type:String,Enumerator:['First Time','fllow Up'],required:true, default:"first Time"},
+    status:{type:String,Enumerator:['First Time','follow Up'],required:true, default:"first Time"},
     history:{type:String},
     height:{type:Number},
     weight:{type:Number},
