@@ -29,7 +29,8 @@ exports.getClinicById = (request, response ,next)=>{
 
 exports.addClinic =(request, response, next)=>{
     let newClinic = new clinicSchema({
-        clinic_location:request.body.clinic_location,
+        clinic_location: request.body.clinic_location,
+        clinicName: request.body.clinicName
     });
     console.log(newClinic)
     newClinic.save()
@@ -53,7 +54,8 @@ exports.updateClinic = (request,response , next)=>
     clinicSchema.updateOne(
         {_id: request.params.id},
         {$set:{
-            clinic_location:request.body.clinic_location,
+            clinic_location: request.body.clinic_location,
+            clinicName: request.body.clinicName
         }})
         .then(result=>{
             response.status(200).json({message:"updated"});

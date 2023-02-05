@@ -16,7 +16,8 @@ mongoose.model('services' , serviceSchema)
 /////////////////////////////////////
 
 const clinicSchema = new mongoose.Schema({
-    _id:{type:Number},
+    _id: { type: Number },
+    clinicName:{type:String},
     clinic_location : addres.adressSchema
     },
     {_id:false}
