@@ -2,7 +2,6 @@
 const express = require('express');
 const controller = require('./../Controllers/doctor');
 const doctorValidation = require('./../Middlewares/doctorMW');
-const scheduleValidation = require("./../Middlewares/scheduleMW");
 const userValidation = require("./../Middlewares/userMW");
 const validator = require("./../Middlewares/errorValidation");
 const router = express.Router();
@@ -29,7 +28,6 @@ router.route('/doctors')
       .post(
         userValidation.userbodyValidation,
         doctorValidation.doctorValidataion,
-        scheduleValidation.scheduleValidation,
         validator,
         controller.addDoctor)
 

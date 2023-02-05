@@ -42,7 +42,7 @@ exports.addDoctor = async (request , response , next)=>{
     }
 
     const {fullName,password,email,age,gender,address,role, specialization , price , 
-        clinic_id ,startTime,endTime,duration} = request.body;
+        clinic_id ,date,startTime,endTime,duration} = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -70,22 +70,25 @@ exports.addDoctor = async (request , response , next)=>{
                 
                 doctor.save()
                     .then(res=>{
-                        const schedule = new SchedulaSchema({
-                            clinic_id:clinic_id,
-                            doc_id:res._id,
-                            date:dateTimeMW.getDateFormat(new Date()),
-                            from:dateTimeMW.getTimeFromString(startTime),
-                            to: dateTimeMW.getTimeFromString(endTime),
-                            duration_in_minutes:duration
-                        });
+                        // const schedule = new SchedulaSchema({
+                        //     clinic_id:clinic_id,
+                        //     doc_id:res._id,
+                        //     date:dateTimeMW.getDateFormat(date),
+                        //     from:dateTimeMW.getTimeFromString(startTime),
+                        //     to: dateTimeMW.getTimeFromString(endTime),
+                        //     duration_in_minutes:duration
+                        // });
                         
-                        schedule.save()
-                        .then(resu=>{
+                        // schedule.save()
+                        // .then(resu=>{
                             response.status(200).json({message:"Docor added"});
-                        })
-                        .catch(err=>next(err))
+                        // })
+                        // .catch(err=>next(err))
                     })
-                    .catch(err=>next(err))
+                    .catch(err=>{
+                        UserSchema.deleteOne({email:email})
+                        .then()
+                        next(err)})
             }).catch(err=>next(err))
         
     }
@@ -148,22 +151,3 @@ exports.updateDoctor = async (request , response , next)=>{
     }
 }
 
-exports.updateSchedule =(request , response , next)=>{
-    try{
-        const {docId,scheduleId,clinic_id ,startTime,endTime,duration} = request.body;
-
-        SchedulaSchema.findOneAndUpdate({_id:scheduleId,doc_id:docId},
-            {$set:{
-                clinic_id:clinic_id,
-                date:dateTimeMW.getDateFormat(new Date()),
-                from:dateTimeMW.getTimeFromString(startTime),
-                to: endTime,
-                duration_in_minutes:duration
-            }});
-        
-        response.status(200).json({message:"Schedule updated"});
-
-    }catch(error){
-        next(error)
-    }
-}
