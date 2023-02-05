@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 require("../Models/PrescriptionModel");
 const prescriptionSchema =  mongoose.model("prespictions");
 const dateTimeMW = require("../Middlewares/dateTimeMW")
+
+
 exports.getAllPrescriptions = (request , response, next)=>{
 
     prescriptionSchema.find()
@@ -30,6 +32,7 @@ exports.getPrescriptionById = (request, response ,next)=>{
     })
     .catch(error => next(error));
 }
+
 exports.addPrescription =(request, response, next)=>{
     let newPrescription = new prescriptionSchema({
         diagnosis:request.body.diagnosis,

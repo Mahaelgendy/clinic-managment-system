@@ -5,6 +5,7 @@ const appointmentSchema = mongoose.model("appointments");
 const schedulesSchema = mongoose.model("schedules")
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 
+
 module.exports.getAllAppointments = (request , response , next)=>{
     appointmentSchema.find().populate({ path: "clinic_id"})
                             .populate({ path: "doctor_id"})
