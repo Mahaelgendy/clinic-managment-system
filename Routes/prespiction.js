@@ -9,14 +9,24 @@ router.route("/prescription")
     .get(controller.getAllPrescriptions)
     .post(
         validator.prescriptionValidation,
-        controller.addPrescription);
-    
+        controller.addPrescription)
+    .delete(controller.deleteAllPrescription)
+ 
 router.route("/prescription/:id")
     .get(controller.getPrescriptionById)
-    .delete(controller.deletePrescriptionById)
     .patch(
         validator.prescriptionValidation,
-        controller.updatePrescription)
+        controller.updatePrescription
+    )
+
+router.route("/prescription/name/:name")
+    .get(controller.getAllPrescriptionsForPatient)
+
+
+router.route("/prescription/dname/:name/pname/:pname")
+    .post(
+        validator.prescriptionValidation,
+        controller.addPrescriptionByPatient)
 
 module.exports = router;
 
