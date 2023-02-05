@@ -4,16 +4,37 @@ const path = require("path");
 require("../Models/clinicModel");
 const serviceSchema =  mongoose.model("services");
 
-exports.getAllServices= (request , response, next)=>{
 
-    serviceSchema.find()
-    .populate({path:"doctor_id"})
-    .populate({path:"clinic_id"})
-    .then(data=>{
-        response.status(201).json(data)
-    })
-    .catch(error=>next(error));
-}
+exports.agetAllServices =(request,response, next)=>{
+    const query = {};
+    if(request.query.name)
+        query.name = request.query.name
+    if(request.query.salary)
+        query.name =Number(request.query.salary)
+    if(request.query.clinic_id)
+        query.name =Number(request.query.clinic_id)
+    if(request.query.doctor_id)
+        query.name = Number(request.query.doctor_id);
+    serviceSchema.find(query)
+        .populate({path:"doctor_id"})
+        .populate({path:"clinic_id"})
+        .then(data=>{
+            response.status(201).json(data)
+        })
+        .catch(error=>next(error));
+
+} 
+
+// exports.getAllServices= (request , response, next)=>{
+
+//     serviceSchema.find()
+//     .populate({path:"doctor_id"})
+//     .populate({path:"clinic_id"})
+//     .then(data=>{
+//         response.status(201).json(data)
+//     })
+//     .catch(error=>next(error));
+// }
 
 exports.getServiceById = (request, response ,next)=>{
     
