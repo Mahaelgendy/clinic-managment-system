@@ -33,8 +33,8 @@ exports.getAllPrescriptions = (request , response, next)=>{
 exports.getPrescriptionById = (request, response ,next)=>{
     
     prescriptionSchema.findOne({_id:request.params.id})
-    .populate({path:"doctor_id"})
-    .populate({path:"patient_id"})
+    .populate({path:"doctor_id", select:{"_id":0,"specialization":1, "price":1} ,populate:{path:"userData",select:{"_id":0,"fullName":1}}})
+    .populate({path:"patient_id" ,populate:{path:"patientData", select:{"_id":0,"fullName":1}}})
     .populate({path:"medicine_id"})
     .then(data => {
         if(data != null){
