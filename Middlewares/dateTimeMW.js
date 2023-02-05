@@ -20,7 +20,7 @@ module.exports.getTimeFromString=(timeAsSting)=>{
     let minuts = timeAsArr[1];
     let seconds = timeAsArr[2];
     
-    let date = new Date();
+    let date = new Date(2022, 0, 1);
     date.setHours(hours, minuts, seconds);
     return date;
 }

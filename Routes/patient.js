@@ -1,15 +1,36 @@
-const controller = require ("../Controllers/patient");
-const express = require("express");
 
+const express = require("express");
+const controller = require ("../Controllers/patient");
+const patientValidation = require("./../Middlewares/patientMW");
+const validator = require("./../Middlewares/errorValidation");
 const router= express.Router();
 
 router.route("/patients")
-        .get(controller.getAllPatients)
-        .post(controller.addPatient)
-        .delete(controller.deletePatients);
+        .get(
+                patientValidation.patientvalidation,
+                validator,
+                controller.getAllPatients)
+        .post(
+                patientValidation.patientvalidation,
+                validator,
+                controller.addPatient)
+        .delete(
+                patientValidation.patientvalidation,
+                validator,
+                controller.deletePatients);
 
-router.get("/patients/:id",controller.getPatientByID);
-router.delete("/patients/:id",controller.deletePatientById)
-router.patch("/patients/:id",controller.updatePatient)
+router.route("/patients/:id")
+        .get(
+                patientValidation.paramvalidation,
+                validator,
+                controller.getPatientByID)
+        .delete(
+                patientValidation.paramvalidation,
+                validator,
+                controller.deletePatientById)
+        .patch(
+                patientValidation.paramvalidation,
+                validator,
+                controller.updatePatient)
 
 module.exports = router;
