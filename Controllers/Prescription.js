@@ -6,6 +6,7 @@ const prescriptionSchema =  mongoose.model("prespictions");
 const userSchema = mongoose.model("users");
 const dateTimeMW = require("../Middlewares/dateTimeMW")
 
+
 exports.getAllPrescriptions = (request , response, next)=>{
 
     const query ={};

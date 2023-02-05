@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcrypt');
-const { request, response } = require('express');
 const saltRounds = 10;
+const { request, response } = require('express');
 const mongoose = require('mongoose');
 
 require('../Models/userModel');
@@ -28,7 +28,7 @@ exports.getDoctorById = (request , response , next)=>{
         if(data!=null){
             response.status(200).json(data);
         }else{
-            response.json({message:"Id not Found"});
+            response.json({message:"Id is not Found"});
         }
     })
     .catch(error=>next(error));
@@ -115,10 +115,11 @@ exports.deleteDoctor = (request , response , next)=>{
     }
 }
 
+//Update Doctor by id
 exports.updateDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
-        const {fullName,password,email,age,address, specialization,price} = request.body;
+        const {fullName,password,email,age,gender,address,role,specialization,price} = request.body;
 
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
@@ -136,7 +137,9 @@ exports.updateDoctor = async (request , response , next)=>{
                 password:hash,
                 email:email,
                 age:age,
+                gender:gender,
                 address:address,
+                role:role
             }});
 
             response.status(200).json({message:"Doctor Updated"})
