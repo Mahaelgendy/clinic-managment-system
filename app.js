@@ -16,7 +16,8 @@ const scheduleRoutes = require("./Routes/schedule");
 const userRoutes = require("./Routes/user");
 const reportRoutes = require("./Routes/report");
 
-// require("dotenv").config();
+
+require("dotenv").config();
 
 let port=process.env.PORT||8080;
 
