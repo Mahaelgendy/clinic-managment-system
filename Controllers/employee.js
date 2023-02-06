@@ -11,6 +11,13 @@ const employeeSchema = mongoose.model("employees");
 const clinicSchema = mongoose.model("clinics");
 
 module.exports.getAllEmployees =  (request,response,next)=>{
+    
+    const query = {}; 
+    if(request.query.id) query._id = Number(request.query.id);
+    if(request.query.clinicId) query.clinicId = Number(request.query.clinicId);
+    if(request.query.salary) query.salary = Number(request.query.salary);
+    if(request.query.position) query.position = request.query.position
+
      employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1}})
                             .populate({path:"clinicId"})
                             .then((data)=>{
@@ -23,7 +30,7 @@ module.exports.getAllEmployees =  (request,response,next)=>{
 module.exports.addEmployee = (request, response, next)=>{
     userSchema.findOne({email:request.body.email})
               .then((data)=>{
-                if(data!=null)
+                if(data!=null&& data.role ==="employee")
                 {
                     let newEmployee=new employeeSchema({
                         salary:request.body.employeeSalary,

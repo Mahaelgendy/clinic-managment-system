@@ -14,6 +14,7 @@ const medicineRoutes = require("./Routes/medicine");
 const employeeRoutes = require("./Routes/employee");
 const scheduleRoutes = require("./Routes/schedule");
 const userRoutes = require("./Routes/user");
+const reportRoutes = require("./Routes/report");
 
 // require("dotenv").config();
 
@@ -47,7 +48,8 @@ server.use(doctorRoutes);
 server.use(medicineRoutes);
 server.use(employeeRoutes);
 server.use(scheduleRoutes);
-server.use(userRoutes)
+server.use(userRoutes);
+server.use(reportRoutes);
 
 //Not Found MW
 server.use((request ,response, next)=>{
