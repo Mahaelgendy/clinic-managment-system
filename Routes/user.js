@@ -7,11 +7,20 @@ const controller = require("./../Controllers/user");
 const userValidation = require("./../Middlewares/userMW");
 const validator = require("./../Middlewares/errorValidation");
 
+const upload = require("./../Middlewares/uploadImageMW");
+
+// const multer = require('multer');
+// const upload = multer({
+//     dest:"uploads/images"
+// })
+
+
 router.route("/users")
     .get(controller.getAllUsers)
     .post(
-        userValidation.userbodyValidation,
-        validator,
+        // userValidation.userbodyValidation,
+        // validator,
+        upload.single("profile"),
         controller.addUser)
     .delete(controller.deleteUsers)
     .patch(

@@ -3,12 +3,14 @@ const mongoose = require("mongoose");
 require("./../Models/userModel");
 const UserSchema = mongoose.model("users");
 const { request, response } = require('express');
+
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 
 exports.addUser = (request, response , next)=>{
-    const {fullName,password,email,age,gender,address,role} = request.body;
+    console.log(request.file)
+    const {fullName,password,email,age,gender,address,role , image} = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -20,7 +22,8 @@ exports.addUser = (request, response , next)=>{
         age:age,
         gender:gender,
         address:address,
-        role:role
+        role:role,
+        image:request.file.path
     });
 
     user.save()
@@ -75,7 +78,8 @@ exports.updateUser = (request,response,next)=>{
         if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
         if (request.query.email) query.email = request.query.email;
 
-        const {fullName,password,email,age,gender,address,role} = request.body;
+        const {fullName,password,email,age,gender,address,role,image} = request.body;
+
 
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
@@ -88,7 +92,8 @@ exports.updateUser = (request,response,next)=>{
                 age:age,
                 gender:gender,
                 address:address,
-                role:role
+                role:role,
+                image:request.file.path
             }})
             .then(res=>{
                 response.status(200).json({message:"User Updated"})
