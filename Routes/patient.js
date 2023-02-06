@@ -6,10 +6,7 @@ const validator = require("./../Middlewares/errorValidation");
 const router= express.Router();
 
 router.route("/patients")
-        .get(
-                patientValidation.patientvalidation,
-                validator,
-                controller.getAllPatients)
+        .get(controller.getAllPatients)
         .post(
                 patientValidation.patientvalidation,
                 validator,
