@@ -17,7 +17,7 @@ module.exports.getAllPatients = (request, response, next)=>{
     if(request.query.patientId) query._id = Number(request.query.patientId);
     if(request.query.weight) query.weight = Number(request.query.weight);
 
-    patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}})
+    patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}}).sort({fullName:-1})
                         .then((data)=>{
                             response.status(200).json(data);
                         })
