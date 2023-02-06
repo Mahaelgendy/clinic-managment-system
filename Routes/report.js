@@ -7,4 +7,7 @@ router.route("/appointmentReportbyDate")
 
 router.route("/appointmentReport")
     .get(controller.getAppointmentReport);
+
+router.route("/invoiceReportbyDate")
+    .get(controller.getAppointmentReportByDate);
 module.exports = router;

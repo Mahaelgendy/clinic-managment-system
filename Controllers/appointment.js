@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
+require("./../Models/doctorModel");
 const appointmentSchema = mongoose.model("appointments");
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const appointmentMW = require("./../middlewares/appointmentMW")
@@ -23,8 +24,8 @@ module.exports.getAllAppointments = (request , response , next)=>{
             path: 'doctor_id',
             select: 'userData',
             model: 'doctors',
-            populate: {path: 'userData', select: {fullName:1}, model: 'users'}
-        }).sort({fullName:-1})
+            populate: {path: 'userData', select: 'fullName', model: 'users'}
+        })
         .populate({ 
             path: "patient_id",
             select: 'patientData',
@@ -95,44 +96,55 @@ module.exports.addAppointment=async(request , response , next)=>{
     let startOfAppointment = request.body.from;
     let doctorId =request.body.doctorId;
     let clinicId = request.body.clinicId;
-    let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
+    let patientId = request.body.patientId;
+    let employeeId = request.body.employeeId;
+
+    if (await appointmentMW.checkAllUsersAvailability(doctorId, clinicId, patientId, employeeId)){
+        let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
+        
+        if (endOfAppointment != null){
     
-    if (endOfAppointment != null){
-
-        let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(null,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
-        console.log('isfree',isFree)
-
-        if(isFree){
-            let newAppointment = new appointmentSchema({
-                clinic_id: clinicId,
-                doctor_id:doctorId,
-                patient_id: request.body.patientId,
-                employee_id: request.body.employeeId,
-                date: appointmentDate,
-                from: dateTimeMW.getTimeFromString(startOfAppointment),
-                to : dateTimeMW.getTimeFromString(endOfAppointment),
-                status: request.body.status,
-                reservation_method:request.body.reservationMethod
-                }
-            );
-            newAppointment.save()
-            .then(result=>{
-                response.status(201).json(result);
-                appointmentMW.sendMailToTheDoctor(doctorId,appointmentDate,startOfAppointment);
-            })
-            .catch(error => next(error));
-        }
+            let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(null,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+            console.log('isfree',isFree)
+    
+            if(isFree){
+                let newAppointment = new appointmentSchema({
+                    clinic_id: clinicId,
+                    doctor_id:doctorId,
+                    patient_id: request.body.patientId,
+                    employee_id: request.body.employeeId,
+                    date: appointmentDate,
+                    from: dateTimeMW.getTimeFromString(startOfAppointment),
+                    to : dateTimeMW.getTimeFromString(endOfAppointment),
+                    status: request.body.status,
+                    reservation_method:request.body.reservationMethod
+                    }
+                );
+                newAppointment.save()
+                .then(result=>{
+                    response.status(201).json(result);
+                    appointmentMW.sendMailToTheDoctor(doctorId,appointmentDate,startOfAppointment);
+                })
+                .catch(error => next(error));
+            }
+            else{
+                let error = new Error("this time is ovelapped with another one please select another time ");
+                error.status=401;
+                next(error);
+            }
+        } 
         else{
-            let error = new Error("this time is ovelapped with another one please select another time ");
-            error.status=401;
-            next(error);
-        }
-    } 
+            let error = new Error("There is No shift in this Day for that Doctor ");
+                error.status=401;
+                next(error);
+        } 
+        
+    }
     else{
-        let error = new Error("There is No shift in this Day for that Doctor ");
-            error.status=401;
-            next(error);
-    } 
+        let error = new Error("There is No Doctor or patient or employee or clinic with that id ");
+                error.status=401;
+                next(error);
+    }
 };
 
 module.exports.updateAppointment=async (request , response , next)=>{
@@ -141,45 +153,55 @@ module.exports.updateAppointment=async (request , response , next)=>{
     let startOfAppointment = request.body.from;
     let doctorId =request.body.doctorId;
     let clinicId = request.body.clinicId;
+    let patientId = request.body.patientId;
+    let employeeId = request.body.employeeId;
     let appointmentId = request.params.id;
 
-    let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
-    if (endOfAppointment != null){
-
-        let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(appointmentId,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
-        console.log('isfree',isFree)
-        if(isFree){
-            appointmentSchema.updateOne({
-                _id : appointmentId
-            },
-            {
-                $set:{ 
-                    clinic_id: clinicId,
-                    doctor_id:doctorId,
-                    patient_id: request.body.patientId,
-                    employee_id: request.body.employeeId,
-                    date: appointmentDate,
-                    From:dateTimeMW.getTimeFromString(startOfAppointment),
-                    to : dateTimeMW.getTimeFromString(endOfAppointment),
-                    status: request.body.status,
-                    reservation_method:request.body.reservationMethod
-                }
-            }).then(result=>{
-                response.status(201).json(result);
-            })
-            .catch(error => next(error));
+    if (await appointmentMW.checkAllUsersAvailability(doctorId, clinicId, patientId, employeeId)){
+        
+        let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
+        if (endOfAppointment != null){
+    
+            let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(appointmentId,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+            console.log('isfree',isFree)
+            if(isFree){
+                appointmentSchema.updateOne({
+                    _id : appointmentId
+                },
+                {
+                    $set:{ 
+                        clinic_id: clinicId,
+                        doctor_id:doctorId,
+                        patient_id: request.body.patientId,
+                        employee_id: request.body.employeeId,
+                        date: appointmentDate,
+                        From:dateTimeMW.getTimeFromString(startOfAppointment),
+                        to : dateTimeMW.getTimeFromString(endOfAppointment),
+                        status: request.body.status,
+                        reservation_method:request.body.reservationMethod
+                    }
+                }).then(result=>{
+                    response.status(201).json(result);
+                })
+                .catch(error => next(error));
+            }
+            else{
+                let error = new Error("this time is ovelapped with another one please select another time ");
+                error.status=401;
+                next(error);
+            }
         }
         else{
-            let error = new Error("this time is ovelapped with another one please select another time ");
-            error.status=401;
-            next(error);
-        }
+            let error = new Error("There is No shift in this Day for that Doctor ");
+                error.status=401;
+                next(error);
+        } 
     }
     else{
-        let error = new Error("There is No shift in this Day for that Doctor ");
-            error.status=401;
-            next(error);
-    } 
+        let error = new Error("There is No Doctor or patient or employee or clinic with that id ");
+                error.status=401;
+                next(error);
+    }
 };
 
 module.exports.deleteAppointmentById = (request , respose , next)=>{
