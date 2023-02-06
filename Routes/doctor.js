@@ -5,6 +5,7 @@ const doctorValidation = require('./../Middlewares/doctorMW');
 const userValidation = require("./../Middlewares/userMW");
 const scheduleValidation = require("./../Middlewares/scheduleMW");
 const validator = require("./../Middlewares/errorValidation");
+const authenticationMW=require("./../Middlewares/authenticationMW")
 const router = express.Router();
 
 router.route("/doctors/:id")

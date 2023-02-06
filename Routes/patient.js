@@ -3,6 +3,8 @@ const express = require("express");
 const controller = require ("../Controllers/patient");
 const patientValidation = require("./../Middlewares/patientMW");
 const validator = require("./../Middlewares/errorValidation");
+const authenticationMW=require("./../Middlewares/authenticationMW")
+
 const router= express.Router();
 
 router.route("/patients")
