@@ -7,10 +7,7 @@ const validator = require("./../Middlewares/errorValidation");
 const router = express.Router();
 
 router.route("/employees")
-       .get(
-            employeeValidation.employeevalidation,
-            validator,
-            controller.getAllEmployees)
+       .get(controller.getAllEmployees)
        .post(  
             employeeValidation.employeevalidation,
             validator,
