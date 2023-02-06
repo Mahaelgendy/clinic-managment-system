@@ -15,6 +15,7 @@ const sortEmployees = (data,query)=>{
     let order = query.order ||"asc";
     let orderValue = order ==="asc"? 1:-1
 
+    
     return data.sort((a,b)=>{
         if(a[sortBy]<b[sortBy]) return -1*orderValue;
         if(a[sortBy]>b[sortBy]) return 1*orderValue;
