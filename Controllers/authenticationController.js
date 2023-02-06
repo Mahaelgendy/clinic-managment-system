@@ -18,7 +18,7 @@ exports.login=(async(request,response,next)=>{
                     id:user._id,
                     role:user.role
                 },
-                "ClinicSystem",
+                process.env.SECRET_KEY,
                 {expiresIn:"2h"})
 
                 if(true && user.role=="admin")
