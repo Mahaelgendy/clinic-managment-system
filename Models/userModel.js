@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     gender:{type: String, enum: ['Female','Male']},
     address: {type:address.adressSchema},
     role:{type: String, required: true, enum: ["admin", "doctor", "patient" , "employee"], default:'patient'},
-    image:String,
+    image:{type:String},
 });
 
 mongoose.model("users",userSchema);

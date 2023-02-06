@@ -2,7 +2,8 @@ const {body , param} = require("express-validator")
 
 exports.clinicValidation=[
     body("_id").isInt().notEmpty().withMessage("ID is Numeric and required"),
-    body("clinic_location").isObject().notEmpty().withMessage("location for this clinic is required")
+    body("clinic_location").isObject().notEmpty().withMessage("location for this clinic is required"),
+    body("clinicName").isString().withMessage("clinic name should be characters only "),
 
 ]
 
