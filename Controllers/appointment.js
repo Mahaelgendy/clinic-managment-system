@@ -7,6 +7,7 @@ const appointmentMW = require("./../middlewares/appointmentMW")
 
 module.exports.getAllAppointments = (request , response , next)=>{
     const query = {};
+    
     if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
     if (request.query.doctorId) query.doctor_id = Number(request.query.doctorId);
     if (request.query.patientId) query.patient_id = Number(request.query.patientId);
@@ -14,11 +15,28 @@ module.exports.getAllAppointments = (request , response , next)=>{
     if (request.query.date) query.date = request.query.date;
     if (request.query.status) query.status = request.query.status;
     if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
-
-    appointmentSchema.find(query).populate({ path: "clinic_id"})
-        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
-        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
-        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
+    let sortField = request.query.sort || 'date';
+    
+    appointmentSchema.find(query).sort({[sortField] :-1})
+        .populate({ path: "clinic_id"})
+        .populate({
+            path: 'doctor_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: {fullName:1}, model: 'users'}
+        }).sort({fullName:-1})
+        .populate({ 
+            path: "patient_id",
+            select: 'patientData',
+            model: 'patients',
+            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+        })
+        .populate({
+            path: "employee_id",
+            select: 'employeeData',
+            model: 'patients',
+            populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+        })
         .then((data)=>{
             response.status(200).json(data);
         })
