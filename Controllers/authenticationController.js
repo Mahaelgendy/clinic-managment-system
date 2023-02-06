@@ -1,11 +1,39 @@
 const mongoose = require ("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { request } = require("http");
+const { response } = require("express");
 require("./../Models/userModel");
+
+const saltRounds = 10;
 
 const userSchema = mongoose.model("users")
 
-exports.login=(async(request,response,next)=>{
+module.exports.signUp = (request, response , next)=>{
+    console.log(request.file)
+    const {fullName,password,email,age,gender,address,role , image} = request.body;
+
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(password, salt);
+
+    const user = new userSchema({
+        fullName:fullName,
+        password:hash,
+        email:email,
+        age:age,
+        gender:gender,
+        address:address,
+        role:role,
+        // image:request.file.path
+    });
+
+    user.save()
+        .then(result=>{
+            response.status(200).json({message:"User added"});
+        })
+        .catch(err=>next(err));
+}
+module.exports.login=(async(request,response,next)=>{
 
     const user =await userSchema.findOne({email:request.body.email})
     if(user != null)
@@ -61,3 +89,6 @@ exports.login=(async(request,response,next)=>{
         response.status(400).json({message:"can not find user"});
     }
 })
+
+
+
