@@ -19,7 +19,7 @@ module.exports.getAllAppointments = (request , response , next)=>{
     let sortField = request.query.sort || 'date';
     
     appointmentSchema.find(query).sort({[sortField] :-1})
-        .populate({ path: "clinic_id"})
+        .populate({ path: "clinic_id" ,select: 'clinicName'})
         .populate({
             path: 'doctor_id',
             select: 'userData',
@@ -35,7 +35,7 @@ module.exports.getAllAppointments = (request , response , next)=>{
         .populate({
             path: "employee_id",
             select: 'employeeData',
-            model: 'patients',
+            model: 'employees',
             populate: {path: 'employeeData', select: 'fullName', model: 'users'}
         })
         .then((data)=>{
@@ -46,10 +46,25 @@ module.exports.getAllAppointments = (request , response , next)=>{
 
 module.exports.getAppointmentbyId = (request , response , next)=>{
     appointmentSchema.findById({_id : request.params.id})
-        .populate({ path: "clinic_id"})
-        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
-        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
-        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
+        .populate({ path: "clinic_id" ,select: 'clinicName'})
+        .populate({
+            path: 'doctor_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: 'fullName', model: 'users'}
+        })
+        .populate({ 
+            path: "patient_id",
+            select: 'patientData',
+            model: 'patients',
+            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+        })
+        .populate({
+            path: "employee_id" ,
+            select: 'employeeData',
+            model: 'employees',
+            populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+        })
         .then(data=>{
             if(data!=null){
                 response.status(200).json(data);
@@ -61,10 +76,25 @@ module.exports.getAppointmentbyId = (request , response , next)=>{
 };
 module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
     appointmentSchema.find({doctor_id : request.params.id})
-        .populate({ path: "clinic_id"})
-        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
-        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
-        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
+        .populate({ path: "clinic_id" ,select: 'clinicName'})
+        .populate({
+            path: 'doctor_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: 'fullName', model: 'users'}
+        })
+        .populate({ 
+            path: "patient_id" ,
+            select: 'patientData',
+            model: 'patients',
+            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+        })
+        .populate({
+            path: "employee_id" ,
+            select: 'employeeData',
+            model: 'employees',
+            populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+        })
         .then(data=>{
             if(data!=null){
                 response.status(200).json(data);
@@ -76,10 +106,25 @@ module.exports.getAppointmentbyDoctorId = (request , response , next)=>{
 };
 module.exports.getAppointmentbyClinicId = (request , response , next)=>{
     appointmentSchema.find({clinic_id : request.params.id})
-        .populate({ path: "clinic_id"})
-        .populate({path: 'doctor_id', select: 'userData', model: 'doctors', populate: {path: 'userData', select: 'fullName', model: 'users'}})
-        .populate({ path: "patient_id" , select: 'patientData', model: 'patients', populate: {path: 'patientData', select: 'fullName', model: 'users'}})
-        .populate({path: "employee_id" , select: 'employeeData', model: 'patients', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
+        .populate({ path: "clinic_id"  ,select: 'clinicName'})
+        .populate({
+            path: 'doctor_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: 'fullName', model: 'users'}
+        })
+        .populate({ 
+            path: "patient_id" ,
+            select: 'patientData',
+            model: 'patients',
+            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+        })
+        .populate({
+            path: "employee_id" ,
+            select: 'employeeData',
+            model: 'employees',
+            populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+        })
         .then(data=>{
             if(data!=null){
                 response.status(200).json(data);
