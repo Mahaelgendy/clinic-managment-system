@@ -2,6 +2,7 @@ const express=require("express");
 const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const server=express();
+
 const appointmentRoutes = require("./Routes/appointment");
 const clinicRoutes = require("./Routes/clinic");
 const serviceRoutes = require("./Routes/service");
@@ -13,7 +14,6 @@ const medicineRoutes = require("./Routes/medicine");
 const employeeRoutes = require("./Routes/employee");
 const scheduleRoutes = require("./Routes/schedule");
 const userRoutes = require("./Routes/user");
-
 
 // require("dotenv").config();
 
@@ -34,7 +34,6 @@ mongoose.connect("mongodb://127.0.0.1:27017/clinicSystemDB")
 
 server.use(morgan('combined'));
 
-//body parser
 server.use(express.json());
 
 //routes

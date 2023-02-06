@@ -1,5 +1,5 @@
 
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const { request, response } = require('express');
 const mongoose = require('mongoose');
@@ -41,8 +41,7 @@ exports.addDoctor = async (request , response , next)=>{
         return response.status(400).json({message:"User is already exist"});
     }
 
-    const {fullName,password,email,age,gender,address,role, specialization , price , 
-        clinic_id ,date,startTime,endTime,duration} = request.body;
+    const {fullName,password,email,age,gender,address,role, specialization , price , image} = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -54,7 +53,8 @@ exports.addDoctor = async (request , response , next)=>{
         age:age,
         gender:gender,
         address:address,
-        role:role
+        role:role,
+        image:request.file.path
     });
     
    
@@ -70,20 +70,7 @@ exports.addDoctor = async (request , response , next)=>{
                 
                 doctor.save()
                     .then(res=>{
-                        // const schedule = new SchedulaSchema({
-                        //     clinic_id:clinic_id,
-                        //     doc_id:res._id,
-                        //     date:dateTimeMW.getDateFormat(date),
-                        //     from:dateTimeMW.getTimeFromString(startTime),
-                        //     to: dateTimeMW.getTimeFromString(endTime),
-                        //     duration_in_minutes:duration
-                        // });
-                        
-                        // schedule.save()
-                        // .then(resu=>{
                             response.status(200).json({message:"Docor added"});
-                        // })
-                        // .catch(err=>next(err))
                     })
                     .catch(err=>{
                         UserSchema.deleteOne({email:email})
@@ -122,7 +109,7 @@ exports.deleteDoctor = (request , response , next)=>{
 exports.updateDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
-        const {fullName,password,email,age,gender,address,role,specialization,price} = request.body;
+        const {fullName,password,email,age,gender,address,role,specialization,price, image} = request.body;
 
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
@@ -142,7 +129,8 @@ exports.updateDoctor = async (request , response , next)=>{
                 age:age,
                 gender:gender,
                 address:address,
-                role:role
+                role:role,
+                image:request.file.path
             }});
 
             response.status(200).json({message:"Doctor Updated"})
