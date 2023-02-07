@@ -40,7 +40,9 @@ exports.getAllUsers = (request , response , next)=>{
     if (request.query.role) query.role = request.query.role;
     if (request.query.email) query.email = request.query.email;
 
-    UserSchema.find(query).sort({fullName:1})
+    let sortField = request.query.sort || 'fullName';
+    
+    UserSchema.find(query).sort({[sortField] :-1})
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);
@@ -56,6 +58,8 @@ exports.deleteUsers = (request , response , next)=>{
         if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
         if (request.query.role) query.role = request.query.role;
         if (request.query.email) query.email = request.query.email;
+
+        
 
         UserSchema.deleteMany(query)
         .then(data=>{

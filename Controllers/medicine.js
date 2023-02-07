@@ -32,8 +32,9 @@ exports.getAllMedicinces = (request , response , next)=>{
     if (request.query.id) query._id = Number(request.query.id);
     if (request.query.name) query.medicineName = request.query.name;
 
-
-    MedicineSchema.find(query).sort({name:1})
+    let sortField = request.query.sort || 'name';
+    
+    MedicineSchema.find(query)
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);
