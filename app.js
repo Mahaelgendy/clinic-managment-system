@@ -20,7 +20,8 @@ const authenticationMW = require ("./Middlewares/authenticationMW");
 
 require("dotenv").config();
 
-// require("dotenv").config();
+
+require("dotenv").config();
 
 let port=process.env.PORT||8080;
 

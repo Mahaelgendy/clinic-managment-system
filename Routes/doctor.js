@@ -7,6 +7,8 @@ const scheduleValidation = require("./../Middlewares/scheduleMW");
 const validator = require("./../Middlewares/errorValidation");
 const router = express.Router();
 
+const upload = require("./../Middlewares/uploadImageMW");
+
 router.route("/doctors/:id")
     .get(
         doctorValidation.paramValidation,
@@ -17,6 +19,7 @@ router.route("/doctors/:id")
         validator,
         controller.deleteDoctor)
     .patch(
+        upload.single("profile"),
         doctorValidation.paramValidation,
         doctorValidation.doctorValidataion,
         userValidation.userbodyValidation,
@@ -27,8 +30,9 @@ router.route("/doctors/:id")
 router.route('/doctors')
       .get(controller.getAllDoctors)
       .post(
+        upload.single("profile"),
         userValidation.userbodyValidation,
-        scheduleValidation.bodyValidation,
+        doctorValidation.doctorValidataion,
         validator,
         controller.addDoctor)
 
