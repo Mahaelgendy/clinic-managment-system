@@ -42,8 +42,8 @@ server.use(morgan('combined'));
 
 server.use(express.json());
 //routes
-// server.use(authenticationRouter);
-// server.use(authenticationMW);
+server.use(authenticationRouter);
+server.use(authenticationMW);
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
