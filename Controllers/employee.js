@@ -34,8 +34,8 @@ module.exports.getAllEmployees = async (request,response,next)=>{
    employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1},})
                             .populate({path:"clinicId"})
                             .then((data)=>{
-                             x= sortEmployees(data, request.query)
-                                response.status(200).json(x);
+                            employeeAfterSort= sortEmployees(data, request.query)
+                                response.status(200).json({message: "Data"+ employeeAfterSort});
                             }) 
                             .catch((error)=>next(error));
 };
