@@ -61,7 +61,7 @@ exports.deleteUsers = (request , response , next)=>{
         if (request.query.role) query.role = request.query.role;
         if (request.query.email) query.email = request.query.email;
 
-        
+         
 
         UserSchema.deleteMany(query)
         .then(data=>{
