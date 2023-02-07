@@ -7,7 +7,7 @@ const dateTimeMW = require("./../middlewares/dateTimeMW")
 const invoiceSchema = mongoose.model("invoices");
 const DoctorSchema = mongoose.model('doctors');
 const appointmentSchema= mongoose.model('appointments');
-//  const employeeSchema = mongoose.model("employees");
+ const employeeSchema = mongoose.model("employees");
 const clinicSchema= mongoose.model('clinics');
 const patientSchema= mongoose.model('patients');
 const serviceSchema= mongoose.model('services');
@@ -83,7 +83,7 @@ exports.addInvoice = async(request, response, next) => {
     const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
     const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
     const patientExist = await patientSchema.findOne({ _id: request.body.patientId })
-    // const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
+    const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
     const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
 
     if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
