@@ -11,7 +11,7 @@ router.route("/clinic")
         controller.addClinic);
     
 router.route("/clinic/:id")
-    .get(controller.getClinicById)
+    // .get(controller.getClinicById)
     .delete(controller.deleteClinicById)
     .patch(
         validator.clinicValidation,

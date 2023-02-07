@@ -34,6 +34,8 @@ exports.addUser = (request, response , next)=>{
 }
 
 exports.getAllUsers = (request , response , next)=>{
+
+    
     const query = {};
     if (request.query.fullName) query.fullName = request.query.fullName;
     if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);

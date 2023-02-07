@@ -29,5 +29,4 @@ router.route("/patients/:id")
                 patientValidation.paramvalidation,
                 validator,
                 controller.updatePatient)
-
 module.exports = router;

@@ -8,7 +8,18 @@ require ("../Models/patientModel");
 const userSchema = mongoose.model("users");
 const patientSchema = mongoose.model("patients");
 
-module.exports.getAllPatients = (request, response, next)=>{
+const sortPatients = (data,query)=>{
+    let sortBy = query.sortBy||'email';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+
+    return data.sort((a,b)=>{
+        if(a[sortBy]<b[sortBy]) return -1*orderValue;
+        if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+}
+
+module.exports.getAllPatients = async (request, response, next)=>{
 
     const query = {};
     if(request.query.status) query.status = request.query.status;
@@ -17,7 +28,9 @@ module.exports.getAllPatients = (request, response, next)=>{
     if(request.query.patientId) query._id = Number(request.query.patientId);
     if(request.query.weight) query.weight = Number(request.query.weight);
 
-    patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}}).sort({fullName:-1})
+    let allPatients= await sortPatients(allPatients, request.query)
+
+    patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}})
                         .then((data)=>{
                             response.status(200).json(data);
                         })
@@ -27,7 +40,7 @@ module.exports.getAllPatients = (request, response, next)=>{
 module.exports.addPatient = (request, response, next)=>{
  userSchema.findOne({email:request.body.email})
             .then((data)=>{
-                if(data!=null)
+                if(data!=null && data.role === "patient")
                 {
                     let newPatient=new patientSchema({
                         status:request.body.patientStatus,
@@ -81,7 +94,14 @@ module.exports.deletePatientById = (request, response, next)=>{
 };
 
 module.exports.deletePatients = (request, response, next)=>{
-    patientSchema.deleteMany({})
+    const query = {};
+    if(request.query.status) query.status = request.query.status;
+    if(request.query.height) query.height = Number(request.query.height);
+    if(request.query.hasInsurance) query.hasInsurance = request.query.hasInsurance;
+    if(request.query.patientId) query._id = Number(request.query.patientId);
+    if(request.query.weight) query.weight = Number(request.query.weight);
+
+    patientSchema.deleteMany(query)
         .then((data)=>{
             response.status(200).json({message:"delete all patients"});
         })
