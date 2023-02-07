@@ -14,7 +14,6 @@ const patientSchema= mongoose.model('patients');
 const serviceSchema= mongoose.model('services');
 
 const path = require("path");
-const stripe = require("stripe")("Add your secret key");
 
 exports.getAllInvoices = (request, response, next) => {
 
@@ -160,6 +159,29 @@ exports.deleteInvoice = (request, response, next) => {
         })
         .catch((error) => next(error));
 };
+exports.deleteInvoiceByFilter = (request, response, next) => {
+    const query = {};
+    if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
+    if (request.query.patient_id) query.patient_id = Number(request.query.patient_id);
+    if (request.query.employee_id) query.employee_id = Number(request.query.employee_id);
+    if (request.query.appointment_id) query.appointment_id = Number(request.query.appointment_id);
+    if (request.query.clinic_id) query.clinic_id = Number(request.query.clinic_id);
+    if (request.query.service_id) query.service_id = Number(request.query.service_id);
+    if (request.query.paymentMethod) query.paymentMethod = request.query.paymentMethod;
+    if (request.query.paymentStatus) query.paymentStatus = request.query.paymentStatus;
+    if (request.query.date) query.date = request.query.date;
+
+    invoiceSchema.deleteMany(query)
+        .then((result) => {
+            if (result.deletedCount == 1) {
+                response.status(201).json({ message: " Invoice deleted" })
+            }
+            else
+                throw new Error("Invoice not found");
+        })
+        .catch((error) => next(error));
+};
+
 exports.displayInvoiceById = (request, response, next) => {
     invoiceSchema.find({ _id: request.params.id })
         .populate({
