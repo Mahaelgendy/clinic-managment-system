@@ -15,9 +15,13 @@ router.route("/clinic")
         controller.addClinic);
     
 router.route("/clinic/:id")
-    .get(
-        authenticationMW.anyUser,
-        controller.getClinicById)
+    // .get(
+    //     authenticationMW.anyUser,
+    //     controller.getClinicById)
+    // .delete(
+    //     authenticationMW.isAdmin,
+    //     controller.deleteClinicById)
+    // .get(controller.getClinicById)
     .delete(
         authenticationMW.isAdmin,
         controller.deleteClinicById)

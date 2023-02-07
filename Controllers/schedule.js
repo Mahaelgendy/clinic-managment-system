@@ -95,7 +95,6 @@ exports.updateSchedule = (request, response, next) => {
         .catch(error => next(error));
 }
 
-
 exports.deleteSchedule = (request, response, next) => {
     SchedulaSchema.deleteOne({ _id: request.params.id})
         .then((result) => {
@@ -108,6 +107,22 @@ exports.deleteSchedule = (request, response, next) => {
         .catch((error) => next(error));
 };
 
+exports.deleteSchedule = (request, response, next) => {
+    const query = {};
+    if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
+    if (request.query.doctorId) query.doc_id = Number(request.query.doctorId);
+    if (request.query.date) query.date = request.query.date;
+
+    SchedulaSchema.deleteOne(query)
+        .then((result) => {
+            if (result.deletedCount == 1) {
+                response.status(201).json({ message: " Schedule deleted" })
+            }
+            else
+                throw new Error("Schedule not found");
+        })
+        .catch((error) => next(error));
+};
 
 // exports.getScheduleByDoctorId = (request, response, next) => {
 //     SchedulaSchema.find({ doctor_id: request.body.id })

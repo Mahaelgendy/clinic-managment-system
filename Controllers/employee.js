@@ -10,7 +10,19 @@ const userSchema = mongoose.model("users");
 const employeeSchema = mongoose.model("employees");
 const clinicSchema = mongoose.model("clinics");
 
-module.exports.getAllEmployees =  (request,response,next)=>{
+const sortEmployees = (data,query)=>{
+    let sortBy = query.sortBy||'salary';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+
+    
+    return data.sort((a,b)=>{
+        if(a[sortBy]<b[sortBy]) return -1*orderValue;
+        if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+};
+
+module.exports.getAllEmployees = async (request,response,next)=>{
     
     const query = {}; 
     if(request.query.id) query._id = Number(request.query.id);
@@ -18,10 +30,12 @@ module.exports.getAllEmployees =  (request,response,next)=>{
     if(request.query.salary) query.salary = Number(request.query.salary);
     if(request.query.position) query.position = request.query.position
 
-     employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1}})
+
+   employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1},})
                             .populate({path:"clinicId"})
                             .then((data)=>{
-                                response.status(200).json(data);
+                            employeeAfterSort= sortEmployees(data, request.query)
+                                response.status(200).json({message: "Data"+ employeeAfterSort});
                             }) 
                             .catch((error)=>next(error));
 };

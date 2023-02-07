@@ -2,9 +2,15 @@ const mongoose = require("mongoose");
 const nodemailer = require('nodemailer');
 require("./../Models/doctorModel");
 require("./../Models/appointmentModel");
+require("./../Models/clinicModel");
+require("./../Models/patientModel");
+require("./../Models/employeeModel");
 const appointmentSchema = mongoose.model("appointments");
-const schedulesSchema = mongoose.model("schedules");
-const doctorsSchema = mongoose.model("doctors");
+const scheduleSchema = mongoose.model("schedules");
+const doctorSchema = mongoose.model("doctors");
+const clinicSchema= mongoose.model("clinics");
+const patientSchema= mongoose.model("patients");
+const employeeSchema = mongoose.model('employees')
 const dateTimeMW = require("./../middlewares/dateTimeMW");
 const {body , param} = require("express-validator");
 
@@ -25,7 +31,7 @@ exports.idParamValidation = [
 
 module.exports.getEndOfAppointment=async(clinicId,doctorId,appointmentDate,startofAppointment)=>{
     try {
-        let doctorSchedule=await schedulesSchema.findOne({doc_id : doctorId, date: appointmentDate, clinic_id:clinicId })
+        let doctorSchedule=await scheduleSchema.findOne({doc_id : doctorId, date: appointmentDate, clinic_id:clinicId })
         if(doctorSchedule != null){
 
             let appointmentDurationInMinutes = doctorSchedule.duration_in_minutes;
@@ -47,7 +53,7 @@ module.exports.getEndOfAppointment=async(clinicId,doctorId,appointmentDate,start
 }
 module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,appointmentDate,startOfAppointment ,endOfAppointment)=>{
     try {
-        let doctorSchedule = await schedulesSchema.findOne({doc_id : doctorId , date: appointmentDate, clinic_id : clinicId })
+        let doctorSchedule = await scheduleSchema.findOne({doc_id : doctorId , date: appointmentDate, clinic_id : clinicId })
         if(doctorSchedule != null){
 
             console.log(doctorSchedule);
@@ -75,9 +81,20 @@ module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,
         return null;
       }
 }
+module.exports.checkAllUsersAvailability=async(doctorId,clinicId,patientId,employeeId)=>{
+    let doctor = await doctorSchema.findById(doctorId);
+    let clinic = await clinicSchema.findById(clinicId);
+    let patient = await patientSchema.findById(patientId);
+    let employee = await employeeSchema.findById(employeeId);
+    console.log(doctor, clinic,patient,employee)
+    if(doctor != null && clinic!= null && patient != null && employee!= null )
+        return true 
+    else
+        return false
+}
 module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
     console.log("send MAil")
-    doctorsSchema.findById({_id: doctorId}).populate({path:'userData'})
+    doctorSchema.findById({_id: doctorId}).populate({path:'userData'})
     .then(doctor=>{
         let doctorMail= doctor.userData.email;
         console.log(doctorMail)

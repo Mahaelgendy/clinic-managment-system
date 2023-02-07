@@ -14,7 +14,8 @@ router.route("/appointments")
                 authenticationMW.isPatientOrAdmin,
                 appointmentValidation.appointmentBodyValidation,
                 errorValidator,
-                controller.addAppointment);
+                controller.addAppointment)
+        .delete(controller.deleteAppointmentByFilter);
 
 router.route("/appointments/:id")
         .get(

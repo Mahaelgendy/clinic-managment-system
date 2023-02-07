@@ -33,7 +33,7 @@ exports.getAllMedicinces = (request , response , next)=>{
     if (request.query.name) query.medicineName = request.query.name;
 
 
-    MedicineSchema.find(query)
+    MedicineSchema.find(query).sort({name:1})
     .then(data=>{
         if(data!=null){
             response.status(200).json(data);

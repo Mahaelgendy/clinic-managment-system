@@ -63,21 +63,23 @@ exports.addPrescription =(request, response, next)=>{
 }
 
 exports.deleteAllPrescription = (request , response ) =>{
-    prescriptionSchema.deleteMany()
+    const query ={};
+    if(request.query.diagnosis)
+        query.diagnosis = request.query.diagnosis
+    if(request.query.currentExamination)
+        query.currentExamination = request.query.currentExamination
+    if(request.query.doctor_id)
+        query.doctor_id = request.query.doctor_id
+    if(request.query.patient_id)
+        query.patient_id = request.query.patient_id
+
+    prescriptionSchema.deleteMany(query)
     .then(result=>{
         response.status(200).json({message:"Delete all prescription"});
     })
     .catch(error=>next(error));
 }
 
-// exports.deletePrescriptionById=(request, response,next)=>
-// {
-//     prescriptionSchema.findByIdAndDelete({_id:request.params.id})
-//     .then(result=>{
-//         response.status(200).json({message:"Delete with id "+request.params.id});
-//     })
-//     .catch(error=>next(error));
-// }
 
 exports.updatePrescription= (request,response , next)=>
 {

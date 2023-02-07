@@ -1,4 +1,5 @@
 const controller = require('../Controllers/service');
+const error = require("../Middlewares/errorValidation")
 const express = require('express');
 
 const validator = require("../Middlewares/clinicMW")
@@ -10,7 +11,9 @@ router.route("/service")
         controller.agetAllServices)
     .post(authenticationMW.isDoctorOrAdmin,
         validator.serviceValidation,
-        controller.addservice);
+        error,
+        controller.addservice)
+    .delete(controller.deleteByFilter);
     
 router.route("/service/:id")
     .get(authenticationMW.anyUser,
@@ -21,6 +24,7 @@ router.route("/service/:id")
     .patch(
         authenticationMW.isDoctorOrAdmin,
         validator.serviceValidation,
+        error,
         controller.updateservice)
 
 module.exports = router;

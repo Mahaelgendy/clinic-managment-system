@@ -1,6 +1,5 @@
 
-// const bcrypt = require('bcrypt');
-const saltRounds = 10;
+
 const { request, response } = require('express');
 const mongoose = require('mongoose');
 
@@ -10,10 +9,15 @@ require('../Models/doctorModel');
 const UserSchema = mongoose.model('users');
 const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
-const dateTimeMW = require("../middlewares/dateTimeMW");
+
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 exports.getAllDoctors=(request , response , next)=>{
-    DoctorSchema.find()
+    const query = {};
+    if (request.query.specialization) query.clinic_id = request.query.specialization;
+    
+    DoctorSchema.find(query)
     .populate({path:'userData'})
     .then(data=>{
         response.status(200).json(data);
@@ -41,7 +45,7 @@ exports.addDoctor = async (request , response , next)=>{
         return response.status(400).json({message:"User is already exist"});
     }
 
-    const {fullName,password,email,age,gender,address,role, specialization , price , image} = request.body;
+    const {fullName,password,email,age,gender,address,role, specialization , price } = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -67,7 +71,6 @@ exports.addDoctor = async (request , response , next)=>{
                     price:price,
                     userData:result._id
                 });
-                
                 doctor.save()
                     .then(res=>{
                             response.status(200).json({message:"Docor added"});

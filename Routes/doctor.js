@@ -8,6 +8,8 @@ const validator = require("./../Middlewares/errorValidation");
 const authenticationMW=require("./../Middlewares/Authorization")
 const router = express.Router();
 
+const upload = require("./../Middlewares/uploadImageMW");
+
 router.route("/doctors/:id")
     .get(
         authenticationMW.isDoctorOrAdmin,
@@ -20,7 +22,11 @@ router.route("/doctors/:id")
         validator,
         controller.deleteDoctor)
     .patch(
+<<<<<<< HEAD
         authenticationMW.isDoctorOrAdmin,
+=======
+        upload.single("profile"),
+>>>>>>> 251bd22fd2caacdbd31cb99efd8c763939c92494
         doctorValidation.paramValidation,
         doctorValidation.doctorValidataion,
         userValidation.userbodyValidation,
@@ -29,13 +35,19 @@ router.route("/doctors/:id")
 
 
 router.route('/doctors')
+<<<<<<< HEAD
     .get(
         authenticationMW.isAdmin,
         controller.getAllDoctors)
     .post(
         authenticationMW.isAdmin,
+=======
+      .get(controller.getAllDoctors)
+      .post(
+        upload.single("profile"),
+>>>>>>> 251bd22fd2caacdbd31cb99efd8c763939c92494
         userValidation.userbodyValidation,
-        scheduleValidation.bodyValidation,
+        doctorValidation.doctorValidataion,
         validator,
         controller.addDoctor)
 

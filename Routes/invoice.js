@@ -16,6 +16,7 @@ router.route("/invoice")
         errorValidator,
         controller.addInvoice
     )
+    .delete(controller.deleteInvoiceByFilter);
     
         
 router.route("/invoice/:id")
