@@ -13,7 +13,10 @@ const SchedulaSchema= mongoose.model('schedules');
 const dateTimeMW = require("../middlewares/dateTimeMW");
 
 exports.getAllDoctors=(request , response , next)=>{
-    DoctorSchema.find()
+    const query = {};
+    if (request.query.specialization) query.clinic_id = request.query.specialization;
+    
+    DoctorSchema.find(query)
     .populate({path:'userData'})
     .then(data=>{
         response.status(200).json(data);

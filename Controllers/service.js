@@ -15,6 +15,7 @@ exports.agetAllServices =(request,response, next)=>{
         query.name =Number(request.query.clinic_id)
     if(request.query.doctor_id)
         query.name = Number(request.query.doctor_id);
+        
     serviceSchema.find(query)
         .populate({path:"doctor_id"})
         .populate({path:"clinic_id"})
@@ -25,16 +26,6 @@ exports.agetAllServices =(request,response, next)=>{
 
 } 
 
-// exports.getAllServices= (request , response, next)=>{
-
-//     serviceSchema.find()
-//     .populate({path:"doctor_id"})
-//     .populate({path:"clinic_id"})
-//     .then(data=>{
-//         response.status(201).json(data)
-//     })
-//     .catch(error=>next(error));
-// }
 
 exports.getServiceById = (request, response ,next)=>{
     
@@ -73,6 +64,23 @@ exports.deleteserviceById=(request, response,next)=>
     .catch(error=>next(error));
 }
 
+exports.deleteByFilter = (request, response, next)=>{
+    const query = {};
+    if(request.query.name)
+        query.name = request.query.name
+    if(request.query.salary)
+        query.name =Number(request.query.salary)
+    if(request.query.clinic_id)
+        query.name =Number(request.query.clinic_id)
+    if(request.query.doctor_id)
+        query.name = Number(request.query.doctor_id);
+    serviceSchema.deleteMany(query)
+        .then(result=>{
+            response.status(200).json({message:"Delete service "});
+        })
+        .catch(error=>next(error));
+}
+
 exports.updateservice = (request,response , next)=>
 {
     serviceSchema.updateOne(
@@ -89,12 +97,6 @@ exports.updateservice = (request,response , next)=>
         .catch(error=>next(error));
 
 }
-
-
-
-
-
-
 
 
 

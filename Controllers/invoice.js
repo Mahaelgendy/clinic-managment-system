@@ -12,9 +12,23 @@ const clinicSchema= mongoose.model('clinics');
 const patientSchema= mongoose.model('patients');
 const serviceSchema= mongoose.model('services');
 
+const path = require("path");
+const stripe = require("stripe")("Add your secret key");
 
 exports.getAllInvoices = (request, response, next) => {
-    invoiceSchema.find({}).populate({ path: "clinic_id" })
+
+    const query = {};
+    if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
+    if (request.query.patient_id) query.patient_id = Number(request.query.patient_id);
+    if (request.query.employee_id) query.employee_id = Number(request.query.employee_id);
+    if (request.query.appointment_id) query.appointment_id = Number(request.query.appointment_id);
+    if (request.query.clinic_id) query.clinic_id = Number(request.query.clinic_id);
+    if (request.query.service_id) query.service_id = Number(request.query.service_id);
+    if (request.query.paymentMethod) query.paymentMethod = request.query.paymentMethod;
+    if (request.query.paymentStatus) query.paymentStatus = request.query.paymentStatus;
+    if (request.query.date) query.date = request.query.date;
+
+    invoiceSchema.find(query).populate({ path: "clinic_id" })
         .populate({
             path: "doctor_id", select: { userData:1,_id:0 }, model: "doctors",
             populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
@@ -138,3 +152,51 @@ exports.deleteInvoice = (request, response, next) => {
 };
 
 
+exports.deleteInvoiceByFilter = (request, response, next) => {
+    const query = {};
+    if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
+    if (request.query.patient_id) query.patient_id = Number(request.query.patient_id);
+    if (request.query.employee_id) query.employee_id = Number(request.query.employee_id);
+    if (request.query.appointment_id) query.appointment_id = Number(request.query.appointment_id);
+    if (request.query.clinic_id) query.clinic_id = Number(request.query.clinic_id);
+    if (request.query.service_id) query.service_id = Number(request.query.service_id);
+    if (request.query.paymentMethod) query.paymentMethod = request.query.paymentMethod;
+    if (request.query.paymentStatus) query.paymentStatus = request.query.paymentStatus;
+    if (request.query.date) query.date = request.query.date;
+
+    invoiceSchema.deleteMany(query)
+        .then((result) => {
+            if (result.deletedCount == 1) {
+                response.status(201).json({ message: " Invoice deleted" })
+            }
+            else
+                throw new Error("Invoice not found");
+        })
+        .catch((error) => next(error));
+};
+
+
+// exports.payment= async (req, res) => {
+//     const { product } = req.body;
+//     const session = await stripe.checkout.sessions.create({
+//         payment_method_types: ["card"],
+//         line_items: [
+//             {
+//                 price_data: {
+//                     currency: "inr",
+//                     product_data: {
+//                         name: product.name,
+//                         images: [product.image],
+//                     },
+//                     unit_amount: product.amount * 100,
+//                 },
+//                 quantity: product.quantity,
+//             },
+//         ],
+//         mode: "payment",
+//         success_url: `${YOUR_DOMAIN}/success.html`,
+//         cancel_url: `${YOUR_DOMAIN}/cancel.html`,
+//     });
+
+//     res.json({ id: session.id });
+// }

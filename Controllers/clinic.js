@@ -4,8 +4,11 @@ require("../Models/clinicModel");
 const clinicSchema =  mongoose.model("clinics");
 
 exports.getAllClinics = (request , response, next)=>{
+    const query = {};
+    if (request.query.clinicName) query.clinic_id = request.query.clinicName;
+    if (request.query._id) query._id = request.query._id;
 
-    clinicSchema.find()
+    clinicSchema.find(query)
     .then(data=>{
         console.log(data)
         response.status(201).json(data)
@@ -13,19 +16,18 @@ exports.getAllClinics = (request , response, next)=>{
     .catch(error=>next(error));
 }
 
-exports.getClinicById = (request, response ,next)=>{
+// exports.getClinicById = (request, response ,next)=>{
     
-    clinicSchema.findOne({_id:request.params.id})
-    .then(data => {
-        if(data != null){
-            response.status(201).json({data})
-        }else {
-            console.log("null")
-            next(new Error({message:"Id is not exist"}));
-        }
-    })
-    .catch(error => next(error));
-}
+//     clinicSchema.findOne({_id:request.params.id})
+//     .then(data => {
+//         if(data != null){
+//             response.status(201).json({data})
+//         }else {
+//             next(new Error({message:"Id is not exist"}));
+//         }
+//     })
+//     .catch(error => next(error));
+// }
 
 exports.addClinic =(request, response, next)=>{
     let newClinic = new clinicSchema({

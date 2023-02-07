@@ -9,7 +9,8 @@ router.route("/appointments")
         .post(
                 appointmentValidation.appointmentBodyValidation,
                 errorValidator,
-                controller.addAppointment);
+                controller.addAppointment)
+        .delete(controller.deleteAppointmentByFilter);
 
 router.route("/appointments/:id")
         .get(

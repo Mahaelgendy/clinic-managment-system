@@ -81,7 +81,14 @@ module.exports.deletePatientById = (request, response, next)=>{
 };
 
 module.exports.deletePatients = (request, response, next)=>{
-    patientSchema.deleteMany({})
+    const query = {};
+    if(request.query.status) query.status = request.query.status;
+    if(request.query.height) query.height = Number(request.query.height);
+    if(request.query.hasInsurance) query.hasInsurance = request.query.hasInsurance;
+    if(request.query.patientId) query._id = Number(request.query.patientId);
+    if(request.query.weight) query.weight = Number(request.query.weight);
+
+    patientSchema.deleteMany(query)
         .then((data)=>{
             response.status(200).json({message:"delete all patients"});
         })
