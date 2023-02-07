@@ -22,11 +22,8 @@ router.route("/doctors/:id")
         validator,
         controller.deleteDoctor)
     .patch(
-<<<<<<< HEAD
         authenticationMW.isDoctorOrAdmin,
-=======
         upload.single("profile"),
->>>>>>> 251bd22fd2caacdbd31cb99efd8c763939c92494
         doctorValidation.paramValidation,
         doctorValidation.doctorValidataion,
         userValidation.userbodyValidation,
@@ -35,17 +32,12 @@ router.route("/doctors/:id")
 
 
 router.route('/doctors')
-<<<<<<< HEAD
     .get(
         authenticationMW.isAdmin,
         controller.getAllDoctors)
     .post(
         authenticationMW.isAdmin,
-=======
-      .get(controller.getAllDoctors)
-      .post(
         upload.single("profile"),
->>>>>>> 251bd22fd2caacdbd31cb99efd8c763939c92494
         userValidation.userbodyValidation,
         doctorValidation.doctorValidataion,
         validator,
