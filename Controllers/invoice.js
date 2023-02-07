@@ -13,9 +13,23 @@ const clinicSchema= mongoose.model('clinics');
 const patientSchema= mongoose.model('patients');
 const serviceSchema= mongoose.model('services');
 
+const path = require("path");
+const stripe = require("stripe")("Add your secret key");
 
 exports.getAllInvoices = (request, response, next) => {
-    invoiceSchema.find({}).populate({ path: "clinic_id" })
+
+    const query = {};
+    if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
+    if (request.query.patient_id) query.patient_id = Number(request.query.patient_id);
+    if (request.query.employee_id) query.employee_id = Number(request.query.employee_id);
+    if (request.query.appointment_id) query.appointment_id = Number(request.query.appointment_id);
+    if (request.query.clinic_id) query.clinic_id = Number(request.query.clinic_id);
+    if (request.query.service_id) query.service_id = Number(request.query.service_id);
+    if (request.query.paymentMethod) query.paymentMethod = request.query.paymentMethod;
+    if (request.query.paymentStatus) query.paymentStatus = request.query.paymentStatus;
+    if (request.query.date) query.date = request.query.date;
+
+    invoiceSchema.find(query).populate({ path: "clinic_id" })
         .populate({
             path: "doctor_id", select: { userData:1,_id:0 }, model: "doctors",
             populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }

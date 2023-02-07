@@ -4,19 +4,26 @@ const controller = require('./../Controllers/medicine');
 const medicineValidation = require("./../Middlewares/medicineMW")
 const validator = require("./../Middlewares/errorValidation");
 const router = express.Router();
+const authenticationMW=require("./../Middlewares/Authorization")
 
 router.route('/medicines')
-    .get(controller.getAllMedicinces)
+    .get(
+        authenticationMW.isDoctorOrAdmin,
+        controller.getAllMedicinces)
     .post(
+        authenticationMW.isDoctor,
         medicineValidation.bodyValidation,
         validator,
         controller.addMedicine)
     .patch(
+        authenticationMW.isDoctor,
         medicineValidation.bodyValidation,
         validator,
         controller.updateMedicines)
         
-    .delete(controller.deleteMedicine)
+    .delete(
+        authenticationMW.isDoctorOrAdmin,
+        controller.deleteMedicine)
 
 
 // router.route('/medicines/:id')

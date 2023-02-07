@@ -1,6 +1,9 @@
 const express=require("express");
 const mongoose = require('mongoose');
 const  morgan = require('morgan');
+const path = require("path");
+const stripe = require("stripe")("Add your secret key");
+
 const server=express();
 
 const appointmentRoutes = require("./Routes/appointment");
@@ -18,9 +21,7 @@ const reportRoutes = require("./Routes/report");
 const authenticationRouter = require("./Routes/authentication");
 const authenticationMW = require ("./Middlewares/authenticationMW");
 
-require("dotenv").config();
-
-
+//require("dotenv").config();
 require("dotenv").config();
 
 let port=process.env.PORT||8080;
@@ -28,6 +29,8 @@ let port=process.env.PORT||8080;
 mongoose.set('strictQuery', true);
 
 mongoose.connect(process.env.DB_URL)
+//mongoose.connect("mongodb://127.0.0.1:27017/clinicSystemDB")
+
     .then(()=>{
         server.listen(port,()=>{
             console.log("I am listening..............", port);
