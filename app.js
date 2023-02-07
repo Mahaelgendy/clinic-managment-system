@@ -26,8 +26,8 @@ let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
 
-//mongoose.connect(process.env.DB_URL)
-mongoose.connect("mongodb://127.0.0.1:27017/clinicSystemDB")
+mongoose.connect(process.env.DB_URL)
+//mongoose.connect("mongodb://127.0.0.1:27017/clinicSystemDB")
 
     .then(()=>{
         server.listen(port,()=>{
@@ -44,7 +44,7 @@ server.use(morgan('combined'));
 server.use(express.json());
 //routes
 server.use(authenticationRouter);
-//server.use(authenticationMW);
+server.use(authenticationMW);
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)

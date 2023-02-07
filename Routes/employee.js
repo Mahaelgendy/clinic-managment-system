@@ -3,17 +3,21 @@ const express = require("express");
 const controller = require ("../Controllers/employee");
 const employeeValidation = require("./../Middlewares/employeeMW");
 const validator = require("./../Middlewares/errorValidation");
-const authenticationMW=require("./../Middlewares/authenticationMW")
+const authenticationMW=require("./../Middlewares/Authorization")
 
 const router = express.Router();
 
 router.route("/employees")
-       .get(controller.getAllEmployees)
-       .post(  
+    .get(
+        authenticationMW.isAdmin,
+        controller.getAllEmployees)
+    .post(  
+            authenticationMW.isAdmin,
             employeeValidation.employeevalidation,
             validator,
             controller.addEmployee)
-       .delete( 
+    .delete( 
+            authenticationMW.isAdmin,
             employeeValidation.employeevalidation,
             validator,
             controller.deleteEmployees)
@@ -21,15 +25,18 @@ router.route("/employees")
 
 
 router.route("/employees/:id")
-        .get(
+    .get(
+            authenticationMW.isEmployeeOrAdmin,
             employeeValidation.paramvalidation,
             validator,
             controller.getEmployeeByID)
-        .delete( 
+    .delete( 
+            authenticationMW.isEmployeeOrAdmin,
             employeeValidation.paramvalidation,
             validator,
             controller.deleteEmployeeByID)
-        .patch(  
+    .patch(  
+            authenticationMW.isEmployeeOrAdmin,
             employeeValidation.paramvalidation,
             validator,
             controller.updateEmployee)

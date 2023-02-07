@@ -5,19 +5,22 @@ const doctorValidation = require('./../Middlewares/doctorMW');
 const userValidation = require("./../Middlewares/userMW");
 const scheduleValidation = require("./../Middlewares/scheduleMW");
 const validator = require("./../Middlewares/errorValidation");
-const authenticationMW=require("./../Middlewares/authenticationMW")
+const authenticationMW=require("./../Middlewares/Authorization")
 const router = express.Router();
 
 router.route("/doctors/:id")
     .get(
+        authenticationMW.isDoctorOrAdmin,
         doctorValidation.paramValidation,
         validator,
         controller.getDoctorById)
     .delete(
+        authenticationMW.isAdmin,
         doctorValidation.paramValidation,
         validator,
         controller.deleteDoctor)
     .patch(
+        authenticationMW.isDoctorOrAdmin,
         doctorValidation.paramValidation,
         doctorValidation.doctorValidataion,
         userValidation.userbodyValidation,
@@ -26,8 +29,11 @@ router.route("/doctors/:id")
 
 
 router.route('/doctors')
-      .get(controller.getAllDoctors)
-      .post(
+    .get(
+        authenticationMW.isAdmin,
+        controller.getAllDoctors)
+    .post(
+        authenticationMW.isAdmin,
         userValidation.userbodyValidation,
         scheduleValidation.bodyValidation,
         validator,

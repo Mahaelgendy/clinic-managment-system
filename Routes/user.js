@@ -6,6 +6,7 @@ const controller = require("./../Controllers/user");
 
 const userValidation = require("./../Middlewares/userMW");
 const validator = require("./../Middlewares/errorValidation");
+const authenticationMW=require("./../Middlewares/Authorization")
 
 const upload = require("./../Middlewares/uploadImageMW");
 
@@ -16,14 +17,19 @@ const upload = require("./../Middlewares/uploadImageMW");
 
 
 router.route("/users")
-    .get(controller.getAllUsers)
+    .get(authenticationMW.isAdmin,
+        controller.getAllUsers)
     .post(
         // userValidation.userbodyValidation,
         // validator,
+        authenticationMW.isAdmin,
         upload.single("profile"),
         controller.addUser)
-    .delete(controller.deleteUsers)
+    .delete(
+        authenticationMW.isAdmin,
+        controller.deleteUsers)
     .patch(
+        authenticationMW.isAdmin,
         userValidation.userbodyValidation,
         validator,
         controller.updateUser)
