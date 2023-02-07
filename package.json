@@ -37,5 +37,6 @@
     "stripe": "^11.9.1",
     "swagger-ui-express": "^4.6.0"
   },
+  "devDependencies": {},
   "description": ""
 }

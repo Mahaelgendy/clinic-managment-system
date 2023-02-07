@@ -3,10 +3,15 @@ const controller = require('./../Controllers/appointment')
 const router = express.Router();
 const errorValidator = require("./../Middlewares/errorValidation");
 const appointmentValidation = require("./../Middlewares/appointmentMW")
+const authenticationMW=require("./../Middlewares/Authorization")
 
 router.route("/appointments")
-        .get(controller.getAllAppointments)
+        .get(
+                authenticationMW.isAdmin,
+                controller.getAllAppointments)
+        
         .post(
+                authenticationMW.isPatientOrAdmin,
                 appointmentValidation.appointmentBodyValidation,
                 errorValidator,
                 controller.addAppointment)
@@ -14,16 +19,19 @@ router.route("/appointments")
 
 router.route("/appointments/:id")
         .get(
+                authenticationMW.anyUser,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 controller.getAppointmentbyId
                 )
         .delete(
+                authenticationMW.isStaff,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 controller.deleteAppointmentById
                 )
         .patch(
+                authenticationMW.isStaff,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 appointmentValidation.appointmentBodyValidation,
@@ -33,6 +41,7 @@ router.route("/appointments/:id")
 
 router.route("/doctorAppointment/:id")
         .get(
+                authenticationMW.isStaff,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 controller.getAppointmentbyDoctorId
@@ -40,6 +49,7 @@ router.route("/doctorAppointment/:id")
 
 router.route("/clinicAppointment/:id")
         .get(
+                authenticationMW.isEmployeeOrAdmin,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 controller.getAppointmentbyClinicId
