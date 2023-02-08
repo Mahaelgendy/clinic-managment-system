@@ -39,7 +39,7 @@ const sortDoctor = (data,query)=>{
 }
 
 exports.getAllDoctors=(request , response , next)=>{
-    
+
     const query = {};
     if (request.query.specialization) query.specialization = request.query.specialization;
     if (request.query.price) query.price = request.query.price;
@@ -95,8 +95,8 @@ exports.addDoctor = async (request , response , next)=>{
         return response.status(400).json({message:"This name is already used, please choose another name"});
     }
 
-    const {fullName,password,email,age,gender,address,role, specialization , price } = request.body;
-
+    const {fullName,password,email,age,gender,address, specialization , price } = request.body;
+    const role = 'doctor'
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
 
