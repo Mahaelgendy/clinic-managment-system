@@ -8,16 +8,6 @@ require ("../Models/patientModel");
 const userSchema = mongoose.model("users");
 const patientSchema = mongoose.model("patients");
 
-const sortPatients = (data,query)=>{
-    let sortBy = query.sortBy||'email';
-    let order = query.order ||"asc";
-    let orderValue = order ==="asc"? 1:-1
-
-    return data.sort((a,b)=>{
-        if(a[sortBy]<b[sortBy]) return -1*orderValue;
-        if(a[sortBy]>b[sortBy]) return 1*orderValue;
-    });
-}
 
 module.exports.getAllPatients = async (request, response, next)=>{
 

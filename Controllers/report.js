@@ -82,7 +82,7 @@ module.exports.getAppointmentReportByDate = (request , response , next)=>{
     ])
       .then(appointmentreport => {
         response.status(200).json(appointmentreport);
-        generatePDF(appointmentreport,true);
+        generateAppointmentPDFByDate(appointmentreport);
       })
       .catch(error => {
         console.error(error);
@@ -105,7 +105,7 @@ module.exports.getAppointmentReport = (request , response , next)=>{
       .populate({path: "employee_id" , select: 'employeeData', model: 'employees', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
       .then((data)=>{
           response.status(200).json(data);
-          generatePDF(data , false)
+          generateAppointmentReport(data)
       })
       .catch((error)=>next(error));
 };
@@ -230,8 +230,7 @@ module.exports.getInvoiceReportByDate = (request , response , next)=>{
   ])
     .then(invoiceReport => {
       response.status(200).json(invoiceReport);
-      console.log(invoiceReport);
-      generateInvoicePDF(invoiceReport,true);
+      generateInvoicePDFByDate(invoiceReport);
     })
     .catch(error => {
       console.error(error);
@@ -257,30 +256,62 @@ module.exports.getInvoiceReport = (request , response , next)=>{
       .populate({path: "employee_id" , select: 'employeeData', model: 'employees', populate: {path: 'employeeData', select: 'fullName', model: 'users'}})
       .then((data)=>{
           response.status(200).json(data);
-          generateInvoicePDF(data,false);
+          generateInvoicePDF(data);
         })
       .catch((error)=>next(error));
 };
 
-
-async function generatePDF(allAppointments,isByDate) {
+async function generateAppointmentReport(allAppointments)
+{
   let doc = new PDFDocument({ margin: 30, size: 'A4' });
-  let header=[]
-  let table = {};
+
   doc.pipe(fs.createWriteStream("./appointmentsReport.pdf"));
   doc.fontSize(18).text("Appointments Report", { align: "center" })
     .moveDown();
 
-  if (isByDate)
-    header=[ "Clinic", "Doctor", "Patient", "From","To", "Status", "reservation Method" ]
-  else
-    header=[ "Date","Clinic", "Doctor", "Patient", "From","To", "Status", "reservation Method" ]
+    let header=[ "Date","Clinic", "Doctor", "Patient", "From","To", "Status", "reservation Method" ]
+    let table = {
+      title: `Appointments`,
+      headers: header,
+      rows: [],
+    };
+
+    for(let i =0 ; i < allAppointments.length ; i++){
+      let currentAppointment = allAppointments[i];
+      table.rows.push(
+        [ 
+          currentAppointment.date,
+          currentAppointment.clinic_id != null ?  currentAppointment.clinic_id.clinicName : "",
+          currentAppointment.doctor_id.userData != null ?  currentAppointment.doctor_id.userData.fullName : "",
+          currentAppointment.patient_id.patientData != null ? currentAppointment.patient_id.patientData.fullName : "",
+          dateTimeMW.getTime(currentAppointment.from),
+          dateTimeMW.getTime(currentAppointment.to),
+          currentAppointment.status,
+          currentAppointment.reservation_method,
+        ]);
+    }
+    await doc.table(table, { 
+      width: 500,
+      padding: 5,
+      columnSpacing:5
+    });
+
+    doc.end();
+    
+}
+async function generateAppointmentPDFByDate(allAppointments) {
+
+  let doc = new PDFDocument({ margin: 30, size: 'A4' });
+  doc.pipe(fs.createWriteStream("./appointmentsReport.pdf"));
+  doc.fontSize(18).text("Appointments Report", { align: "center" })
+  .moveDown();
+  
+  let table = {};
+  header=[ "Clinic", "Doctor", "Patient", "From","To", "Status", "reservation Method" ]
 
   for(let i =0 ; i < allAppointments.length ; i++){
     let currentAppointment = allAppointments[i];
-    
-    if (isByDate){
-      table = {
+        table = {
         title: `Appointments in date ${currentAppointment._id}`,
         headers: header,
         rows: [],
@@ -289,7 +320,7 @@ async function generatePDF(allAppointments,isByDate) {
       appointments.forEach(appointment => {
         table.rows.push(
           [ 
-            appointment.clinic.clinic_location.city,
+            appointment.clinic != null ?  appointment.clinic.clinicName : "",
             appointment.doctor.fullname.length> 0 ?  appointment.doctor.fullname[0] : "",
             appointment.patient.fullname.length> 0 ?  appointment.patient.fullname[0]: "",
             dateTimeMW.getTime(appointment.from),
@@ -298,26 +329,6 @@ async function generatePDF(allAppointments,isByDate) {
             appointment.reservationMethod,
           ]);
       });
-    }
-    else{
-      table = {
-        title: `Appointments`,
-        headers: header,
-        rows: [],
-      };
-        table.rows.push(
-          [ 
-            currentAppointment.date,
-            currentAppointment.clinic_id != null ?  currentAppointment.clinic_id.clinic_location.city : "",
-            currentAppointment.doctor_id.userData != null ?  currentAppointment.doctor_id.userData.fullName : "",
-            currentAppointment.patient_id.patientData != null ? currentAppointment.patient_id.patientData.fullName : "",
-            dateTimeMW.getTime(currentAppointment.from),
-            dateTimeMW.getTime(currentAppointment.to),
-            currentAppointment.status,
-            currentAppointment.reservation_method,
-          ]);
-    }
-
     // Add the table to the PDF document
     await doc.table(table, { 
       width: 500,
@@ -327,24 +338,17 @@ async function generatePDF(allAppointments,isByDate) {
   }
   doc.end();
 }
+async function generateInvoicePDFByDate(allInvoices)
+{
+    let doc = new PDFDocument({ margin: 30, size: 'A4' });
+    doc.pipe(fs.createWriteStream("./invoiceReport.pdf"));
+    doc.fontSize(18).text("Invoice Report", { align: "center" })
+      .moveDown();
+    let header= [ "Clinic","Service", "Doctor", "Patient","Employee","appointment Date", "Status", "Reservation Method","Time","Total Cost","Actual Paid" ]
 
-async function generateInvoicePDF(allInvoices,isByDate) {
-  let doc = new PDFDocument({ margin: 30, size: 'A4' });
-  let header=[]
-  let table = {};
-  doc.pipe(fs.createWriteStream("./invoiceReport.pdf"));
-  doc.fontSize(18).text("Invoice Report", { align: "center" })
-    .moveDown();
-
-  if (isByDate)
-    header=[ "Clinic","Service", "Doctor", "Patient","Employee","appointment Date", "Status", "Reservation Method","Time","Total Cost","Actual Paid" ]
-  else
-    header=[ "Date","Clinic","Service", "Doctor", "Patient","Employee","appointment Date", "Status", "Reservation Method","Time","Total Cost","Actual Paid"]
-
-  for(let i =0 ; i < allInvoices.length ; i++){
-    let currentInvoice = allInvoices[i];
-    
-    if (isByDate){
+    let table = {};
+    for(let i =0 ; i < allInvoices.length ; i++){
+      let currentInvoice = allInvoices[i];
       table = {
         title: `Invoices in date ${currentInvoice._id}`,
         headers: header,
@@ -367,13 +371,30 @@ async function generateInvoicePDF(allInvoices,isByDate) {
             invoice.actualPaid
           ]);
       });
-    }
-    else{
-      table = {
-        title: `Invoices`,
-        headers: header,
-        rows: [],
-      };
+    await doc.table(table, { 
+      width: 500,
+      padding: 5,
+      columnSpacing:5
+    });
+  }
+  doc.end();
+}
+async function generateInvoicePDF(allInvoices) {
+  let doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+  doc.pipe(fs.createWriteStream("./invoiceReport.pdf"));
+  doc.fontSize(18).text("Invoice Report", { align: "center" })
+  .moveDown();
+
+  let header=[ "Date","Clinic","Service", "Doctor", "Patient","Employee","appointment Date", "Status", "Reservation Method","Time","Total Cost","Actual Paid"]
+  let table = {
+      title: `Invoices`,
+      headers: header,
+      rows: [],
+    };
+
+  for(let i =0 ; i < allInvoices.length ; i++){
+    let currentInvoice = allInvoices[i];
         table.rows.push(
           [ 
             currentInvoice.date,
@@ -389,14 +410,12 @@ async function generateInvoicePDF(allInvoices,isByDate) {
             currentInvoice.totalCost,
             currentInvoice.actualPaid
           ]);
-    }
-
     // Add the table to the PDF document
-    await doc.table(table, { 
-      width: 500,
-      padding: 5,
-      columnSpacing:5
-    });
   }
+  await doc.table(table, { 
+    width: 500,
+    padding: 5,
+    columnSpacing:5
+  });
   doc.end();
 }

@@ -6,6 +6,7 @@ const stripe = require("stripe")("sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgq
 require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const onlinePayment=require("./../Middlewares/payment")
+const { jsPDF } = require("jspdf");
 
 const invoiceSchema = mongoose.model("invoices");
 const DoctorSchema = mongoose.model('doctors');
@@ -56,17 +57,26 @@ exports.getAllInvoices = (request, response, next) => {
 exports.getInvoiceById = (request, response, next) => {
     invoiceSchema.find({ _id: request.params.id })
         .populate({
-            path: "doctor_id", select: { userData:1,_id:0 }, model: "doctors",
+            path: "doctor_id",
+            select: { userData:1,_id:0 },
+            model: "doctors",
             populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
         })
         .populate({
-            path: "patient_id", select: { userData:1,_id:0 }, model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }})
-        .populate({ path: "employee_id", select: {userData:1,_id:0 }, model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }})
+            path: "patient_id",
+            select: { userData:1,_id:0 },
+            model: "doctors",
+            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+        })
+        .populate({ 
+            path: "employee_id",
+            select: {userData:1,_id:0 },
+            model: "doctors",
+            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+        })
         .populate({path: "appointment_id",select: "date"})
         .populate({path: "clinic_id",select: {clinicName:1,_id:0}})
-        .populate({ path: "service_id", select: { name: 1, _id: 0 } })
+        .populate({path: "service_id", select: { name: 1, _id: 0 } })
         
         .then((data) => {
             if (data != null) {
@@ -177,8 +187,6 @@ exports.deleteInvoice = (request, response, next) => {
         })
         .catch((error) => next(error));
 };
-
-
 exports.deleteInvoiceByFilter = (request, response, next) => {
     const query = {};
     if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
@@ -202,28 +210,115 @@ exports.deleteInvoiceByFilter = (request, response, next) => {
         .catch((error) => next(error));
 };
 
+exports.displayInvoiceById = (request, response, next) => {
+    invoiceSchema.find({ _id: request.params.id })
+        .populate({
+            path: "doctor_id",
+            select: { userData:1,_id:0 },
+            model: "doctors",
+            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+        })
+        .populate({
+            path: "patient_id",
+            select: { userData:1,_id:0 },
+            model: "doctors",
+            populate: { path: "userData", select: {fullName:1,email:1,address:1,_id:0 }, model: "users" }
+        })
+        .populate({ 
+            path: "employee_id",
+            select: {userData:1,_id:0 },
+            model: "doctors",
+            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+        })
+        .populate({path: "appointment_id",select: "date"})
+        .populate({path: "clinic_id",select: {clinicName:1,_id:0}})
+        .populate({path: "service_id", select: { name: 1, _id: 0 } })
+        
+        .then((data) => {
+            if (data != null) {
+                generateInvoicePDF(data[0]);
+                response.status(201).json(data);
+           }
+            else {
+                console.log("null")
+                next(new Error({ message: "Id doesn't exist" }));
+            }
+        })
+        .catch(error => next(error));
+};
 
-// exports.payment= async (req, res) => {
-//     const { product } = req.body;
-//     const session = await stripe.checkout.sessions.create({
-//         payment_method_types: ["card"],
-//         line_items: [
-//             {
-//                 price_data: {
-//                     currency: "inr",
-//                     product_data: {
-//                         name: product.name,
-//                         images: [product.image],
-//                     },
-//                     unit_amount: product.amount * 100,
-//                 },
-//                 quantity: product.quantity,
-//             },
-//         ],
-//         mode: "payment",
-//         success_url: `${YOUR_DOMAIN}/success.html`,
-//         cancel_url: `${YOUR_DOMAIN}/cancel.html`,
-//     });
+function generateInvoicePDF(invoice){
+    // Initialize the PDF document
+    let parientAddress =invoice.patient_id != null ? invoice.patient_id.userData != null ? invoice.patient_id.userData.address: "" : ""
+    let patientDate = invoice.patient_id != null ? invoice.patient_id.userData != null ? invoice.patient_id.userData : "" : "";
+    const doc = new jsPDF();
 
-//     res.json({ id: session.id });
-// }
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(30);
+    doc.setTextColor(0, 0, 139);
+    doc.text("Invoice",19, 30);
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(15);
+    doc.setTextColor(0, 0, 139);
+    doc.text("Invoice To:",20, 40, null, null);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.setTextColor(0,0,0)
+    doc.text(patientDate.fullName,20, 47, null, null);
+    doc.text(parientAddress.building+ " " + parientAddress.city+ " " + parientAddress.street ,20, 52, null, null);
+    doc.text(patientDate.email,20, 58, null, null);
+
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(15);
+    doc.setTextColor(0, 0, 139);
+    doc.text("Invoice Details:",130, 40, null, null,"left");
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.setTextColor(0,0,0)
+    doc.text("Inovice No. "+ invoice._id ,130, 47, null, null,"left");
+    doc.text("Invoice Date : "+ invoice.date ,130, 52, null, null,"left");
+    doc.text("Invoice time : " + invoice.time,130, 57, null, null,"left");
+
+    let cliniName = invoice.clinic_id != null ? invoice.clinic_id.clinicName : "";
+    let serviceName = invoice.service_id != null ? invoice.service_id.name : "";
+    let doctorName = invoice.doctor_id != null ? (invoice.doctor_id.userData != null ? invoice.doctor_id.userData.fullName: "") : "";
+
+    var header = ["Clinic","Service","Doctor","Cost","Paid"];
+    var data = [  
+    [cliniName, serviceName, doctorName, invoice.totalCost.toString(), invoice.actualPaid.toString()],
+    ];
+
+    doc.setFillColor(0, 0, 139);
+    doc.rect(15, 92, 180, 10, "F");
+    doc.setFontSize(16);
+    doc.setFontSize(15);
+    for (var i = 0; i < header.length; i++) {
+    doc.setTextColor(255, 255, 255);
+    doc.text(header[i],25 + i * 35,100);
+    }
+
+    doc.setFontSize(12,"normal");
+    doc.setTextColor(0, 0, 0);
+    for (var i = 0; i < data.length; i++) {
+    for (var j = 0; j < data[i].length; j++) {
+        doc.text(25 + j *35, 120 + i * 20, data[i][j]);
+    }
+    }
+    doc.line(15,120 + data.length * 20, 195, 120 + data.length * 20);
+
+    let remainig = invoice.totalCost- invoice.actualPaid;
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(15);
+    doc.setTextColor(0,0,0)
+    doc.text("Sub Total = " + invoice.totalCost.toString() ,150, 150, null, null,"left");
+    doc.text("Tax %  = 0.00%" ,150, 157, null, null,"left");
+    doc.text("Grand Total = " + invoice.totalCost.toString() ,150, 162, null, null,"left");
+    doc.text("Remaning = " + remainig.toString() ,150, 167, null, null,"left");
+
+    // Save the PDF document
+    doc.save("invoice.pdf");
+}
