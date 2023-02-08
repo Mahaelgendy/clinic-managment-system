@@ -7,7 +7,7 @@ const authenticationMW=require("./../Middlewares/Authorization")
 
 router.route("/appointments")
         .get(
-                authenticationMW.isAdmin,
+                authenticationMW.anyUser,
                 controller.getAllAppointments)
         
         .post(
@@ -15,7 +15,9 @@ router.route("/appointments")
                 appointmentValidation.appointmentBodyValidation,
                 errorValidator,
                 controller.addAppointment)
-        .delete(controller.deleteAppointmentByFilter);
+        .delete(
+                authenticationMW.isStaff,
+                controller.deleteAppointmentByFilter);
 
 router.route("/appointments/:id")
         .get(
@@ -31,7 +33,7 @@ router.route("/appointments/:id")
                 controller.deleteAppointmentById
                 )
         .patch(
-                authenticationMW.isStaff,
+                authenticationMW.isEmployeeOrAdmin,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 appointmentValidation.appointmentBodyValidation,

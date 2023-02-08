@@ -19,7 +19,7 @@ exports.appointmentBodyValidation = [
     body("doctorId").isInt().notEmpty().withMessage("Doctor ID must be Numeric and required"),
     body("clinicId").isInt().notEmpty().withMessage("ClinicID must be Numeric and required"),
     body("patientId").isInt().notEmpty().withMessage("Patient ID must be Numeric and required"),
-    // body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
+    body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
     body("status").isIn(['First Time' , 'Follow Up']).notEmpty().withMessage("Status should be First Time or Follow Up"),
     body("reservationMethod").isIn(['Online' , 'Offline']).notEmpty().withMessage("Reservation method should be Either Online or Offline"),
     body("date").isString().notEmpty().matches(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/).withMessage("Date must be string in format YYYY-MM-DD"),
@@ -122,9 +122,54 @@ module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
             }
           });
     })
-    .catch(error=>next(error));
-    
+    .catch(error=>next(error));  
 }
+module.exports.sortAppointment = (data,query)=>{
+    let sortBy = query.sortBy||'date';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+
+    if (sortBy=='doctorName' || sortBy == 'doctorname'){
+        data.sort((a, b) => {
+            if (a.doctor_id.userData.fullName < b.doctor_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.doctor_id.userData.fullName > b.doctor_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else if (sortBy=='patientName' || sortBy == 'patientname'){
+        data.sort((a, b) => {
+            if (a.patient_id.userData.fullName < b.patient_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.patient_id.userData.fullName > b.patient_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else if (sortBy=='employeeName' || sortBy == 'employeename'){
+        data.sort((a, b) => {
+            if (a.employee_id.userData.fullName < b.employee_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.employee_id.userData.fullName > b.employee_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else{
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
+};
+
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
