@@ -5,6 +5,30 @@ const appointmentSchema = mongoose.model("appointments");
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const appointmentMW = require("./../middlewares/appointmentMW")
 
+const sortAppointment = (data,query)=>{
+    let sortBy = query.sortBy||'date';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+    console.log(orderValue);
+
+    if (sortBy=='fullName' || sortBy == 'fullname'){
+        data.sort((a, b) => {
+            if (a.doctor_id.userData.fullName < b.doctor_id.userData.fullName) {
+                return 1;
+            }
+            if (a.doctor_id.userData.fullName > b.doctor_id.userData.fullName) {
+                return -1;
+            }
+            return 0;
+        });
+    }
+    else{
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
+};
 
 module.exports.getAllAppointments = (request , response , next)=>{
     const query = {};
@@ -16,9 +40,8 @@ module.exports.getAllAppointments = (request , response , next)=>{
     if (request.query.date) query.date = request.query.date;
     if (request.query.status) query.status = request.query.status;
     if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
-    let sortField = request.query.sort || 'date';
     
-    appointmentSchema.find(query).sort({[sortField] :-1})
+    appointmentSchema.find(query)
         .populate({ path: "clinic_id" ,select: 'clinicName'})
         .populate({
             path: 'doctor_id',
@@ -39,6 +62,7 @@ module.exports.getAllAppointments = (request , response , next)=>{
             populate: {path: 'employeeData', select: 'fullName', model: 'users'}
         })
         .then((data)=>{
+            sortAppointment(data,request.query);
             response.status(200).json(data);
         })
         .catch((error)=>next(error));
@@ -251,6 +275,23 @@ module.exports.updateAppointment=async (request , response , next)=>{
 
 module.exports.deleteAppointmentById = (request , respose , next)=>{
     appointmentSchema.deleteOne({_id : request.params.id})
+        .then((data)=>{
+            respose.status(200).json(data);
+        })
+        .catch((error)=>next(error));
+};
+
+module.exports.deleteAppointmentByFilter = (request , respose , next)=>{
+    const query = {};
+    if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
+    if (request.query.doctorId) query.doctor_id = Number(request.query.doctorId);
+    if (request.query.patientId) query.patient_id = Number(request.query.patientId);
+    if (request.query.employeeId) query.employee_id = Number(request.query.employeeId);
+    if (request.query.date) query.date = request.query.date;
+    if (request.query.status) query.status = request.query.status;
+    if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
+
+    appointmentSchema.deleteMany(query)
         .then((data)=>{
             respose.status(200).json(data);
         })
