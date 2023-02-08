@@ -13,14 +13,96 @@ const SchedulaSchema= mongoose.model('schedules');
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+// const sortDoctor = (data,query)=>{
+//     // let sortBy = 'fullName';
+
+//     // if (sortBy=='fullName' || sortBy == 'fullname'){
+//     //     data.sort((a, b) => {
+//     //         if (a.userData.fullName < b.userData.fullName) {
+//     //             return 1;
+//     //         }
+//     //         if (a.userData.fullName > b.userData.fullName) {
+//     //             return -1;
+//     //         }
+//     //         return 0;
+//     //     });
+//     // }
+//     // else{
+//     //     return data.sort((a,b)=>{
+//     //         if(a[sortBy]<b[sortBy]) return -1*orderValue;
+//     //         if(a[sortBy]>b[sortBy]) return 1*orderValue;
+//     //     });
+//     // }
+
+
+
+//     // let sortBy = query.sortBy||'fullName';
+//     // let order = query.order ||"asc";
+//     // let orderValue = order ==="asc"? 1:-1
+
+    
+//     // return data.sort((a,b)=>{
+//     //     if(a.userData.sortBy<b.userData.sortBy) return -1*orderValue;
+//     //     if(a.userData.sortBy>b.userData.sortBy) return 1*orderValue;
+//     // });
+// };
+
+const sortDoctor = (data,query)=>{
+    let sortBy = query.sortBy||'date';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+    console.log(orderValue);
+
+    if (sortBy=='fullName' || sortBy == 'fullname'){
+        data.sort((a, b) => {
+            if (a.userData.fullName < b.userData.fullName) {
+                return -1*orderValue
+            }
+            if (a.userData.fullName > b.userData.fullName) {
+                return 1*orderValue
+            }
+            return 0;
+        });
+    }
+    else{
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+     });
+    }
+}
 exports.getAllDoctors=(request , response , next)=>{
     const query = {};
-    if (request.query.specialization) query.clinic_id = request.query.specialization;
-    
+    if (request.query.specialization) query.specialization = request.query.specialization;
+    if (request.query.fullName) query.fullName = request.query.fullName;
+    if (request.query.email) query.email = request.query.email;
+
+    let mydata = [];
+
+    UserSchema.find({role:"doctor"})
+    .then(data=>{
+        for(let i=0; i<data.length; i++){
+            let id = data[i]._id;
+            // console.log(id)
+            DoctorSchema.find({userData:id},{_id:0})
+            .populate({path:"userData"})
+            .then(result=>{
+                // console.log(result)
+                mydata[i] = result
+                response.data = result
+                // response.status(200).json(result);
+            })
+            console.log(response.data);
+        }
+    }).catch(error=>next(error));
+
+
     DoctorSchema.find(query)
     .populate({path:'userData'})
     .then(data=>{
-        response.status(200).json(data);
+        sortDoctor(data, request.query)
+        response.status(200).json({data});
+        // response.status(200).json(data);
     })
     .catch(error=>next(error));
 }
@@ -40,9 +122,14 @@ exports.getDoctorById = (request , response , next)=>{
 
 exports.addDoctor = async (request , response , next)=>{
     const emailExist = await UserSchema.findOne({email:request.body.email});
-
+    
     if(emailExist){
         return response.status(400).json({message:"User is already exist"});
+    }
+
+    const diplicatName = await UserSchema.findOne({fullName:request.body.fullName , role:request.body.role})
+    if(diplicatName){
+        return response.status(400).json({message:"This name is already used, please choose another name"});
     }
 
     const {fullName,password,email,age,gender,address,role, specialization , price } = request.body;
@@ -58,7 +145,7 @@ exports.addDoctor = async (request , response , next)=>{
         gender:gender,
         address:address,
         role:role,
-        image:request.file.path
+        image:request.file.filename
     });
     
    
@@ -112,7 +199,7 @@ exports.deleteDoctor = (request , response , next)=>{
 exports.updateDoctor = async (request , response , next)=>{
     try{
         const doctorId = request.params.id;
-        const {fullName,password,email,age,gender,address,role,specialization,price, image} = request.body;
+        const {fullName,password,email,gender,age,address,specialization,price} = request.body;
 
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
@@ -132,8 +219,7 @@ exports.updateDoctor = async (request , response , next)=>{
                 age:age,
                 gender:gender,
                 address:address,
-                role:role,
-                image:request.file.path
+                image:request.file.filename
             }});
 
             response.status(200).json({message:"Doctor Updated"})

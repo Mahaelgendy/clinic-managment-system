@@ -44,6 +44,7 @@ mongoose.connect(process.env.DB_URL)
 server.use(morgan('combined'));
 
 server.use(express.json());
+
 //routes
 server.use(authenticationRouter);
 server.use(authenticationMW);

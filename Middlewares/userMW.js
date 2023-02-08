@@ -1,15 +1,15 @@
 
 const {body, param} = require('express-validator')
 exports.userbodyValidation = [
-    body('fullName').isString().withMessage("Name should be String"),
-    body('password').not().isEmpty().isLength({min: 6}).withMessage("Password must be at least 6 char long"),
-    body('email').isEmail().withMessage("Email is invalid"),
-    body('age').isInt().withMessage("Age is invalid"),
-    body('gender').isIn(['Female', 'Male']).withMessage("Gender is invalid"),
-    body('address.city').isString().withMessage("Invalid city"),
-    body('address.street').isString().withMessage("Invalid street"),
-    body('address.building').isInt().withMessage("Invalid building"),
-    body('role').isIn(['admin','doctor', 'patient', 'employee']).withMessage("Role is invalid")
+    body('fullName').isString().optional().withMessage("Name should be String"),
+    body('password').not().isEmpty().isLength({min: 6}).optional().withMessage("Password must be at least 6 char long"),
+    body('email').isEmail().optional().withMessage("Email is invalid"),
+    body('age').optional().isInt().optional().withMessage("Age is invalid"),
+    body('gender').optional().isIn(['Female', 'Male']).withMessage("Gender is invalid"),
+    body('address.city').isString().optional().withMessage("Invalid city"),
+    body('address.street').optional().isString().withMessage("Invalid street"),
+    body('address.building').optional().isInt().withMessage("Invalid building"),
+    body('role').optional().isIn(['admin','doctor', 'patient', 'employee']).withMessage("Role is invalid")
 ]
 
 exports.useridValidaion = [

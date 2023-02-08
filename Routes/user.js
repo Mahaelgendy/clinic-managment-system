@@ -15,10 +15,8 @@ router.route("/users")
     .get(authenticationMW.isAdmin,
         controller.getAllUsers)
     .post(
-        // userValidation.userbodyValidation,
-        // validator,
         authenticationMW.isAdmin,
-            upload.single("profile"),
+        upload.single("profile"),
         userValidation.userbodyValidation,
         validator,
         controller.addUser)

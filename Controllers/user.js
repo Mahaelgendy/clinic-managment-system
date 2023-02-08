@@ -7,9 +7,28 @@ const { request, response } = require('express');
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+const sortUsers = (data,query)=>{
+    let sortBy = query.sortBy||'fullName';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
 
-exports.addUser = (request, response , next)=>{
-    console.log(request.file)
+    
+    return data.sort((a,b)=>{
+        if(a[sortBy]<b[sortBy]) return -1*orderValue;
+        if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+};
+exports.addUser = async (request, response , next)=>{
+
+    const emailExist = await UserSchema.findOne({email:request.body.email});
+    if(emailExist){
+        return response.status(400).json({message:"User is already exist"});
+    }
+    const diplicatName = await UserSchema.findOne({fullName:request.body.fullName , role:request.body.role})
+    if(diplicatName){
+        return response.status(400).json({message:"This name is already used, please choose another name"});
+    }
+
     const {fullName,password,email,age,gender,address,role} = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
@@ -23,7 +42,7 @@ exports.addUser = (request, response , next)=>{
         gender:gender,
         address:address,
         role:role,
-        // image:request.file.path
+        image:request.file.filename
     });
 
     user.save()
@@ -41,13 +60,12 @@ exports.getAllUsers = (request , response , next)=>{
     if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
     if (request.query.role) query.role = request.query.role;
     if (request.query.email) query.email = request.query.email;
-
-    let sortField = request.query.sort || 'fullName';
     
-    UserSchema.find(query).sort({[sortField] :-1})
+    UserSchema.find(query)
     .then(data=>{
         if(data!=null){
-            response.status(200).json(data);
+            userAfterSort= sortUsers(data, request.query)
+            response.status(200).json({userAfterSort});
         }
     })
     .catch(error=>next(error));
@@ -99,7 +117,7 @@ exports.updateUser = (request,response,next)=>{
                 gender:gender,
                 address:address,
                 role:role,
-                image:request.file.path
+                image:request.file.filename
             }})
             .then(res=>{
                 response.status(200).json({message:"User Updated"})
