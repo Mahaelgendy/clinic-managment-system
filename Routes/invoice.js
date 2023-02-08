@@ -1,5 +1,7 @@
 const express = require('express');
+const payment = require("../Middlewares/payment")
 const router = express.Router();
+
 
 const controller = require('./../Controllers/invoice')
 const errorValidator = require("./../Middlewares/errorValidation");
@@ -8,6 +10,7 @@ const invoiceValidation = require("../Middlewares/invoiceMW")
 router.route("/invoice")
     .get(controller.getAllInvoices)
     .post(
+     //   payment.createToken,
         invoiceValidation.bodyValidation,
         errorValidator,
         controller.addInvoice
@@ -33,5 +36,8 @@ router.route("/invoice/:id")
         errorValidator,
         controller.deleteInvoice
     );
-        
+
+// router.route("/payment")
+//     .post(payment.createToken)
+
  module.exports= router;

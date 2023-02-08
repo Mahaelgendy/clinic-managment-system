@@ -2,7 +2,6 @@ const express=require("express");
 const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const path = require("path");
-const stripe = require("stripe")("Add your secret key");
 
 const server=express();
 
@@ -45,8 +44,8 @@ server.use(morgan('combined'));
 
 server.use(express.json());
 //routes
-server.use(authenticationRouter);
-server.use(authenticationMW);
+// server.use(authenticationRouter);
+// server.use(authenticationMW);
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)

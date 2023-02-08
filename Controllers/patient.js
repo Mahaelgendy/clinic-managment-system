@@ -8,16 +8,16 @@ require ("../Models/patientModel");
 const userSchema = mongoose.model("users");
 const patientSchema = mongoose.model("patients");
 
-const sortPatients = (data,query)=>{
-    let sortBy = query.sortBy||'email';
-    let order = query.order ||"asc";
-    let orderValue = order ==="asc"? 1:-1
+// const sortPatients = (data,query)=>{
+//     let sortBy = query.sortBy||'email';
+//     let order = query.order ||"asc";
+//     let orderValue = order ==="asc"? 1:-1
 
-    return data.sort((a,b)=>{
-        if(a[sortBy]<b[sortBy]) return -1*orderValue;
-        if(a[sortBy]>b[sortBy]) return 1*orderValue;
-    });
-}
+//     return data.sort((a,b)=>{
+//         if(a[sortBy]<b[sortBy]) return -1*orderValue;
+//         if(a[sortBy]>b[sortBy]) return 1*orderValue;
+//     });
+// }
 
 module.exports.getAllPatients = async (request, response, next)=>{
 
@@ -28,7 +28,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
     if(request.query.patientId) query._id = Number(request.query.patientId);
     if(request.query.weight) query.weight = Number(request.query.weight);
 
-    let allPatients= await sortPatients(allPatients, request.query)
+    // let allPatients= await sortPatients(allPatients, request.query)
 
     patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}})
                         .then((data)=>{

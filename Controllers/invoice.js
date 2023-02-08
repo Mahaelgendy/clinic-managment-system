@@ -1,6 +1,9 @@
 const {request , response} = require("express");
+const { body } = require("express-validator");
 const mongoose = require("mongoose");
-
+const { payment } = require("paypal-rest-sdk");
+// const stripe = require('stripe')('sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn');
+const paymentMw = require("../Middlewares/payment")
 require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 
@@ -12,8 +15,6 @@ const clinicSchema= mongoose.model('clinics');
 const patientSchema= mongoose.model('patients');
 const serviceSchema= mongoose.model('services');
 
-const path = require("path");
-const stripe = require("stripe")("Add your secret key");
 
 exports.getAllInvoices = (request, response, next) => {
 
@@ -78,39 +79,40 @@ exports.getInvoiceById = (request, response, next) => {
         .catch(error => next(error));
 };
 
-exports.addInvoice = async(request, response, next) => {
-    const doctorExist=await DoctorSchema.findOne({_id:request.body.doctorId})
-    const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
-    const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
-    const patientExist = await patientSchema.findOne({ _id: request.body.patientId })
-    const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
-    const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
+// exports.addInvoice = async(request, response, next) => {
+//     const doctorExist=await DoctorSchema.findOne({_id:request.body.doctorId})
+//     const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
+//     const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
+//     const patientExist = await patientSchema.findOne({ _id: request.body.patientId })
+//     const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
+//     const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
 
-    if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
-        return response.status(400).json({message:"Check your data "})
-    }
+//     if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
+//         return response.status(400).json({message:"Check your data "})
+//     }
 
-    let newInvoice = new invoiceSchema({
-        clinic_id: request.body.clinicId,
-        service_id: request.body.serviceId,
-        doctor_id: request.body.doctorId,
-        patient_id: request.body.patientId,
-        employee_id: request.body.employeeId,
-        appointment_id: request.body.appointmentId,
-        paymentMethod: request.body.paymentMethod,
-        paymentStatus: request.body.paymentStatus,
-        totalCost: request.body.totalCost,
-        actualPaid: request.body.actualPaid,
-        date: dateTimeMW.getDateFormat(new Date()),
-        time: dateTimeMW.getTime(new Date()),
+//     let newInvoice = new invoiceSchema({
+//         clinic_id: request.body.clinicId,
+//         service_id: request.body.serviceId,
+//         doctor_id: request.body.doctorId,
+//         patient_id: request.body.patientId,
+//         employee_id: request.body.employeeId,
+//         appointment_id: request.body.appointmentId,
+//         paymentMethod: request.body.paymentMethod,
+//         paymentStatus: request.body.paymentStatus,
+//         totalCost: request.body.totalCost,
+//         actualPaid: request.body.actualPaid,
+//         date: dateTimeMW.getDateFormat(new Date()),
+//         time: dateTimeMW.getTime(new Date()),
 
-    });
-    newInvoice.save()
-        .then(result => {
-            response.status(201).json(result);
-        })
-        .catch(error => next(error));
-};
+//     });
+    
+//     newInvoice.save()
+//         .then(result => {
+//             response.status(201).json(result);
+//         })
+//         .catch(error => next(error));
+// };
 
 exports.updateInvoice = (request, response, next) => {
     invoiceSchema.updateOne({ _id: request.params.id },
@@ -152,7 +154,7 @@ exports.deleteInvoice = (request, response, next) => {
 };
 
 
-exports.deleteInvoiceByFilter = (request, response, next) => {
+exports.deleteInvoiceByFilter =async (request, response, next) => {
     const query = {};
     if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
     if (request.query.patient_id) query.patient_id = Number(request.query.patient_id);
@@ -173,6 +175,49 @@ exports.deleteInvoiceByFilter = (request, response, next) => {
                 throw new Error("Invoice not found");
         })
         .catch((error) => next(error));
+};
+
+exports.addInvoice = async(request, response, next) => {
+    const doctorExist=await DoctorSchema.findOne({_id:request.body.doctorId})
+    const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
+    const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
+    const patientExist = await patientSchema.findOne({ _id: request.body.patientId })
+    const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
+    const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
+    const transactionId = await paymentMw.createToken();
+    console.log(transactionId)
+    // if(request.body.paymentMethod =="Credit Card"){
+    //    // let pay = await paymentMw.createToken();
+    //      console.log(response.body)
+    // }
+
+
+
+    // if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
+    //     return response.status(400).json({message:"Check your data "})
+    // }
+
+    // let newInvoice = new invoiceSchema({
+    //     clinic_id: request.body.clinicId,
+    //     service_id: request.body.serviceId,
+    //     doctor_id: request.body.doctorId,
+    //     patient_id: request.body.patientId,
+    //     employee_id: request.body.employeeId,
+    //     appointment_id: request.body.appointmentId,
+    //     paymentMethod: request.body.paymentMethod,
+    //     paymentStatus: request.body.paymentStatus,
+    //     totalCost: request.body.totalCost,
+    //     actualPaid: request.body.actualPaid,
+    //     date: dateTimeMW.getDateFormat(new Date()),
+    //     time: dateTimeMW.getTime(new Date()),
+
+    // });
+    
+    // newInvoice.save()
+    //     .then(result => {
+    //         response.status(201).json(result);
+    //     })
+    //     .catch(error => next(error));
 };
 
 
