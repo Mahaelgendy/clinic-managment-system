@@ -12,11 +12,6 @@ const upload = require("./../Middlewares/uploadImageMW");
 
 router.route("/users")
     .get(controller.getAllUsers)
-    .post(
-        upload.single("profile"),
-        userValidation.userbodyValidation,
-        validator,
-        controller.addUser)
     .delete(controller.deleteUsers)
     .patch(
         upload.single("profile"),
@@ -24,4 +19,7 @@ router.route("/users")
         validator,
         controller.updateUser)
 
+
+router.route("/changePassword")
+        .post(controller.changePassword)
 module.exports = router
