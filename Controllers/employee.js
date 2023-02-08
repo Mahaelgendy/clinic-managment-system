@@ -44,45 +44,92 @@ module.exports.getAllEmployees = async (request,response,next)=>{
 };
 
 
-module.exports.addEmployee = (request, response, next)=>{
-    userSchema.findOne({email:request.body.email})
-              .then((data)=>{
-                if(data!=null&& data.role ==="employee")
-                { 
-                    employeeSchema.find({}).populate({path:"employeeData"})
-                                    .findOne({employeeData:data._id})
-                                    .then((employee)=>{
+// module.exports.addEmployee = (request, response, next)=>{
+//     userSchema.findOne({email:request.body.email})
+//               .then((data)=>{
+//                 if(data!=null)
+//                 { 
+//                     employeeSchema.find({}).populate({path:"employeeData"})
+//                                     .findOne({employeeData:data._id})
+//                                     .then((employee)=>{
 
-                                        if(employee == null)
-                                        {
-                                            let newEmployee=new employeeSchema({
-                                                salary:request.body.employeeSalary,
-                                                phone:request.body.employeePhone,
-                                                position:request.body.employeePosition,
-                                                employeeData:data._id,
-                                                clinicId:request.body.clinic_Id
-                                            });
-                                            newEmployee.save()
-                                            .then(result=>{
-                                                response.status(201).json({message:"added new Employee is done"});
-                                            })
-                                            .catch(error=>next(error))
-                                        }
-                                        else
-                                        {
-                                            response.status(404).json({message:"This employee already exsists"})
-                                        }
-                                    })
+//                                         if(employee == null)
+//                                         {
+//                                             let newEmployee=new employeeSchema({
+//                                                 salary:request.body.employeeSalary,
+//                                                 phone:request.body.employeePhone,
+//                                                 position:request.body.employeePosition,
+//                                                 employeeData:data._id,
+//                                                 clinicId:request.body.clinic_Id
+//                                             });
+//                                             newEmployee.save()
+//                                             .then(result=>{
+//                                                 response.status(201).json({message:"added new Employee is done"});
+//                                             })
+//                                             .catch(error=>next(error))
+//                                         }
+//                                         else
+//                                         {
+//                                             response.status(404).json({message:"This employee already exsists"})
+//                                         }
+//                                     })
 
-                }
-                else
-                {
-                    response.status(404).json({message:"This Email does not exsist or role does not employee"})
-                }
-              })
-              .catch(error=>next(error))
-};
+//                 }
+//                 else
+//                 {
+//                     response.status(404).json({message:"This Email does not exsist or role does not employee"})
+//                 }
+//               })
+//               .catch(error=>next(error))
+// };
 
+module.exports.addEmployee =(request, response, next)=>{
+    let employeeExists = userSchema.findOne({email:request.body.email});
+
+    if(employeeExists)
+    {
+        return response.status(400).json({message:"User is already exist"});
+    }
+
+    else
+    {
+        const {fullName,password,email,age,gender,address,role,image, clinicId,salary,phone,position} = request.body;
+
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hash = bcrypt.hashSync(password, salt);
+
+        const empRole = "employee"
+        
+        const user = new userSchema({
+            fullName:fullName,
+            password:hash,
+            email:email,
+            age:age,
+            gender:gender,
+            address:address,
+            role:empRole,
+            clinicId:clinicId,
+            image:request.file.path
+        });
+        user.save()
+            .then((result)=>{
+
+                const newEmployee = new employeeSchema({
+                    salary: salary,
+                    phone:phone,
+                    position:position
+                });
+                newEmployee.save()
+                            .then(()=>{
+                                response.status(200).json({message:"New employee added successfully"});
+                            })
+                            .catch((error)=>next(error));
+                            
+            })
+            .catch((error)=>next(error));
+        
+    }
+}
 
 module.exports.deleteEmployees = (request, response, next)=>{
     employeeSchema.deleteMany({})
