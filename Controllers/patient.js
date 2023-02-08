@@ -28,7 +28,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
     if(request.query.patientId) query._id = Number(request.query.patientId);
     if(request.query.weight) query.weight = Number(request.query.weight);
 
-    let allPatients= await sortPatients(allPatients, request.query)
+   // let allPatients= await sortPatients(allPatients, request.query)
 
     patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}})
                         .then((data)=>{
@@ -112,7 +112,27 @@ module.exports.getPatientByID = (request, response, next)=>{
     patientSchema.findOne({_id:request.params.id})
                     .populate({path:"patientData"})
                     .then((data)=>{
-                        response.status(200).json(data);
+                        if (data != null) {
+                            console.log(data.patientData._id)
+                            if (request.role == 'patient' && (data.patientData._id == request.id)) {
+                                console.log("true, patient")
+                                response.status(200).json(data);
+                            }
+                            else if (request.role == 'doctor') {
+                                console.log("true, doctor")
+                                response.status(200).json(data);
+                            }
+                            else if (request.role == 'admin') {
+                                console.log("true, admin")
+                                response.status(200).json(data);
+                            }
+                            else{
+                                response.json({message:"You aren't authourized to see this data"});
+                            }
+                        }
+                        else  {
+                        response.json({message:"Id is not Found"});
+                    }
                     })
                     .catch((error)=>next(error));
 

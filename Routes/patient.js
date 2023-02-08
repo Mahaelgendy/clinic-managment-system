@@ -24,7 +24,7 @@ router.route("/patients")
 
 router.route("/patients/:id")
         .get(
-                authenticationMW.isDoctorOrAdmin,
+                authenticationMW.isDoctorOrAdminOrPatient,
                 patientValidation.paramvalidation,
                 validator,
                 controller.getPatientByID)

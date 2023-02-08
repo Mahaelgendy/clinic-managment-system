@@ -1,19 +1,21 @@
-const {request , response} = require("express");
+const { request, response } = require("express");
+//const stripe = require("stripe");
 const mongoose = require("mongoose");
+const stripe = require("stripe")("sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn");
 
 require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
+const onlinePayment=require("./../Middlewares/payment")
 
 const invoiceSchema = mongoose.model("invoices");
 const DoctorSchema = mongoose.model('doctors');
 const appointmentSchema= mongoose.model('appointments');
- const employeeSchema = mongoose.model("employees");
+const employeeSchema = mongoose.model("employees");
 const clinicSchema= mongoose.model('clinics');
 const patientSchema= mongoose.model('patients');
 const serviceSchema= mongoose.model('services');
 
 const path = require("path");
-const stripe = require("stripe")("Add your secret key");
 
 exports.getAllInvoices = (request, response, next) => {
 
@@ -105,12 +107,37 @@ exports.addInvoice = async(request, response, next) => {
         time: dateTimeMW.getTime(new Date()),
 
     });
-    newInvoice.save()
-        .then(result => {
+   await newInvoice.save()
+    // try {
+    //     let res = await newInvoice.save()
+    //     console.log(res)
+    //     let paymentMethod = request.body.paymentMethod;
+    //     if (paymentMethod == 'Credit Card') {
+
+    //         console.log("credit")
+    //         let charge = await onlinePayment.payment()
+
+    //         console.log(charge)
+    //     }
+    // }
+    // catch (error) {
+    //     next(error);
+    // }
+        .then( result => {
+            let paymentMethod = request.body.paymentMethod;
+            if (paymentMethod == 'Credit Card') {
+
+                console.log("credit")
+                let charge= onlinePayment.payment()
+
+                console.log(charge)
+
+            }
             response.status(201).json(result);
         })
         .catch(error => next(error));
 };
+
 
 exports.updateInvoice = (request, response, next) => {
     invoiceSchema.updateOne({ _id: request.params.id },

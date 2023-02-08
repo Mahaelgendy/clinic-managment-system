@@ -28,10 +28,21 @@ exports.getAllDoctors=(request , response , next)=>{
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
-    .then(data=>{
-        if(data!=null){
-            response.status(200).json(data);
-        }else{
+        .then(data => {
+            if (data != null) {
+                if (request.role == 'doctor' && (data.userData._id == request.id)) {
+                    console.log("true, doctor")
+                    response.status(200).json(data);
+                }
+                else if (request.role == 'admin') {
+                    console.log("true, admin")
+                    response.status(200).json(data);
+                }
+                else{
+                    response.json({message:"You aren't authourized to see this data"});
+                }
+            }
+            else  {
             response.json({message:"Id is not Found"});
         }
     })
@@ -117,7 +128,8 @@ exports.updateDoctor = async (request , response , next)=>{
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password, salt);
 
-        const doctor = await DoctorSchema.findByIdAndUpdate({_id:doctorId},
+
+        const doctor = await DoctorSchema.updateOne({_id:doctorId},
             {$set:{
                 specialization:specialization,
                 price:price
