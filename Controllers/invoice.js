@@ -46,9 +46,19 @@ exports.getAllInvoices = (request, response, next) => {
         .populate({path: "service_id",select:{name:1,_id:0}})
 
         .then((data) => {
+            //&& (data.userData._id == request.id)
             console.log(data)
-
-            response.status(200).json(data);
+            if (request.role == 'employee' ) {
+                console.log("true, employee")
+                response.status(200).json(data);
+            }
+            else if (request.role == 'admin') {
+                console.log("true, admin")
+                response.status(200).json(data);
+            }
+            else{
+                response.json({message:"You aren't authourized to see this data"});
+            }
         })
         .catch(error => next(error));
 };
@@ -98,9 +108,9 @@ exports.addInvoice = async(request, response, next) => {
     const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
     const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
 
-    if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
-        return response.status(400).json({message:"Check your data "})
-    }
+    // if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
+    //     return response.status(400).json({message:"Check your data "})
+    // }
 
     let newInvoice = new invoiceSchema({
         clinic_id: request.body.clinicId,
@@ -135,14 +145,14 @@ exports.addInvoice = async(request, response, next) => {
     // }
         .then( result => {
             let paymentMethod = request.body.paymentMethod;
-            if (paymentMethod == 'Credit Card') {
+            // if (paymentMethod == 'Credit Card') {
 
-                console.log("credit")
-                let charge= onlinePayment.payment()
+            //     console.log("credit")
+            //     //let charge= onlinePayment.payment()
 
-                console.log(charge)
+            //     //console.log(charge)
 
-            }
+            // }
             response.status(201).json(result);
         })
         .catch(error => next(error));
