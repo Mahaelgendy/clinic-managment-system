@@ -28,5 +28,6 @@ module.exports.getTimeFromString=(timeAsSting)=>{
 }
 module.exports.getDateTimeForSpecificDay=(time , dateAsString)=>{
     let day = new Date(dateAsString);
+    time = new Date(time);
     return new Date(day.getFullYear(), day.getMonth(), day.getDate(),time.getHours(),time.getMinutes(),time.getSeconds());
 }
