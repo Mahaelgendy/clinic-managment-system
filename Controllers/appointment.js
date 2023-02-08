@@ -10,17 +10,8 @@ const appointmentMW = require("./../middlewares/appointmentMW")
 
 
 module.exports.getAllAppointments = (request , response , next)=>{
-    const query = {};
-    
-    if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
-    if (request.query.doctorId) query.doctor_id = Number(request.query.doctorId);
-    if (request.query.patientId) query.patient_id = Number(request.query.patientId);
-    if (request.query.employeeId) query.employee_id = Number(request.query.employeeId);
-    if (request.query.date) query.date = request.query.date;
-    if (request.query.status) query.status = request.query.status;
-    if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
+    const query = appointmentMW.getTheQueryToFindWith(request);
 
-    console.log(query)
     appointmentSchema.find(query)
         .populate({ path: "clinic_id" ,select: 'clinicName'})
         .populate({
@@ -325,15 +316,7 @@ module.exports.deleteAppointmentById = (request , respose , next)=>{
 };
 
 module.exports.deleteAppointmentByFilter = (request , respose , next)=>{
-    const query = {};
-    if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
-    if (request.query.doctorId) query.doctor_id = Number(request.query.doctorId);
-    if (request.query.patientId) query.patient_id = Number(request.query.patientId);
-    if (request.query.employeeId) query.employee_id = Number(request.query.employeeId);
-    if (request.query.date) query.date = request.query.date;
-    if (request.query.status) query.status = request.query.status;
-    if (request.query.reservationMethod) query.reservation_method = request.query.reservationMethod;
-
+     const query = appointmentMW.getTheQueryToFindWith(request);
     appointmentSchema.deleteMany(query)
         .then((data)=>{
             respose.status(200).json(data);
