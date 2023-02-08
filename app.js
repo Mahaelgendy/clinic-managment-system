@@ -4,7 +4,7 @@ const  morgan = require('morgan');
 const path = require("path");
 
 const server=express();
-
+const bodyParser =require("body-parser")
 const appointmentRoutes = require("./Routes/appointment");
 const clinicRoutes = require("./Routes/clinic");
 const serviceRoutes = require("./Routes/service");
@@ -39,13 +39,11 @@ mongoose.connect(process.env.DB_URL)
     });
 
 server.use(morgan('combined'));
-
 server.use(express.json());
+
 //routes
 server.use(authenticationRouter);
- server.use(authenticationMW);
-// server.use(authenticationRouter);
-// server.use(authenticationMW);
+server.use(authenticationMW);
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)

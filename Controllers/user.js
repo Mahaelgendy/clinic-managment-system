@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 require("./../Models/userModel");
 const UserSchema = mongoose.model("users");
@@ -33,15 +32,14 @@ module.exports.changePassword =async (request, response, next)=>{
                         const salt = bcrypt.genSaltSync(saltRounds);
                         const hash = bcrypt.hashSync(request.body.newPassword, salt);
 
-                         UserSchema.findOne({_id:data._id})
+                        UserSchema.findOne({_id:data._id})
                         .then((user)=>{
                             UserSchema.findByIdAndUpdate({
                                 _id:data._id
                             },
                             {$set:{password:hash}})
-                            .then(()=>{
-                                                             
-                              token = jwt.sign({
+                            .then(()=>{                       
+                                token = jwt.sign({
                                 data:user,
                             },
                             process.env.SECRET_KEY,
@@ -79,11 +77,12 @@ exports.getAllUsers = (request , response , next)=>{
     if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
     if (request.query.role) query.role = request.query.role;
     if (request.query.email) query.email = request.query.email;
-
-    UserSchema.find(query).sort({fullName:1})
+    
+    UserSchema.find(query)
     .then(data=>{
         if(data!=null){
-            response.status(200).json(data);
+            userAfterSort= sortUsers(data, request.query)
+            response.status(200).json({userAfterSort});
         }
     })
     .catch(error=>next(error));
@@ -96,6 +95,8 @@ exports.deleteUsers = (request , response , next)=>{
         if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
         if (request.query.role) query.role = request.query.role;
         if (request.query.email) query.email = request.query.email;
+
+         
 
         UserSchema.deleteMany(query)
         .then(data=>{
@@ -119,7 +120,7 @@ exports.updateUser = (request,response,next)=>{
         if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
         if (request.query.email) query.email = request.query.email;
 
-        const {fullName,email,age,gender,address,role} = request.body;
+        const {fullName,email,age,address,role} = request.body;
 
 
         UserSchema.updateOne({query},
@@ -127,7 +128,6 @@ exports.updateUser = (request,response,next)=>{
                 fullName:fullName,
                 email:email,
                 age:age,
-                gender:gender,
                 address:address,
                 role:role,
                 image:request.file.path
