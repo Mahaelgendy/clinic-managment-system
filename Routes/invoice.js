@@ -40,5 +40,6 @@ router.route("/invoice/:id")
         errorValidator,
         controller.deleteInvoice
     );
-        
+ router.route("/displayinvoice/:id")
+        .get(controller.displayInvoiceById)
  module.exports= router;

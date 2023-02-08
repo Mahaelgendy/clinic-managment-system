@@ -15,4 +15,5 @@ router.route("/signUp")
             validator,
             controller.signUp)
 
+
 module.exports = router;

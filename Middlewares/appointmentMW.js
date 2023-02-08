@@ -19,7 +19,7 @@ exports.appointmentBodyValidation = [
     body("doctorId").isInt().notEmpty().withMessage("Doctor ID must be Numeric and required"),
     body("clinicId").isInt().notEmpty().withMessage("ClinicID must be Numeric and required"),
     body("patientId").isInt().notEmpty().withMessage("Patient ID must be Numeric and required"),
-    // body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
+    body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
     body("status").isIn(['First Time' , 'Follow Up']).notEmpty().withMessage("Status should be First Time or Follow Up"),
     body("reservationMethod").isIn(['Online' , 'Offline']).notEmpty().withMessage("Reservation method should be Either Online or Offline"),
     body("date").isString().notEmpty().matches(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/).withMessage("Date must be string in format YYYY-MM-DD"),

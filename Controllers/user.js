@@ -5,8 +5,11 @@ const UserSchema = mongoose.model("users");
 const { request, response } = require('express');
 
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const saltRounds = 10;
 
+<<<<<<< HEAD
 const sortUsers = (data,query)=>{
     let sortBy = query.sortBy||'fullName';
     let order = query.order ||"asc";
@@ -30,10 +33,33 @@ exports.addUser = async (request, response , next)=>{
     }
 
     const {fullName,password,email,age,gender,address,role} = request.body;
+=======
+module.exports.changePassword =async (request, response, next)=>{
 
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const hash = bcrypt.hashSync(password, salt);
+    try
+    {
+        let chnagedPas ={
+            oldPassword:request.body.oldPassword,
+            newPassword:request.body.newPassword,
+            confirmPassword:request.body.confirmPassword
+        }
+>>>>>>> 48c8e7ed277b8e664c542b275606b73e0c3d96e4
 
+        if(chnagedPas.newPassword!=chnagedPas.confirmPassword)
+        {
+            response.status(400).json({message:"Not matched"});
+        }
+        else
+        {
+            UserSchema.findOne({_id:request.id})
+            .then((data)=>{
+                console.log(data.password)
+                    if(bcrypt.compareSync(request.body.oldPassword,data.password))
+                    {
+                        const salt = bcrypt.genSaltSync(saltRounds);
+                        const hash = bcrypt.hashSync(request.body.newPassword, salt);
+
+<<<<<<< HEAD
     const user = new UserSchema({
         fullName:fullName,
         password:hash,
@@ -44,17 +70,49 @@ exports.addUser = async (request, response , next)=>{
         role:role,
         image:request.file.filename
     });
+=======
+                         UserSchema.findOne({_id:data._id})
+                        .then((user)=>{
+                            UserSchema.findByIdAndUpdate({
+                                _id:data._id
+                            },
+                            {$set:{password:hash}})
+                            .then(()=>{
+                                                             
+                              token = jwt.sign({
+                                data:user,
+                            },
+                            process.env.SECRET_KEY,
+                            {expiresIn:"2h"})
+>>>>>>> 48c8e7ed277b8e664c542b275606b73e0c3d96e4
 
-    user.save()
-        .then(res=>{
-            response.status(200).json({message:"User added"});
-        })
-        .catch(err=>next(err));
-}
+                            })
+                            .then(()=>{
+                                return response.status(200).json({message:"password changed successfully"+token});
+                            })
+    
+                        })
+                        .catch(error=>next(error));
+
+                            console.log(data._id)
+
+                        
+                    }
+                    else 
+                    {
+                        response.status(400).json({message:"old password is invalid"});
+                    }
+            });
+        }
+
+    }
+    catch(error){
+        next(error)
+    }
+};
 
 exports.getAllUsers = (request , response , next)=>{
-
-    
+ 
     const query = {};
     if (request.query.fullName) query.fullName = request.query.fullName;
     if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
@@ -95,6 +153,7 @@ exports.deleteUsers = (request , response , next)=>{
     
 };
 
+
 exports.updateUser = (request,response,next)=>{
     try{
         const query = {};
@@ -102,16 +161,12 @@ exports.updateUser = (request,response,next)=>{
         if (request.query.id) query._id = mongoose.Types.ObjectId(request.query.id);
         if (request.query.email) query.email = request.query.email;
 
-        const {fullName,password,email,age,gender,address,role} = request.body;
+        const {fullName,email,age,gender,address,role} = request.body;
 
-
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(password, salt);
 
         UserSchema.updateOne({query},
             {$set:{
                 fullName:fullName,
-                password:hash,
                 email:email,
                 age:age,
                 gender:gender,

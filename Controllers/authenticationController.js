@@ -45,7 +45,7 @@ module.exports.signUp = async(request, response , next)=>{
 
 module.exports.login=(async(request,response,next)=>{
 
-    const user =await userSchema.findOne({email:request.body.email})
+    const user = await userSchema.findOne({email:request.body.email})
     if(user != null)
     {
         try
@@ -84,7 +84,6 @@ module.exports.login=(async(request,response,next)=>{
             else
             {
                 response.status(400).json({message:"Incorrect password"});
-
             }
            
         }
@@ -98,7 +97,8 @@ module.exports.login=(async(request,response,next)=>{
     {
         response.status(400).json({message:"can not find user"});
     }
-})
+});
+
 
 
 
