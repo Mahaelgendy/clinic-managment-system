@@ -30,12 +30,15 @@ module.exports.getAllEmployees = async (request,response,next)=>{
     if(request.query.salary) query.salary = Number(request.query.salary);
     if(request.query.position) query.position = request.query.position
 
+    const page = request.query.page *1 || 1;
+    const limit = request.query.limit *1 || 3;
+    const skip =(page - 1) * limit;
 
    employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1,email:1}})
-                            .populate({path:"clinicId"})
+                            .populate({path:"clinicId"}).skip(skip).limit(limit)
                             .then((data)=>{
-                            employeeAfterSort= sortEmployees(data, request.query)
-                                response.status(200).json( employeeAfterSort);
+                           let employeeAfterSort= sortEmployees(data, request.query)
+                                response.status(200).json(employeeAfterSort);
                             }) 
                             .catch((error)=>next(error));
 };
