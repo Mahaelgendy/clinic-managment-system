@@ -122,9 +122,54 @@ module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
             }
           });
     })
-    .catch(error=>next(error));
-    
+    .catch(error=>next(error));  
 }
+module.exports.sortAppointment = (data,query)=>{
+    let sortBy = query.sortBy||'date';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+
+    if (sortBy=='doctorName' || sortBy == 'doctorname'){
+        data.sort((a, b) => {
+            if (a.doctor_id.userData.fullName < b.doctor_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.doctor_id.userData.fullName > b.doctor_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else if (sortBy=='patientName' || sortBy == 'patientname'){
+        data.sort((a, b) => {
+            if (a.patient_id.userData.fullName < b.patient_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.patient_id.userData.fullName > b.patient_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else if (sortBy=='employeeName' || sortBy == 'employeename'){
+        data.sort((a, b) => {
+            if (a.employee_id.userData.fullName < b.employee_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.employee_id.userData.fullName > b.employee_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else{
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
+};
+
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
