@@ -4,7 +4,7 @@ const router = express.Router();
 const authenticationMW=require("./../Middlewares/Authorization")
 
 
-router.route("/appointmentReport")
+router.route("/appointmentReportByDate")
     .get(
         authenticationMW.isEmployeeOrAdmin,
         controller.getAppointmentReportByDate);
@@ -15,10 +15,12 @@ router.route("/appointmentReport")
         controller.getAppointmentReport);
 
 router.route("/invoiceReport")
-    .get(authenticationMW.isEmployeeOrAdmin,
+    .get(
+        authenticationMW.isEmployeeOrAdmin,
         controller.getInvoiceReport);
 
 router.route("/invoiceReportbyDate")
-    .get(authenticationMW.isEmployeeOrAdmin,
+    .get(
+        authenticationMW.isEmployeeOrAdmin,
         controller.getInvoiceReportByDate);
 module.exports = router;

@@ -1,18 +1,20 @@
 const mongoose = require("mongoose");
 const nodemailer = require('nodemailer');
+const {body , param} = require("express-validator");
+
 require("./../Models/doctorModel");
 require("./../Models/appointmentModel");
 require("./../Models/clinicModel");
 require("./../Models/patientModel");
 require("./../Models/employeeModel");
+
 const appointmentSchema = mongoose.model("appointments");
 const scheduleSchema = mongoose.model("schedules");
 const doctorSchema = mongoose.model("doctors");
 const clinicSchema= mongoose.model("clinics");
 const patientSchema= mongoose.model("patients");
-const employeeSchema = mongoose.model('employees')
+const employeeSchema = mongoose.model('employees');
 const dateTimeMW = require("./../middlewares/dateTimeMW");
-const {body , param} = require("express-validator");
 
 
 exports.appointmentBodyValidation = [
@@ -169,7 +171,25 @@ module.exports.sortAppointment = (data,query)=>{
         });
     }
 };
+module.exports.getTheQueryToFindWith=(request)=> {
+    const query = {};
 
+    if (request.query.clinicId)
+        query.clinic_id = Number(request.query.clinicId);
+    if (request.query.doctorId)
+        query.doctor_id = Number(request.query.doctorId);
+    if (request.query.patientId)
+        query.patient_id = Number(request.query.patientId);
+    if (request.query.employeeId)
+        query.employee_id = Number(request.query.employeeId);
+    if (request.query.date)
+        query.date = request.query.date;
+    if (request.query.status)
+        query.status = request.query.status;
+    if (request.query.reservationMethod)
+        query.reservation_method = request.query.reservationMethod;
+    return query;
+}
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
