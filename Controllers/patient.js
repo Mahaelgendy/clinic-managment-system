@@ -14,11 +14,25 @@ const sortPatients = (data,query)=>{
     let order = query.order ||"asc";
     let orderValue = order ==="asc"? 1:-1
 
+    if (sortBy=='fullName' || sortBy == 'fullname'){
+        data.sort((a, b) => {
+            if (a.userData.fullName < b.userData.fullName) {
+                return -1*  orderValue
+            }
+            if (a.userData.fullName > b.userData.fullName) {
+                return 1*  orderValue
+            }
+            return 0;
+        });
+    }
     
-    return data.sort((a,b)=>{
-        if(a[sortBy]<b[sortBy]) return -1*orderValue;
-        if(a[sortBy]>b[sortBy]) return 1*orderValue;
-    });
+    else
+    {    
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
 };
 
 

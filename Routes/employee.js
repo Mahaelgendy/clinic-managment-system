@@ -4,6 +4,10 @@ const controller = require ("../Controllers/employee");
 const employeeValidation = require("./../Middlewares/employeeMW");
 const validator = require("./../Middlewares/errorValidation");
 const authenticationMW=require("./../Middlewares/Authorization")
+const userValidation = require("./../Middlewares/userMW");
+
+const upload = require("./../Middlewares/uploadImageMW");
+const { useridValidaion } = require("../Middlewares/userMW");
 
 const router = express.Router();
 
@@ -13,6 +17,7 @@ router.route("/employees")
         controller.getAllEmployees)
     .post(  
             authenticationMW.isAdmin,
+            upload.single("profile"),
             employeeValidation.employeevalidation,
             validator,
             controller.addEmployee)
@@ -37,9 +42,17 @@ router.route("/employees/:id")
             controller.deleteEmployeeByID)
     .patch(  
             authenticationMW.isEmployeeOrAdmin,
+            upload.single("profile"),
             employeeValidation.paramvalidation,
             validator,
             controller.updateEmployee)
 
+router.route("/employees/email/:email")
+        .get(
+                authenticationMW.isEmployeeOrAdmin,
+                userValidation.userEmailValidation,
+                validator,
+                controller.getEmployeeByEmail
+        )
 
 module.exports = router;
