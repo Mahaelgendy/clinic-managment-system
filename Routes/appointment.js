@@ -11,7 +11,7 @@ router.route("/appointments")
                 controller.getAllAppointments)
         
         .post(
-                authenticationMW.isPatientOrAdmin,
+                // authenticationMW.isPatientOrAdmin,
                 appointmentValidation.appointmentBodyValidation,
                 errorValidator,
                 controller.addAppointment)
