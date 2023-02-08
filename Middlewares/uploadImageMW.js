@@ -11,16 +11,18 @@ const storage = multer.diskStorage({
     }
 })
  
-// const multerFilter = (req, file, cb) =>{
-// 	if(file.mimetype.startsWith('image')){
-// 		cb(null,true)
-// 	} else{
-//         cb("Not an image! please upload only image.",false);
-// 	}
-// }
+const multerFilter = (req, file, cb) =>{
+	if(file.mimetype.startsWith('image')){
+		cb(null,true)
+	} else{
+        cb("Not an image! please upload only image.",false);
+	}
+}
+
+
 const upload = multer({
     storage: storage,
-    // fileFilter:multerFilter,
+    fileFilter:multerFilter,
     limits:1024*1024*5
 });
 

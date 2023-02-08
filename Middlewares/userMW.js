@@ -1,4 +1,10 @@
 
+require('../Models/userModel');
+require('../Models/doctorModel');
+const mongoose = require("mongoose")
+const UserSchema = mongoose.model('users');
+
+
 const {body, param} = require('express-validator')
 exports.userbodyValidation = [
     body('fullName').isString().optional().withMessage("Name should be String"),

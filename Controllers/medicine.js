@@ -25,6 +25,18 @@ exports.addMedicine = async(request,response , next)=>{
                .catch(error=>next(error));
 }
 
+
+const sortMedicine = (data,query)=>{
+    let sortBy = query.sortBy||'name';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+    
+    return data.sort((a,b)=>{
+        if(a[sortBy]<b[sortBy]) return -1*orderValue;
+        if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+};
+
 exports.getAllMedicinces = (request , response , next)=>{
     const query = {};
     if (request.query.speciality) query.speciality = request.query.speciality;
@@ -37,6 +49,7 @@ exports.getAllMedicinces = (request , response , next)=>{
     MedicineSchema.find(query)
     .then(data=>{
         if(data!=null){
+            sortMedicine(data,request.query);
             response.status(200).json(data);
         }
     })

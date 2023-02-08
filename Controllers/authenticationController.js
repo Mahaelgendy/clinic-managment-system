@@ -5,21 +5,18 @@ const { request } = require("http");
 const { response } = require("express");
 require("./../Models/userModel");
 
+
 const saltRounds = 10;
 
 const userSchema = mongoose.model("users")
 
 module.exports.signUp = async(request, response , next)=>{
-    const emailExist = await UserSchema.findOne({email:request.body.email});
+    const emailExist = await userSchema.findOne({email:request.body.email});
     if(emailExist){
-        return response.status(400).json({message:"User is already exist"});
-    }
-    const diplicatName = await UserSchema.findOne({fullName:request.body.fullName , role:request.body.role})
-    if(diplicatName){
-        return response.status(400).json({message:"This name is already used, please choose another name"});
+        return response.status(400).json({message:"Email is already Used"});
     }
 
-    const {fullName,password,email,age,gender,address,role , image} = request.body;
+    const {fullName,password,email,age,gender,address,role } = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -32,7 +29,7 @@ module.exports.signUp = async(request, response , next)=>{
         gender:gender,
         address:address,
         role:role,
-        image:request.file.filename
+        image:request.file.path
     });
 
     user.save()

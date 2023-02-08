@@ -3,7 +3,6 @@ const express = require('express');
 const controller = require('./../Controllers/doctor');
 const doctorValidation = require('./../Middlewares/doctorMW');
 const userValidation = require("./../Middlewares/userMW");
-const scheduleValidation = require("./../Middlewares/scheduleMW");
 const validator = require("./../Middlewares/errorValidation");
 const authenticationMW=require("./../Middlewares/Authorization")
 const router = express.Router();
@@ -28,13 +27,14 @@ router.route("/doctors/:id")
         doctorValidation.doctorValidataion,
         userValidation.userbodyValidation,
         validator,
-        controller.updateDoctor)
+        controller.updateDoctorById)
 
 
 router.route('/doctors')
     .get(
         authenticationMW.isAdmin,
         controller.getAllDoctors)
+    
     .post(
         authenticationMW.isAdmin,
         upload.single("profile"),
@@ -43,6 +43,21 @@ router.route('/doctors')
         validator,
         controller.addDoctor)
 
-
+router.route("/doctors/email/:email")
+        .get(
+            authenticationMW.isDoctorOrAdmin,
+            userValidation.userEmailValidation,
+            validator,
+            controller.getDoctorByEmail
+        )
+        .patch(
+            authenticationMW.isDoctorOrAdmin,
+            upload.single("profile"),
+            userValidation.userEmailValidation,
+            doctorValidation.doctorValidataion,
+            userValidation.userbodyValidation,
+            validator,
+            controller.updateDoctorByEmail
+        )
 module.exports = router
 
