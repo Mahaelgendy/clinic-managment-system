@@ -94,7 +94,7 @@ exports.deleteAllPrescription = (request , response ) =>{
     //     response.status(200).json({message:"Delete all prescription"});
     // })
     // .catch(error=>next(error));
-}
+//}
 
 exports.updatePrescription= (request,response , next)=>
 {
