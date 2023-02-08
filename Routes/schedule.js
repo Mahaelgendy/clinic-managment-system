@@ -29,7 +29,7 @@ router.route("/schedule/:id")
             
 router.route("/schedule")
     .post(
-        // authenticationMW.isDoctorOrAdmin,
+        authenticationMW.isDoctorOrAdmin,
         scheduleValidation.bodyValidation,
         errorValidator,
         controller.newSchedule
