@@ -144,10 +144,10 @@ module.exports.sortAppointment = (data,query)=>{
     }
     else if (sortBy=='patientName' || sortBy == 'patientname'){
         data.sort((a, b) => {
-            if (a.patient_id.userData.fullName < b.patient_id.userData.fullName) {
+            if (a.patient_id.patientData.fullName < b.patient_id.patientData.fullName) {
                 return -1*orderValue;
             }
-            if (a.patient_id.userData.fullName > b.patient_id.userData.fullName) {
+            if (a.patient_id.patientData.fullName > b.patient_id.patientData.fullName) {
                 return 1*orderValue;
             }
             return 0;
@@ -155,10 +155,10 @@ module.exports.sortAppointment = (data,query)=>{
     }
     else if (sortBy=='employeeName' || sortBy == 'employeename'){
         data.sort((a, b) => {
-            if (a.employee_id.userData.fullName < b.employee_id.userData.fullName) {
+            if (a.employee_id.employeeData.fullName < b.employee_id.employeeData.fullName) {
                 return -1*orderValue;
             }
-            if (a.employee_id.userData.fullName > b.employee_id.userData.fullName) {
+            if (a.employee_id.employeeData.fullName > b.employee_id.employeeData.fullName) {
                 return 1*orderValue;
             }
             return 0;
