@@ -5,37 +5,17 @@ require("../Models/userModel");
 const prescriptionSchema =  mongoose.model("prespictions");
 const userSchema = mongoose.model("users");
 const dateTimeMW = require("../Middlewares/dateTimeMW")
+const prescriptionMW = require("../Middlewares/PrescriptionMW")
 
 
 exports.getAllPrescriptions = (request , response, next)=>{
-
-    const query ={};
-    if(request.query.diagnosis)
-        query.diagnosis = request.query.diagnosis
-    if(request.query.currentExamination)
-        query.currentExamination = request.query.currentExamination
-    if(request.query.doctor_id)
-        query.doctor_id = request.query.doctor_id
-    if(request.query.patient_id)
-        query.patient_id = request.query.patient_id
+    const query = prescriptionMW.getQueryToFindWith(request);
 
     prescriptionSchema.find(query)
     .populate({path:"doctor_id", select:{"_id":0,"specialization":1, "price":1} ,populate:{path:"userData",select:{"_id":0,"fullName":1}}})
     .populate({path:"patient_id" ,populate:{path:"patientData", select:{"_id":0,"fullName":1}}})
     .populate({path:"medicine_id"})
     .then(data=>{
-        if((request.role =="doctor") && (data.doctor_id == request.id)){
-            //filter prescription for doctor
-            console.log("you are doctor ,authourized ");
-            let alldotorprescription  = data.filter(item =>{
-                item.doctor_id = request.id
-            })
-            response.json(alldotorprescription);
-        }
-        else{
-            console.log("you are admin ,authourized ");
-            response.json(data);
-        }
         response.status(201).json(data)
     })
     .catch(error=>next(error));
@@ -75,15 +55,7 @@ exports.addPrescription =(request, response, next)=>{
 }
 
 exports.deleteAllPrescription = (request , response ) =>{
-    const query ={};
-    if(request.query.diagnosis)
-        query.diagnosis = request.query.diagnosis
-    if(request.query.currentExamination)
-        query.currentExamination = request.query.currentExamination
-    if(request.query.doctor_id)
-        query.doctor_id = request.query.doctor_id
-    if(request.query.patient_id)
-        query.patient_id = request.query.patient_id
+  
 
     prescriptionSchema.find(query)
         .then(data=>{
@@ -109,6 +81,13 @@ exports.deleteAllPrescription = (request , response ) =>{
             }
         })
         .catch(error=>next(error));
+    const query = prescriptionMW.getQueryToFindWith(request);
+    prescriptionSchema.deleteMany(query)
+    .then(result=>{
+        response.status(200).json({message:"Delete all prescription"});
+    })
+    .catch(error=>next(error));
+}
 
     // prescriptionSchema.deleteMany(query)
     // .then(result=>{
@@ -181,3 +160,5 @@ exports.getAllPrescriptionsForPatient = async (request, response , next)=>{
     }
     
 }
+
+
