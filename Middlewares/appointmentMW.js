@@ -1,18 +1,20 @@
 const mongoose = require("mongoose");
 const nodemailer = require('nodemailer');
+const {body , param} = require("express-validator");
+
 require("./../Models/doctorModel");
 require("./../Models/appointmentModel");
 require("./../Models/clinicModel");
 require("./../Models/patientModel");
 require("./../Models/employeeModel");
+
 const appointmentSchema = mongoose.model("appointments");
 const scheduleSchema = mongoose.model("schedules");
 const doctorSchema = mongoose.model("doctors");
 const clinicSchema= mongoose.model("clinics");
 const patientSchema= mongoose.model("patients");
-const employeeSchema = mongoose.model('employees')
+const employeeSchema = mongoose.model('employees');
 const dateTimeMW = require("./../middlewares/dateTimeMW");
-const {body , param} = require("express-validator");
 
 
 exports.appointmentBodyValidation = [
@@ -122,8 +124,71 @@ module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
             }
           });
     })
-    .catch(error=>next(error));
-    
+    .catch(error=>next(error));  
+}
+module.exports.sortAppointment = (data,query)=>{
+    let sortBy = query.sortBy||'date';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+
+    if (sortBy=='doctorName' || sortBy == 'doctorname'){
+        data.sort((a, b) => {
+            if (a.doctor_id.userData.fullName < b.doctor_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.doctor_id.userData.fullName > b.doctor_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else if (sortBy=='patientName' || sortBy == 'patientname'){
+        data.sort((a, b) => {
+            if (a.patient_id.userData.fullName < b.patient_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.patient_id.userData.fullName > b.patient_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else if (sortBy=='employeeName' || sortBy == 'employeename'){
+        data.sort((a, b) => {
+            if (a.employee_id.userData.fullName < b.employee_id.userData.fullName) {
+                return -1*orderValue;
+            }
+            if (a.employee_id.userData.fullName > b.employee_id.userData.fullName) {
+                return 1*orderValue;
+            }
+            return 0;
+        });
+    }
+    else{
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
+};
+module.exports.getTheQueryToFindWith=(request)=> {
+    const query = {};
+
+    if (request.query.clinicId)
+        query.clinic_id = Number(request.query.clinicId);
+    if (request.query.doctorId)
+        query.doctor_id = Number(request.query.doctorId);
+    if (request.query.patientId)
+        query.patient_id = Number(request.query.patientId);
+    if (request.query.employeeId)
+        query.employee_id = Number(request.query.employeeId);
+    if (request.query.date)
+        query.date = request.query.date;
+    if (request.query.status)
+        query.status = request.query.status;
+    if (request.query.reservationMethod)
+        query.reservation_method = request.query.reservationMethod;
+    return query;
 }
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift

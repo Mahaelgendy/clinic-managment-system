@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 require("./../Models/userModel");
 const UserSchema = mongoose.model("users");
