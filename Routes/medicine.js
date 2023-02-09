@@ -15,15 +15,15 @@ router.route('/medicines')
         medicineValidation.bodyValidation,
         validator,
         controller.addMedicine)
-    .patch(
-        authenticationMW.isDoctorOrAdmin,
-        medicineValidation.bodyValidation,
-        validator,
-        controller.updateMedicines)
-        
+
     .delete(
         authenticationMW.isDoctorOrAdmin,
         controller.deleteMedicine)
 
-
+router.route("/medicines/:id")
+        .patch(
+            authenticationMW.isDoctorOrAdmin,
+            medicineValidation.bodyValidation,
+            validator,
+            controller.updateMedicines)
 module.exports = router
