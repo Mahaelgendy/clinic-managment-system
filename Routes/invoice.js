@@ -1,5 +1,7 @@
 const express = require('express');
+const payment = require("../Middlewares/payment")
 const router = express.Router();
+
 
 const controller = require('./../Controllers/invoice')
 const errorValidator = require("./../Middlewares/errorValidation");
@@ -12,6 +14,7 @@ router.route("/invoice")
         authenticationMW.isEmployeeOrAdmin,
         controller.getAllInvoices)
     .post(
+     //   payment.createToken,
         authenticationMW.isEmployee,
         invoiceValidation.bodyValidation,
         errorValidator,
@@ -41,6 +44,10 @@ router.route("/invoice/:id")
         errorValidator,
         controller.deleteInvoice
     );
+
+// router.route("/payment")
+//     .post(payment.createToken)
+
  router.route("/displayinvoice/:id")
         .get(controller.displayInvoiceById)
  module.exports= router;

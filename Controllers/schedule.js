@@ -49,6 +49,7 @@ exports.getScheduleById = (request, response, next) => {
         })
         .catch((error) => next(error));
 };
+
 exports.newSchedule = async(request, response, next) => {
     const doctorExist=await DoctorSchema.findOne({_id:request.body.doctor_id})
     const clinicExist=await clinicSchema.findOne({_id:request.body.clinic_id})
@@ -71,7 +72,6 @@ exports.newSchedule = async(request, response, next) => {
         })
         .catch(error => next(error));
 };
-
 
 exports.updateSchedule = (request, response, next) => {
     SchedulaSchema.updateOne({ _id: request.params.id},

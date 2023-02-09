@@ -1,6 +1,9 @@
 const {request , response} = require("express");
+const { body } = require("express-validator");
 const mongoose = require("mongoose");
-
+const { payment } = require("paypal-rest-sdk");
+// const stripe = require('stripe')('sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn');
+const paymentMw = require("../Middlewares/payment")
 require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const invoiceMW = require("./../middlewares/invoiceMW")
@@ -113,12 +116,14 @@ exports.addInvoice = async(request, response, next) => {
         time: dateTimeMW.getTime(new Date()),
 
     });
+       
     newInvoice.save()
         .then(result => {
             response.status(201).json(result);
         })
         .catch(error => next(error));
 };
+
 
 exports.updateInvoice = (request, response, next) => {
     invoiceSchema.updateOne({ _id: request.params.id },

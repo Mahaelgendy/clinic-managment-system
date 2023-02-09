@@ -13,7 +13,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const sortDoctor = (data,query)=>{
-    let sortBy = query.sortBy||'date';
+    let sortBy = query.sortBy||'price';
     let order = query.order ||"asc";
     let orderValue = order ==="asc"? 1:-1
     console.log(orderValue);
@@ -68,6 +68,7 @@ exports.getDoctorByEmail=(request , response , next)=>{
    
 
 }
+
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
@@ -134,7 +135,8 @@ exports.addDoctor = async (request , response , next)=>{
     }
 }
 
-exports.deleteDoctor = (request , response , next)=>{
+
+exports.deleteDoctorById = (request , response , next)=>{
     try{
         const doctorId = request.params.id;
         DoctorSchema.findById({_id:doctorId})

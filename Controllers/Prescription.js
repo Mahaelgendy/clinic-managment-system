@@ -16,7 +16,6 @@ exports.getAllPrescriptions = (request , response, next)=>{
     .populate({path:"patient_id" ,populate:{path:"patientData", select:{"_id":0,"fullName":1}}})
     .populate({path:"medicine_id"})
     .then(data=>{
-        prescriptionMW.sortPrescription(data)
         response.status(201).json(data)
     })
     .catch(error=>next(error));
@@ -56,6 +55,32 @@ exports.addPrescription =(request, response, next)=>{
 }
 
 exports.deleteAllPrescription = (request , response ) =>{
+  
+
+    prescriptionSchema.find(query)
+        .then(data=>{
+            if((request.role =="doctor") && (data.doctor_id == request.id)){
+                //filter prescription for doctor
+                console.log("you are doctor ,authourized ");
+                prescriptionSchema.deleteMany({
+                    doctor_id:data.doctor_id
+                })
+                .then(result=>{
+                    console.log("Delete all prescription for doctor")
+                    response.status(200).json({message:"Delete all prescription for doctor"});
+                })
+                .catch(error=>next(error));
+            }
+            else{
+                console.log("you are admin ,authourized ");
+                prescriptionSchema.deleteMany(query)
+                .then(result=>{
+                    response.status(200).json({message:"Delete all prescription"});
+                })
+                .catch(error=>next(error));
+            }
+        })
+        .catch(error=>next(error));
     const query = prescriptionMW.getQueryToFindWith(request);
     prescriptionSchema.deleteMany(query)
     .then(result=>{
@@ -64,6 +89,12 @@ exports.deleteAllPrescription = (request , response ) =>{
     .catch(error=>next(error));
 }
 
+    // prescriptionSchema.deleteMany(query)
+    // .then(result=>{
+    //     response.status(200).json({message:"Delete all prescription"});
+    // })
+    // .catch(error=>next(error));
+//}
 
 exports.updatePrescription= (request,response , next)=>
 {
