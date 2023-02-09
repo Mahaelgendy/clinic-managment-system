@@ -7,6 +7,7 @@ const MedicineSchema = mongoose.model('medicines');
 
 exports.addMedicine = async(request,response , next)=>{
     const {name , company , speciality , description}= request.body;
+    
     const medicineFound = await MedicineSchema.findOne({speciality:speciality , medicineName:name});
     if(medicineFound){
         return response.status(400).json({message:"Medicine is already exist"});
