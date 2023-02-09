@@ -7,6 +7,7 @@ require("../Models/doctorModel")
 const MedicineSchema = mongoose.model('medicines');
 const usersSchema = mongoose.model('users');
 const doctorSchema = mongoose.model('doctors')
+
 exports.addMedicine = async(request,response , next)=>{
     const {name , company , speciality , description}= request.body;
     
@@ -104,7 +105,9 @@ exports.getAllMedicinces =async (request , response , next)=>{
 
 exports.updateMedicines =async (request,response,next)=>{
     try{
+
         const query = {};
+        if (request.query.speciality) query.speciality = request.query.speciality;
         if (request.query.id) query._id = Number(request.query.id);
         if (request.query.name) query.medicineName = request.query.name;
 
