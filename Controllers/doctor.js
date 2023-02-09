@@ -42,7 +42,7 @@ exports.getDoctorById = (request , response , next)=>{
                     response.json({message:"You aren't authourized to see this data"});
                 }
             }
-            else  {
+            else if(data == null) {
             response.json({message:"Id is not Found"});
         }
     })

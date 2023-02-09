@@ -24,7 +24,7 @@ router.route("/schedule/:id")
         authenticationMW.isDoctorOrAdmin,
         scheduleValidation.paramValidation,
         errorValidator,
-        controller.deleteSchedule
+        controller.deleteScheduleById
     )
             
 router.route("/schedule")
@@ -34,7 +34,10 @@ router.route("/schedule")
         errorValidator,
         controller.newSchedule
     )
-    .get(authenticationMW.isAdmin,
+    .delete(
+        controller.deleteScheduleByFilter
+    )
+    .get(authenticationMW.isDoctorOrAdmin,
         controller.getAllSchedules)
 
 module.exports= router;

@@ -9,7 +9,7 @@ exports.clinicValidation=[
 
 exports.serviceValidation=[ 
     body("name").isString().withMessage("service name in this clinic"),
-    body("salary").isInt().withMessage("service salary in this clinic"),
+    body("salary").isInt().default(0).withMessage("service salary in this clinic"),
     body("doctor_id").isInt().withMessage("doctor id for this service in this clinic"),
     body("clinic_id").isInt().withMessage("clinic id for this service in this service")
 ]

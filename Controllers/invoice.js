@@ -1,11 +1,10 @@
 const { request, response } = require("express");
-//const stripe = require("stripe");
 const mongoose = require("mongoose");
 const stripe = require("stripe")("sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn");
 
-require('../Models/invoiceModel');
+const invoiceMW=require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
-const onlinePayment=require("./../Middlewares/payment")
+//const onlinePayment=require("./../Middlewares/payment")
 const { jsPDF } = require("jspdf");
 
 const invoiceSchema = mongoose.model("invoices");
@@ -18,7 +17,7 @@ const serviceSchema= mongoose.model('services');
 
 const path = require("path");
 
-exports.getAllInvoices = (request, response, next) => {
+module.exports.getAllInvoices = (request, response, next) => {
 
     const query = {};
     if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
@@ -31,26 +30,37 @@ exports.getAllInvoices = (request, response, next) => {
     if (request.query.paymentStatus) query.paymentStatus = request.query.paymentStatus;
     if (request.query.date) query.date = request.query.date;
 
-    invoiceSchema.find(query).populate({ path: "clinic_id" })
-        .populate({
-            path: "doctor_id", select: { userData:1,_id:0 }, model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
-        })
-        .populate({
-            path: "patient_id", select: { userData:1,_id:0 }, model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }})
-        .populate({ path: "employee_id", select: {userData:1,_id:0 }, model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }})
-        .populate({path: "appointment_id",select: "date"})
-        .populate({path: "clinic_id",select: {clinicName:1,_id:0}})
-        .populate({path: "service_id",select:{name:1,_id:0}})
+    invoiceSchema.find(query)
+    .populate({ path: "clinic_id" })
+    .populate({
+        path: 'doctor_id',
+        select: 'userData',
+        model: 'doctors',
+        populate: {path: 'userData', select: 'fullName', model: 'users'}
+    })
+    .populate({ 
+        path: "patient_id",
+        select: 'patientData',
+        model: 'patients',
+        populate: {path: 'patientData', select: 'fullName', model: 'users'}
+    })
+    .populate({
+        path: "employee_id",
+        select: 'employeeData',
+        model: 'employees',
+        populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+    })
+    .populate({path: "appointment_id",select: "date"})
+    .populate({path: "clinic_id",select: {clinicName:1}})
+    .populate({path: "service_id",select:{name:1}})
+
 
         .then((data) => {
-            //&& (data.userData._id == request.id)
-            console.log(data)
-            if (request.role == 'employee' ) {
-                console.log("true, employee")
-                response.status(200).json(data);
+            if(request.role == 'employee'){
+                const filteredData = data.filter(invoice => {
+                return invoice.employee_id.employeeData._id.toString() === request.id;})
+                //invoiceMW.sortInvoice(filteredData,request.query);
+                response.status(200).json(filteredData);
             }
             else if (request.role == 'admin') {
                 console.log("true, admin")
@@ -64,25 +74,25 @@ exports.getAllInvoices = (request, response, next) => {
 };
 
 
-exports.getInvoiceById = (request, response, next) => {
-    invoiceSchema.find({ _id: request.params.id })
+module.exports.getInvoiceById = (request, response, next) => {
+    invoiceSchema.findById({ _id: request.params.id })
         .populate({
             path: "doctor_id",
             select: { userData:1,_id:0 },
             model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+            populate: { path: "userData", select: {fullName:1,_id:0}, model: "users" }
         })
         .populate({
             path: "patient_id",
-            select: { userData:1,_id:0 },
-            model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+            select: { patientData:1,_id:0 },
+            model: "patients",
+            populate: { path: "patientData", select: {fullName:1,_id:0 }, model: "users" }
         })
         .populate({ 
             path: "employee_id",
-            select: {userData:1,_id:0 },
-            model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+            select: {employeeData:1,_id:0 },
+            model: "employees",
+            populate: { path: "employeeData", select: {fullName:1,_id:1 }, model: "users" }
         })
         .populate({path: "appointment_id",select: "date"})
         .populate({path: "clinic_id",select: {clinicName:1,_id:0}})
@@ -90,17 +100,26 @@ exports.getInvoiceById = (request, response, next) => {
         
         .then((data) => {
             if (data != null) {
-                response.status(201).json({ data })
+                if ((request.role == 'employee') && (request.id == data.employee_id.employeeData._id)) {
+                    response.status(200).json(data);
+                }
+                else if (request.role == 'admin') {
+                    response.status(200).json(data);
+                }
+                else{
+                    response.json({message:"You aren't authourized to see this data"});
+                }
             }
-            else {
+
+            else  {
                 console.log("null")
-                next(new Error({ message: "Id doesn't exist" }));
+                response.json({message:"Id doesn't exist"});
             }
         })
         .catch(error => next(error));
 };
 
-exports.addInvoice = async(request, response, next) => {
+module.exports.addInvoice = async(request, response, next) => {
     const doctorExist=await DoctorSchema.findOne({_id:request.body.doctorId})
     const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
     const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
@@ -112,6 +131,11 @@ exports.addInvoice = async(request, response, next) => {
     //     return response.status(400).json({message:"Check your data "})
     // }
 
+    function totalCost() {
+       // console.log(doctorExist.price) 
+        //console.log(serviceExist.salary)
+      return doctorExist.price+serviceExist.salary
+    }
     let newInvoice = new invoiceSchema({
         clinic_id: request.body.clinicId,
         service_id: request.body.serviceId,
@@ -121,13 +145,36 @@ exports.addInvoice = async(request, response, next) => {
         appointment_id: request.body.appointmentId,
         paymentMethod: request.body.paymentMethod,
         paymentStatus: request.body.paymentStatus,
-        totalCost: request.body.totalCost,
+        totalCost: totalCost(),
         actualPaid: request.body.actualPaid,
         date: dateTimeMW.getDateFormat(new Date()),
         time: dateTimeMW.getTime(new Date()),
 
     });
-   await newInvoice.save()
+    let savedinvoice = await newInvoice.save()
+    
+    let paymentMethod = request.body.paymentMethod;
+    
+       if (paymentMethod == 'Credit Card') {
+        let createdToken= await stripe.tokens.create({
+               card: {
+                   number: '4242424242424242',
+                   exp_month: 03,
+                   exp_year: 2030,
+                   cvc: '737'
+               }
+           });
+           let charging= await stripe.charges.create({
+            amount: 2000,
+            currency: "usd",
+            description: "An example charge",
+            source: createdToken.id
+           })
+           console.log(charging.id)
+
+           
+    }
+    response.status(201).json(savedinvoice);
     // try {
     //     let res = await newInvoice.save()
     //     console.log(res)
@@ -143,61 +190,109 @@ exports.addInvoice = async(request, response, next) => {
     // catch (error) {
     //     next(error);
     // }
-        .then( result => {
-            let paymentMethod = request.body.paymentMethod;
-            // if (paymentMethod == 'Credit Card') {
-
-            //     console.log("credit")
-            //     //let charge= onlinePayment.payment()
-
-            //     //console.log(charge)
-
-            // }
-            response.status(201).json(result);
-        })
-        .catch(error => next(error));
+      //  .then( result => {
+          
+       // })
+       // .catch(error => next(error));
 };
 
 
-exports.updateInvoice = (request, response, next) => {
-    invoiceSchema.updateOne({ _id: request.params.id },
-        {
-            $set: {
-                clinic_id: request.body.clinicId,
-                doctor_id: request.body.doctorId,
-                service_id: request.body.serviceId,
-                patient_id: request.body.patientId,
-                employee_id: request.body.employeeId,
-                appointment_id: request.body.appointmentId,
-                paymentMethod: request.body.paymentMethod,
-                paymentStatus: request.body.paymentStatus,
-                totalCost: request.body.totalCost,
-                actualPaid: request.body.actualPaid,
-                date: dateTimeMW.getDateFormat(new Date()),
-                time: dateTimeMW.getTime(new Date()),
-            }
-        }).then(result => {
-            if (result.modifiedCount == 1) {
-                response.status(201).json({ message: "Invoice updated" })
-            }
-            else
-                throw new Error("Invoice not found");
+module.exports.updateInvoice = async (request, response, next) => {
+   
+    await employeeSchema.findOne({ "employeeData": request.id })
+        .then(data => {
+            //  console.log("yes")
+            //console.log(data)
+            console.log(data._id)
+            let EMPID = data._id
+            console.log("emp" + EMPID)
+            // console.log(request.id)
+            invoiceSchema.findOneAndUpdate({
+                _id: request.params.id,
+                employee_id: EMPID
+            },
+                {
+                    $set: {
+                        clinic_id: request.body.clinicId,
+                        doctor_id: request.body.doctorId,
+                        service_id: request.body.serviceId,
+                        patient_id: request.body.patientId,
+                        // employee_id: request.body.employeeId,
+                        appointment_id: request.body.appointmentId,
+                        paymentMethod: request.body.paymentMethod,
+                        paymentStatus: request.body.paymentStatus,
+                        totalCost: request.body.totalCost,
+                        actualPaid: request.body.actualPaid,
+                        date: dateTimeMW.getDateFormat(new Date()),
+                        time: dateTimeMW.getTime(new Date()),
+                    }
+                }
+            ).then(result => {
+                console.log(result)
+                if (result) {
+                    response.status(201).json({ message: "Invoice updated" })
+                }
+                   
+                // if (result.modifiedCount==1) {
+                //     response.status(201).json({ message: "Invoice updated" })
+                // }
+                // else if(result.modifiedCount==0) {
+                //     response.status(201).json({ message: "You haven't changed any data" })
+                // }
+                else if(result==null)
+                    throw new Error("Invoice not found");
+            })
+                
+                .catch(error => next(error));
+
         })
-        .catch(error => next(error));
+        .catch(err => {
+            throw new Error("employee not found");
+        })
 };
 
-exports.deleteInvoice = (request, response, next) => {
-    invoiceSchema.deleteOne({ _id: request.params.id })
-        .then((result) => {
-            if (result.deletedCount == 1) {
-                response.status(201).json({ message: " Invoice deleted" })
-            }
-            else
-                throw new Error("Invoice not found");
+module.exports.deleteInvoice = (request, response, next) => {
+
+    if (request.role == 'admin') {
+        invoiceSchema.deleteOne({ _id: request.params.id })
+            .then((result) => {
+            
+                if (result.deletedCount == 1) {
+                    response.status(201).json({ message: " Invoice deleted" })
+                }
+                else
+                    throw new Error("Invoice not found");
+            })
+            .catch((error) => next(error));
+    }
+
+    else if (request.role == "employee") {
+         employeeSchema.findOne({ "employeeData": request.id })
+        .then(data => {
+            // console.log("yes")
+            // console.log(data)
+            // console.log(data._id)
+            let EMPID = data._id
+            // console.log(DOCID)
+            // console.log(request.id)
+
+            invoiceSchema.deleteOne({ _id: request.params.id, employee_id: EMPID })
+                .then((result) => {
+                    if (result.deletedCount == 1) {
+                        response.status(201).json({ message: " Invoice deleted" })
+                    }
+                    else
+                        throw new Error("Invoice not found");
+                })
+                .catch((error) => next(error));
         })
-        .catch((error) => next(error));
+        .catch(err => {
+            throw new Error("Employee not found");
+        })  
+    }
 };
-exports.deleteInvoiceByFilter = (request, response, next) => {
+  
+module.exports.deleteInvoiceByFilter = (request, response, next) => {
     const query = {};
     if (request.query.doctor_id) query.doctor_id = Number(request.query.doctor_id);
     if (request.query.patient_id) query.patient_id = Number(request.query.patient_id);
@@ -211,7 +306,8 @@ exports.deleteInvoiceByFilter = (request, response, next) => {
 
     invoiceSchema.deleteMany(query)
         .then((result) => {
-            if (result.deletedCount == 1) {
+            console.log(result)
+            if (result.deletedCount >= 1) {
                 response.status(201).json({ message: " Invoice deleted" })
             }
             else
@@ -220,7 +316,7 @@ exports.deleteInvoiceByFilter = (request, response, next) => {
         .catch((error) => next(error));
 };
 
-exports.displayInvoiceById = (request, response, next) => {
+module.exports.displayInvoiceById = (request, response, next) => {
     invoiceSchema.find({ _id: request.params.id })
         .populate({
             path: "doctor_id",

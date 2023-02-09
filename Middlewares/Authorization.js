@@ -20,8 +20,7 @@ module.exports.isDoctor=(request, response, next)=> {
     if ((request.role == 'doctor'))
     {
         console.log(request.role)
-        console.log(request.params.id)
-        console.log(request.id)
+
         next();
     }
     else {
@@ -36,8 +35,7 @@ module.exports.isDoctorOrAdmin=(request, response, next)=> {
     if ((request.role == 'doctor')||(request.role == 'admin'))
     {
         console.log(request.role)
-        console.log(request.params.id)
-        console.log(request.id)
+     
         next();
     }
     else {
@@ -122,7 +120,17 @@ module.exports.isEmployeeOrAdmin=(request, response, next)=> {
         next(error)
     }
 }
-
+module.exports.isEmployeeOrPatient=(request, response, next)=> {
+    if ((request.role == 'employee')||(request.role == 'patient'))
+    {
+        next();
+    }
+    else {
+        let error= new Error("Not Authorized")
+        error.status=403;
+        next(error)
+    }
+}
 module.exports.isStaff=(request, response, next)=> {
     if ((request.role == 'admin')||(request.role == 'employee')||(request.role == 'doctor'))
     {

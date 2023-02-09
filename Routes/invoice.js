@@ -7,7 +7,7 @@ const invoiceValidation = require("../Middlewares/invoiceMW")
 const authenticationMW=require("./../Middlewares/Authorization")
 
 router.route("/invoice")
-    //.all(authenticationMW.isAdmin)
+    
     .get(authenticationMW.isEmployeeOrAdmin,
         controller.getAllInvoices)
     .post(
@@ -16,7 +16,9 @@ router.route("/invoice")
         errorValidator,
         controller.addInvoice
     )
-    .delete(controller.deleteInvoiceByFilter);
+    .delete(
+        authenticationMW.isAdmin,
+        controller.deleteInvoiceByFilter);
     
         
 router.route("/invoice/:id")
@@ -41,5 +43,7 @@ router.route("/invoice/:id")
         controller.deleteInvoice
     );
  router.route("/displayinvoice/:id")
-        .get(controller.displayInvoiceById)
+     .get(
+         authenticationMW.isEmployeeOrAdmin,
+         controller.displayInvoiceById)
  module.exports= router;
