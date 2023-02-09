@@ -77,7 +77,7 @@ exports.getAllMedicinces =async (request , response , next)=>{
     if (request.query.id) query._id = Number(request.query.id);
     if (request.query.name) query.medicineName = request.query.name;
     let sortField = request.query.sort || 'name';
-    console.log(query)
+    // console.log(query)
     if(request.role =="admin"){
         MedicineSchema.find(query)
         .then(data=>{
@@ -112,7 +112,7 @@ exports.updateMedicines =async (request,response,next)=>{
         const {name , company , speciality , description}= request.body;
 
         if(request.role =="admin"){
-            MedicineSchema.updateOne({query},
+            MedicineSchema.updateOne(query,
                 {$set:{
                     medicineName:name,
                     companyName:company,
@@ -152,7 +152,7 @@ exports.deleteMedicine =async (request , response , next)=>{
         if (request.query.name) query.medicineName = request.query.name;
 
         if(request.role =="admin"){
-           await MedicineSchema.deleteMany({query})
+           await MedicineSchema.deleteMany(query)
                 .then(res=>{
                     response.status(200).json({message:"Medicine deleted"});
                 })
