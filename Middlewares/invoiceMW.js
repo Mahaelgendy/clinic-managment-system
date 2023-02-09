@@ -142,9 +142,9 @@ module.exports.generateInvoicePDF =(invoice)=>{
     doc.setFontSize(12,"normal");
     doc.setTextColor(0, 0, 0);
     for (var i = 0; i < data.length; i++) {
-    for (var j = 0; j < data[i].length; j++) {
-        doc.text(25 + j *35, 120 + i * 20, data[i][j]);
-    }
+        for (var j = 0; j < data[i].length; j++) {
+            doc.text(25 + j *35, 120 + i * 20, data[i][j]);
+        }
     }
     doc.line(15,120 + data.length * 20, 195, 120 + data.length * 20);
 
