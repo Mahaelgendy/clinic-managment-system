@@ -8,6 +8,16 @@ require ("../Models/patientModel");
 const userSchema = mongoose.model("users");
 const patientSchema = mongoose.model("patients");
 
+// const sortPatients = (data,query)=>{
+//     let sortBy = query.sortBy||'email';
+//     let order = query.order ||"asc";
+//     let orderValue = order ==="asc"? 1:-1
+
+//     return data.sort((a,b)=>{
+//         if(a[sortBy]<b[sortBy]) return -1*orderValue;
+//         if(a[sortBy]>b[sortBy]) return 1*orderValue;
+//     });
+// }
 
 const sortPatients = (data,query)=>{
     let sortBy = query.sortBy||'_id';
@@ -49,6 +59,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
     const limit = request.query.limit *1 || 3;
     const skip =(page - 1) * limit;
 
+    // let allPatients= await sortPatients(allPatients, request.query)
 
     patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}}).skip(skip).limit(limit)
                         .then((data)=>{

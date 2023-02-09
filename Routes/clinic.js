@@ -21,7 +21,7 @@ router.route("/clinic/:id")
     // .delete(
     //     authenticationMW.isAdmin,
     //     controller.deleteClinicById)
-    // .get(controller.getClinicById)
+    //.get(controller.getClinicById)
     .delete(
         authenticationMW.isAdmin,
         controller.deleteClinicById)

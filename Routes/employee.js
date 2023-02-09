@@ -36,7 +36,7 @@ router.route("/employees/:id")
             validator,
             controller.getEmployeeByID)
     .delete( 
-            authenticationMW.isEmployeeOrAdmin,
+            authenticationMW.isAdmin,
             employeeValidation.paramvalidation,
             validator,
             controller.deleteEmployeeByID)

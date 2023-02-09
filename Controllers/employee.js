@@ -42,7 +42,6 @@ module.exports.getAllEmployees = async (request,response,next)=>{
     
     const query = {}; 
     if(request.query.id) query._id = Number(request.query.id);
-    if(request.query.clinicId) query.clinicId = Number(request.query.clinicId);
     if(request.query.salary) query.salary = Number(request.query.salary);
     if(request.query.position) query.position = request.query.position
 
@@ -50,7 +49,7 @@ module.exports.getAllEmployees = async (request,response,next)=>{
     const limit = request.query.limit *1 || 3;
     const skip =(page - 1) * limit;
 
-   employeeSchema.find({}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1,email:1}})
+   employeeSchema.find(query).populate({path:"employeeData",select:{fullName:1,age:1,gender:1,email:1}})
                             .populate({path:"clinicId"}).skip(skip).limit(limit)
                             .then((data)=>{
                            let employeeAfterSort= sortEmployees(data, request.query)
@@ -195,7 +194,21 @@ module.exports.getEmployeeByID = (request, response, next)=>{
                   .then((data)=>{
                         if(data!=null)
                         {
-                            response.status(200).json(data);
+                            console.log((request.id ))
+                            console.log(data.employeeData._id)
+                            if(request.role == "employee" && (data.employeeData._id == request.id) ){
+                                console.log("you are employee , authemticated")
+                                response.status(200).json(data);
+                            }
+                            else if(request.role == "admin"){
+                                console.log("you are admin , authourized")
+                                response.status(200).json(data);
+                            }
+                            else{
+                                response.json({message:"You aren't authourized to see this data"});
+
+                            }
+
                         }
                         else
                         {
