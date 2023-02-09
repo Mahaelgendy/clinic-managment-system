@@ -11,7 +11,7 @@ router.route("/login")
 
 router.route("/signUp")   
         .post(
-           upload.single("profile"),
+           upload.single("image"),
             registerValidation.userbodyValidation,
             validator,
             controller.signUp)

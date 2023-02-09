@@ -123,7 +123,6 @@ module.exports.addEmployee =async (request, response, next)=>{
             gender:request.body.gender,
             address:request.body.address,
             role:empRole,
-            clinicId:request.body.clinic_Id,
             image:request.file.path
         });
         user.save()
@@ -133,7 +132,8 @@ module.exports.addEmployee =async (request, response, next)=>{
                     employeeData:result._id,
                     salary:request.body.employeeSalary,
                     phone:request.body.employeePhone,
-                    position:request.body.employeePosition
+                    position:request.body.employeePosition,
+                    clinicId:request.body.clinic_Id,
                 });
                 newEmployee.save()
                             .then(()=>{

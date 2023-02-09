@@ -5,10 +5,12 @@ const mongoose = require('mongoose');
 
 require('../Models/userModel');
 require('../Models/doctorModel');
-
+require('../Models/clinicModel')
 const UserSchema = mongoose.model('users');
 const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
+const serviceSchema = mongoose.model("services")
+
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
@@ -156,9 +158,12 @@ exports.deleteDoctorById = (request , response , next)=>{
             .then(()=>{
                 SchedulaSchema.deleteMany({doc_id:doctorId})
                 .then(()=>{
-                    DoctorSchema.findByIdAndDelete({_id:doctorId})
+                    serviceSchema.deleteMany({doctor_id:doctorId})
                     .then(()=>{
-                        response.status(200).json({message:"Doctor deleted"});
+                        DoctorSchema.findByIdAndDelete({_id:doctorId})
+                        .then(()=>{
+                            response.status(200).json({message:"Doctor deleted"});
+                        })
                     })
                 })
                 
@@ -176,29 +181,21 @@ exports.updateDoctorById = async (request , response , next)=>{
 
         const doctorId = request.params.id;
 
-        const emailExist = await UserSchema.findOne({email:request.body.email});
-        if(emailExist){
-            return response.status(400).json({message:"Email is already used"});
-        }
-        const duplicateName = await UserSchema.findOne({fullName:request.body.fullName})
+        const duplicateName = await UserSchema.findOne({fullName:request.body.fullName});
         if(duplicateName){
             return response.status(400).json({message:"This name is already used, please choose another name"});
         }
+        const {fullName,age,address,specialization,price} = request.body;
 
-        const {fullName,email,age,address,specialization,price} = request.body;
-
-
-        const doctor = await DoctorSchema.updateOne({_id:doctorId},
+        const doctor = await DoctorSchema.findByIdAndUpdate({_id:doctorId},
             {$set:{
                 specialization:specialization,
                 price:price
             }});
             
-
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
             {$set:{
                 fullName:fullName,
-                email:email,
                 age:age,
                 address:address,
                 image:request.file.path
@@ -224,7 +221,7 @@ exports.updateDoctorByEmail = async (request , response , next)=>{
         const emailparam = request.params.email;
         const {fullName,email,age,address,specialization,price} = request.body;
         
-        const user = await UserSchema.updateOne({email:emailparam},
+        const user = await UserSchema.findOneAndUpdate({email:emailparam},
             {$set:{
                 fullName:fullName,
                 email:email,

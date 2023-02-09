@@ -6,24 +6,22 @@ require("./../Models/doctorModel");
 require("./../Models/appointmentModel");
 require("./../Models/clinicModel");
 require("./../Models/patientModel");
-require("./../Models/employeeModel");
 
 const appointmentSchema = mongoose.model("appointments");
 const scheduleSchema = mongoose.model("schedules");
 const doctorSchema = mongoose.model("doctors");
 const clinicSchema= mongoose.model("clinics");
 const patientSchema= mongoose.model("patients");
-const employeeSchema = mongoose.model('employees');
 const dateTimeMW = require("./../middlewares/dateTimeMW");
 
 
 exports.appointmentBodyValidation = [
-    body("doctorId").isInt().notEmpty().withMessage("Doctor ID must be Numeric and required"),
-    body("clinicId").isInt().notEmpty().withMessage("ClinicID must be Numeric and required"),
-    body("patientId").isInt().notEmpty().withMessage("Patient ID must be Numeric and required"),
-    body("employeeId").isInt().notEmpty().withMessage("Employee ID must be Numeric and required"),
-    body("status").isIn(['First Time' , 'Follow Up']).notEmpty().withMessage("Status should be First Time or Follow Up"),
-    body("reservationMethod").isIn(['Online' , 'Offline']).notEmpty().withMessage("Reservation method should be Either Online or Offline"),
+    body("doctorId").isInt().withMessage("Doctor ID must be Numeric and required").optional(),
+    body("clinicId").isInt().withMessage("ClinicID must be Numeric and required").optional(),
+    body("patientId").isInt().withMessage("Patient ID must be Numeric and required").optional(),
+    body("employeeId").isInt().withMessage("Employee ID must be Numeric and required").optional(),
+    body("status").isIn(['First Time' , 'Follow Up']).notEmpty().withMessage("Status should be First Time or Follow Up").optional(),
+    body("reservationMethod").isIn(['Online' , 'Offline']).notEmpty().withMessage("Reservation method should be Either Online or Offline").optional(),
     body("date").isString().notEmpty().matches(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/).withMessage("Date must be string in format YYYY-MM-DD"),
     body("from").isString().notEmpty().matches(/^(?:(?:[0-1][0-9]|2[0-3]):[0-5]?[0-9](?::[0-5]?[0-9])?)|(?:[0-9]:[0-5]?[0-9](?::[0-5]?[0-9])?)$/).withMessage("From time must be string in format hh:mm:ss"),
 ]
@@ -83,13 +81,13 @@ module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,
         return null;
       }
 }
-module.exports.checkAllUsersAvailability=async(doctorId,clinicId,patientId,employeeId)=>{
+module.exports.checkAllUsersAvailability=async(doctorId,clinicId,patientId)=>{
     let doctor = await doctorSchema.findById(doctorId);
     let clinic = await clinicSchema.findById(clinicId);
     let patient = await patientSchema.findById(patientId);
-    let employee = await employeeSchema.findById(employeeId);
-    console.log(doctor, clinic,patient,employee)
-    if(doctor != null && clinic!= null && patient != null && employee!= null )
+    // let employee = await employeeSchema.findById(employeeId);
+
+    if(doctor != null && clinic!= null && patient != null )
         return true 
     else
         return false

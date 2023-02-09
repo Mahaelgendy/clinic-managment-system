@@ -7,7 +7,7 @@ const express = require('express');
 // const validator = require("../Middlewares/")
 const router = express.Router();
 
-router.route("/prescription")
+router.route("/prescriptions")
     .get(authenticationMW.isDoctorOrAdminOrPatient,
         controller.getAllPrescriptions)
     .post(
@@ -19,7 +19,7 @@ router.route("/prescription")
         authenticationMW.isDoctorOrAdmin,
         controller.deleteAllPrescription)
  
-router.route("/prescription/:id")
+router.route("/prescriptions/:id")
     .get(
         authenticationMW.isDoctorOrAdminOrPatient,
         controller.getPrescriptionById)
@@ -32,13 +32,13 @@ router.route("/prescription/:id")
     .delete(authenticationMW.isDoctorOrAdmin,
         controller.deletePrescriptionById)
 
-router.route("/prescription/name/:name")
+router.route("/prescriptions/name/:name")
     .get(
         authenticationMW.isDoctorOrAdminOrPatient,
         controller.getAllPrescriptionsForPatient)
 
 
-router.route("/prescription/dname/:name/pname/:pname")
+router.route("/prescriptions/dname/:name/pname/:pname")
     .post(
         authenticationMW.isDoctor,
         validator.prescriptionValidation,

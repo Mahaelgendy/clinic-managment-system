@@ -24,7 +24,6 @@ module.exports.getAllInvoices = (request, response, next) => {
     const query = invoiceMW.getQueryToFilterWith(request);
 
     invoiceSchema.find(query)
-    .populate({ path: "clinic_id" })
     .populate({
         path: 'doctor_id',
         select: 'userData',
@@ -46,8 +45,6 @@ module.exports.getAllInvoices = (request, response, next) => {
     .populate({path: "appointment_id",select: "date"})
     .populate({path: "clinic_id",select: {clinicName:1}})
     .populate({path: "service_id",select:{name:1}})
-
-
         .then((data) => {
             if(request.role == 'employee'){
                 const filteredData = data.filter(invoice => {
@@ -159,7 +156,7 @@ module.exports.addInvoice = async(request, response, next) => {
             
             try {
                 let charge = await stripe.charges.create({
-                amount: 2000,
+                amount: totalCost(),
                 currency: "usd",
                 description: "An example charge",
                 source: createdToken.id
@@ -287,27 +284,27 @@ module.exports.deleteInvoiceByFilter = (request, response, next) => {
 module.exports.displayInvoiceById = (request, response, next) => {
     invoiceSchema.find({ _id: request.params.id })
         .populate({
-            path: "doctor_id",
-            select: { userData:1,_id:0 },
-            model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
-        })
-        .populate({
-            path: "patient_id",
-            select: { userData:1,_id:0 },
-            model: "doctors",
-            populate: { path: "userData", select: {fullName:1,email:1,address:1,_id:0 }, model: "users" }
+            path: 'doctor_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: {fullName:1 }, model: 'users'}
         })
         .populate({ 
+            path: "patient_id",
+            select: 'patientData',
+            model: 'patients',
+            populate: {path: 'patientData', select: {fullName:1,email:1,address:1}, model: 'users'}
+        })
+        .populate({
             path: "employee_id",
-            select: {userData:1,_id:0 },
-            model: "doctors",
-            populate: { path: "userData", select: {fullName:1,_id:0 }, model: "users" }
+            select: 'employeeData',
+            model: 'employees',
+            populate: {path: 'employeeData', select: {fullName:1}, model: 'users'}
         })
         .populate({path: "appointment_id",select: "date"})
-        .populate({path: "clinic_id",select: {clinicName:1,_id:0}})
-        .populate({path: "service_id", select: { name: 1, _id: 0 } })
-        
+        .populate({path: "clinic_id",select: {clinicName:1}})
+        .populate({path: "service_id",select:{name:1}})
+
         .then((data) => {
             if (data != null) {
                 invoiceMW.generateInvoicePDF(data[0]);

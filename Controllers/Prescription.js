@@ -1,10 +1,12 @@
 const {request , response} = require("express");
 const { cookie } = require("express-validator");
 const mongoose = require("mongoose");
+
 require("../Models/PrescriptionModel");
 require("../Models/userModel");
 require("../Models/doctorModel");
 require("../Models/patientModel")
+
 const prescriptionSchema =  mongoose.model("prespictions");
 const userSchema = mongoose.model("users");
 const doctorSchema = mongoose.model("doctors");
@@ -18,7 +20,7 @@ exports.getAllPrescriptions =async (request , response, next)=>{
     console.log(request.role)
     if(request.role=="admin"){
         prescriptionSchema.find(query)
-        .populate({path:"doctor_id", select:{"specialization":1, "price":1} ,populate:{path:"userData",select:{"fullName":1, "role":1}}})
+        .populate({path:"doctor_id", select:{"specialization":1, "price":1} ,populate:{path:"userData",select:{"fullName":1}}})
         .populate({path:"patient_id" ,populate:{path:"patientData", select:{"fullName":1}}})
         .populate({path:"medicine_id", select:{"medicineName":1}})
             .then(res=>{
@@ -33,12 +35,12 @@ exports.getAllPrescriptions =async (request , response, next)=>{
         query.doctor_id =doctotid._id;
         console.log(query)
         prescriptionSchema.find(query)
-        .populate({path:"doctor_id", select:{"specialization":1, "price":1} ,populate:{path:"userData",select:{"fullName":1, "role":1}}})
+        .populate({path:"doctor_id", select:{"specialization":1, "price":1} ,populate:{path:"userData",select:{"fullName":1}}})
         .populate({path:"patient_id" ,populate:{path:"patientData", select:{"fullName":1}}})
         .populate({path:"medicine_id", select:{"medicineName":1}})
             .then(res=>{
                 if(res != null){
-                    console.log("Autherized doctor ");
+                    prescriptionMW.sortPrescription(res,request.query)
                     response.status(201).json(res)
                 }
                 else{
@@ -60,7 +62,7 @@ exports.getAllPrescriptions =async (request , response, next)=>{
             .populate({path:"medicine_id", select:{"medicineName":1}})
                 .then(res=>{
                     if(res != null){
-                        console.log("Autherized patient ");
+                        prescriptionMW.sortPrescription(res,request.query)
                         response.status(201).json(res)
                     }
                     else{
@@ -82,15 +84,12 @@ exports.getPrescriptionById =async (request, response ,next)=>{
         if(data != null){
             if(data.patient_id.patientData!= null){
                 if((data.doctor_id.userData._id == request.id) && (request.role =="doctor")){
-                    console.log("doctor "+data)
                     response.status(201).json({data})
                 }
                 else if((data.patient_id.patientData._id == request.id) && (request.role =="patient")){
-                    console.log("patient "+ data)
                     response.status(201).json({data})
                 }
                 else if ((request.role =="admin")){
-                    console.log("admin")
                     response.status(201).json({data})
                 }else{
                     response.status(201).json({"massage":"not Atherized"});
@@ -107,47 +106,55 @@ exports.getPrescriptionById =async (request, response ,next)=>{
     .catch(error => next(error));
 }
 
-exports.addPrescription =(request, response, next)=>{
-    let newPrescription = new prescriptionSchema({
-        diagnosis:request.body.diagnosis,
-        currentExamination:dateTimeMW.getDateFormat(new Date()),
-        nextExamination:request.body.nextExamination,
-        doctor_id:request.body.doctor_id,
-        patient_id:request.body.patient_id,
-        medicine_id:request.body.medicine_id
-    });
-    newPrescription.save()
-        .then(result =>{
-            response.status(201).json({Message:"new prescription Added"});
-        })
-        .catch(error => next(error));
+exports.addPrescription =async (request, response, next)=>{
+    const doctor = await doctorSchema.findOne({userData: request.id});
+    if(doctor._id == request.body.doctor_id){
+        let newPrescription = new prescriptionSchema({
+            diagnosis:request.body.diagnosis,
+            currentExamination:dateTimeMW.getDateFormat(new Date()),
+            nextExamination:request.body.nextExamination,
+            doctor_id:request.body.doctor_id,
+            patient_id:request.body.patient_id,
+            medicine_id:request.body.medicine_id
+        });
+        newPrescription.save()
+            .then(result =>{
+                response.status(201).json({Message:"new prescription Added"});
+            })
+            .catch(error => next(error));
+    }else{
+        response.status(201).json({"massage":"not Atherized"});
+    }
 }
 
-exports.deleteAllPrescription = (request , response ) =>{
+exports.deleteAllPrescription = async (request , response ) =>{
     const query = prescriptionMW.getQueryToFindWith(request);
     if(request.role =="admin"){
         prescriptionSchema.deleteMany(query)
         .then(result=>{
-            console.log("admin")
             response.status(200).json({message:"Delete all prescription for doctor"});
         })
         .catch(error=> next(error));
     }
     else if(request.role=="doctor"){
-        let doctor = doctorSchema.findOne({"userData":request.id},{"_id":1,"userData":1});
+        let doctor = await doctorSchema.findOne({"userData":request.id},{"_id":1,"userData":1});
         if(doctor != null){
             query.doctor_id = doctor._id;
             prescriptionSchema.deleteMany(query)
             .then(result=>{
-                console.log("Delete all prescription for doctor")
-                response.status(200).json({message:"Delete all prescription for doctor"});
+                if(result != null){
+                    response.status(200).json({message:"Delete all prescription for doctor"});
+                }
+                else{
+                    response.status(200).json({message:"no prescriptions to be deleted"});
+                }
             })
             .catch(error=> next(error));
         }
     }
 }
 
-exports.deletePrescriptionById = (request , response ) =>{
+exports.deletePrescriptionById = async (request , response ) =>{
     if(request.role =="admin"){
         prescriptionSchema.findByIdAndDelete({"_id":request.params.id})
         .then(result =>{
@@ -155,19 +162,22 @@ exports.deletePrescriptionById = (request , response ) =>{
             if(result ==null){
                 response.status(401).json({message:" not Found"});
             }else{
-                console.log("Delete  prescription")
                 response.status(200).json({message:"Delete  prescription from admin"});
             }
         })
         .catch(error=> next(error));
     }
     else if(request.role=="doctor"){
-        let doctor = doctorSchema.findOne({"userData":request.id},{"_id":1,"userData":1});
+        let doctor = await doctorSchema.findOne({"userData":request.id},{"userData":1});
         if(doctor != null){
-            prescriptionSchema.deleteOne({"doctor_id":doctor._id , "_id":request.params.id})
+            prescriptionSchema.findOneAndDelete({"doctor_id":doctor._id , "_id":request.params.id})
             .then(result=>{
-                console.log("Delete  prescription for doctor")
-                response.status(200).json({message:"Delete all prescription for doctor"});
+                if(result != null){
+                    response.status(200).json({message:"Delete all prescription for doctor"});
+                }
+                else{
+                    response.status(200).json({message:"prescription does not exist or you are not authorized"});
+                }
             })
             .catch(error=> next(error));
         }
@@ -183,7 +193,6 @@ exports.updatePrescription= (request,response , next)=>
             diagnosis:request.body.diagnosis,
             currentExamination:dateTimeMW.getDateFormat(new Date()),
             nextExamination:request.body.nextExamination,
-            doctor_id:request.body.clinic_location,
             patient_id:request.body.clinic_id,
             medicine_id:request.body.medicine_id
         }})
@@ -235,15 +244,12 @@ exports.getAllPrescriptionsForPatient = async (request, response , next)=>{
                 if(data != null){
                     if(data.patient_id.patientData!= null){
                         if((data.doctor_id.userData._id == request.id) && (request.role =="doctor")){
-                            console.log("doctor "+data)
                             response.status(201).json({data})
                         }
                         else if((data.patient_id.patientData._id == request.id) && (request.role =="patient")){
-                            console.log("patient "+ data)
                             response.status(201).json({data})
                         }
                         else if ((request.role =="admin")){
-                            console.log("admin")
                             response.status(201).json({data})
                         }else{
                             response.status(201).json({"massage":"not Atherized"});

@@ -22,7 +22,7 @@ router.route("/doctors/:id")
         controller.deleteDoctorById)
     .patch(
         authenticationMW.isDoctorOrAdmin,
-        upload.single("profile"),
+        upload.single("image"),
         doctorValidation.paramValidation,
         doctorValidation.doctorValidataion,
         userValidation.userbodyValidation,
@@ -37,7 +37,7 @@ router.route('/doctors')
     
     .post(
         authenticationMW.isAdmin,
-        upload.single("profile"),
+        upload.single("image"),
         userValidation.userbodyValidation,
         doctorValidation.doctorValidataion,
         validator,
@@ -52,7 +52,7 @@ router.route("/doctors/email/:email")
         )
         .patch(
             authenticationMW.isDoctorOrAdmin,
-            upload.single("profile"),
+            upload.single("image"),
             userValidation.userEmailValidation,
             doctorValidation.doctorValidataion,
             userValidation.userbodyValidation,

@@ -19,7 +19,7 @@ router.route("/users")
         controller.deleteUsers)
     .patch(
         authenticationMW.isAdmin,
-        upload.single("profile"),
+        upload.single("image"),
         userValidation.userbodyValidation,
         validator,
         controller.updateUser)
