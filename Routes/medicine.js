@@ -19,11 +19,11 @@ router.route('/medicines')
     .delete(
         authenticationMW.isDoctorOrAdmin,
         controller.deleteMedicine)
+    
+    .patch(
+        authenticationMW.isDoctorOrAdmin,
+        medicineValidation.bodyValidation,
+        validator,
+        controller.updateMedicines)
 
-router.route("/medicines/:id")
-        .patch(
-            authenticationMW.isDoctorOrAdmin,
-            medicineValidation.bodyValidation,
-            validator,
-            controller.updateMedicines)
 module.exports = router
