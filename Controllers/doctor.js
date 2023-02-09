@@ -5,10 +5,11 @@ const mongoose = require('mongoose');
 
 require('../Models/userModel');
 require('../Models/doctorModel');
-
+r
 const UserSchema = mongoose.model('users');
 const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
+
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
@@ -156,6 +157,7 @@ exports.deleteDoctorById = (request , response , next)=>{
             .then(()=>{
                 SchedulaSchema.deleteMany({doc_id:doctorId})
                 .then(()=>{
+
                     DoctorSchema.findByIdAndDelete({_id:doctorId})
                     .then(()=>{
                         response.status(200).json({message:"Doctor deleted"});
@@ -174,8 +176,6 @@ exports.deleteDoctorById = (request , response , next)=>{
 exports.updateDoctorById = async (request , response , next)=>{
     try{
 
-        const doctorId = request.params.id;
-
         const emailExist = await UserSchema.findOne({email:request.body.email});
         if(emailExist){
             return response.status(400).json({message:"Email is already used"});
@@ -185,10 +185,12 @@ exports.updateDoctorById = async (request , response , next)=>{
             return response.status(400).json({message:"This name is already used, please choose another name"});
         }
 
+        const doctorId = request.params.id;
+
         const {fullName,email,age,address,specialization,price} = request.body;
 
 
-        const doctor = await DoctorSchema.updateOne({_id:doctorId},
+        const doctor = await DoctorSchema.findByIdAndUpdate({_id:doctorId},
             {$set:{
                 specialization:specialization,
                 price:price
@@ -224,7 +226,7 @@ exports.updateDoctorByEmail = async (request , response , next)=>{
         const emailparam = request.params.email;
         const {fullName,email,age,address,specialization,price} = request.body;
         
-        const user = await UserSchema.updateOne({email:emailparam},
+        const user = await UserSchema.findByIdAndUpdate({email:emailparam},
             {$set:{
                 fullName:fullName,
                 email:email,
