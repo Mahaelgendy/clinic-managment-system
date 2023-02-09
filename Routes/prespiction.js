@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 
 router.route("/prescription")
-    .get(authenticationMW.isDoctorOrAdmin,
+    .get(authenticationMW.isDoctorOrAdminOrPatient,
         controller.getAllPrescriptions)
     .post(
         authenticationMW.isDoctor,
@@ -24,11 +24,13 @@ router.route("/prescription/:id")
         authenticationMW.isDoctorOrAdminOrPatient,
         controller.getPrescriptionById)
     .patch(
-        authenticationMW.isDoctorOrAdmin,
+        authenticationMW.isDoctor,
         validator.prescriptionValidation,
         errorValidation,
         controller.updatePrescription
     )
+    .delete(authenticationMW.isDoctorOrAdmin,
+        controller.deletePrescriptionById)
 
 router.route("/prescription/name/:name")
     .get(
@@ -38,7 +40,7 @@ router.route("/prescription/name/:name")
 
 router.route("/prescription/dname/:name/pname/:pname")
     .post(
-        authenticationMW.isDoctorOrAdminOrPatient,
+        authenticationMW.isDoctor,
         validator.prescriptionValidation,
         errorValidation,
         controller.addPrescriptionByPatient)

@@ -190,7 +190,7 @@ module.exports.deleteEmployeeByID =  (request, response, next)=>{
 
 
 module.exports.getEmployeeByID = (request, response, next)=>{
-    employeeSchema.findOne({_id:request.params.id}).populate({path:"employeeData",select:{fullName:1}})
+    employeeSchema.findOne({_id:request.params.id}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1,email:1}})
                   .then((data)=>{
                         if(data!=null)
                         {
