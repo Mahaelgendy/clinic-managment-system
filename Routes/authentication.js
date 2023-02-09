@@ -10,10 +10,9 @@ router.route("/login")
 
 router.route("/signUp")   
         .post(
-            upload.single("profile"),
+           upload.single("profile"),
             registerValidation.userbodyValidation,
             validator,
             controller.signUp)
-
 
 module.exports = router;

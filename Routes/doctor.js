@@ -19,7 +19,7 @@ router.route("/doctors/:id")
         authenticationMW.isAdmin,
         doctorValidation.paramValidation,
         validator,
-        controller.deleteDoctor)
+        controller.deleteDoctorById)
     .patch(
         authenticationMW.isDoctorOrAdmin,
         upload.single("profile"),
@@ -59,5 +59,7 @@ router.route("/doctors/email/:email")
             validator,
             controller.updateDoctorByEmail
         )
+
+
 module.exports = router
 
