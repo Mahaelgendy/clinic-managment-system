@@ -9,17 +9,33 @@ require("../Models/clinicModel");
 const userSchema = mongoose.model("users");
 const employeeSchema = mongoose.model("employees");
 const clinicSchema = mongoose.model("clinics");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const sortEmployees = (data,query)=>{
     let sortBy = query.sortBy||'salary';
     let order = query.order ||"asc";
     let orderValue = order ==="asc"? 1:-1
 
-    
-    return data.sort((a,b)=>{
-        if(a[sortBy]<b[sortBy]) return -1*orderValue;
-        if(a[sortBy]>b[sortBy]) return 1*orderValue;
-    });
+    if (sortBy=='fullName' || sortBy == 'fullname'){
+        data.sort((a, b) => {
+            if (a.userData.fullName < b.userData.fullName) {
+                return -1*orderValue
+            }
+            if (a.userData.fullName > b.userData.fullName) {
+                return 1*orderValue
+            }
+            return 0;
+        });
+    }
+
+    else
+    {    
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
 };
 
 module.exports.getAllEmployees = async (request,response,next)=>{
@@ -44,45 +60,95 @@ module.exports.getAllEmployees = async (request,response,next)=>{
 };
 
 
-module.exports.addEmployee = (request, response, next)=>{
-    userSchema.findOne({email:request.body.email})
-              .then((data)=>{
-                if(data!=null&& data.role ==="employee")
-                { 
-                    employeeSchema.find({}).populate({path:"employeeData"})
-                                    .findOne({employeeData:data._id})
-                                    .then((employee)=>{
+// module.exports.addEmployee = (request, response, next)=>{
+//     userSchema.findOne({email:request.body.email})
+//               .then((data)=>{
+//                 if(data!=null)
+//                 { 
+//                     employeeSchema.find({}).populate({path:"employeeData"})
+//                                     .findOne({employeeData:data._id})
+//                                     .then((employee)=>{
 
-                                        if(employee == null)
-                                        {
-                                            let newEmployee=new employeeSchema({
-                                                salary:request.body.employeeSalary,
-                                                phone:request.body.employeePhone,
-                                                position:request.body.employeePosition,
-                                                employeeData:data._id,
-                                                clinicId:request.body.clinic_Id
-                                            });
-                                            newEmployee.save()
-                                            .then(result=>{
-                                                response.status(201).json({message:"added new Employee is done"});
-                                            })
-                                            .catch(error=>next(error))
-                                        }
-                                        else
-                                        {
-                                            response.status(404).json({message:"This employee already exsists"})
-                                        }
-                                    })
+//                                         if(employee == null)
+//                                         {
+//                                             let newEmployee=new employeeSchema({
+//                                                 salary:request.body.employeeSalary,
+//                                                 phone:request.body.employeePhone,
+//                                                 position:request.body.employeePosition,
+//                                                 employeeData:data._id,
+//                                                 clinicId:request.body.clinic_Id
+//                                             });
+//                                             newEmployee.save()
+//                                             .then(result=>{
+//                                                 response.status(201).json({message:"added new Employee is done"});
+//                                             })
+//                                             .catch(error=>next(error))
+//                                         }
+//                                         else
+//                                         {
+//                                             response.status(404).json({message:"This employee already exsists"})
+//                                         }
+//                                     })
 
-                }
-                else
-                {
-                    response.status(404).json({message:"This Email does not exsist or role does not employee"})
-                }
-              })
-              .catch(error=>next(error))
-};
+//                 }
+//                 else
+//                 {
+//                     response.status(404).json({message:"This Email does not exsist or role does not employee"})
+//                 }
+//               })
+//               .catch(error=>next(error))
+// };
 
+module.exports.addEmployee =async (request, response, next)=>{
+    let employeeExists = await userSchema.findOne({email:request.body.email});
+
+    if(employeeExists)
+    {
+        return response.status(400).json({message:"Employee  already exists"});
+    }
+
+    else
+    {
+        const password = request.body.password
+
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hash = bcrypt.hashSync(password, salt);
+
+        const empRole = "employee"
+        
+        const user = new userSchema({
+            fullName:request.body.fullName,
+            password:hash,
+            email:request.body.email,
+            age:request.body.age,
+            gender:request.body.gender,
+            address:request.body.address,
+            role:empRole,
+            clinicId:request.body.clinic_Id,
+            image:request.file.path
+        });
+        user.save()
+            .then((result)=>{
+                    console.log(result);
+                const newEmployee = new employeeSchema({
+                    employeeData:result._id,
+                    salary:request.body.employeeSalary,
+                    phone:request.body.employeePhone,
+                    position:request.body.employeePosition
+                });
+                newEmployee.save()
+                            .then(()=>{
+                                response.status(200).json({message:"New employee added successfully"});
+                            })
+                            .catch(err=>{
+                                userSchema.deleteOne({email:email})
+                                .then()
+                                next(err)})
+            })
+            .catch((error)=>next(error));
+        
+    }
+}
 
 module.exports.deleteEmployees = (request, response, next)=>{
     employeeSchema.deleteMany({})
@@ -139,6 +205,27 @@ module.exports.getEmployeeByID = (request, response, next)=>{
                   .catch(error=>next(error));
 };
 
+module.exports.getEmployeeByEmail = (request, response, next)=>{
+    const email = request.params.email;
+
+    userSchema.findOne({email:email})
+                .then((userData)=>{
+                    employeeSchema.findOne({employeeData:userData._id})
+                                    .populate({path:"employeeData"})
+                                        .then((data)=>{
+                                            if(data!=null)
+                                            {
+                                                response.status(200).json(data);
+                                            }
+                                            else
+                                            {
+                                                response.json({message:"Employee not Found"});
+                                            }
+                                        })
+                })
+                  .catch(error=>next(error));
+};
+
 module.exports.updateEmployee = (request, response, next)=>{
         employeeSchema.findByIdAndUpdate({
             _id:request.params.id
@@ -148,7 +235,8 @@ module.exports.updateEmployee = (request, response, next)=>{
                 salary:request.body.employeeSalary,
                 phone:request.body.employeePhone,
                 position:request.body.employeePosition,
-                clinicId:request.body.clinic_Id
+                clinicId:request.body.clinic_Id,
+                image:request.file.path
             }
         }).then(result=>{
             response.status(200).json({message:"updated"});

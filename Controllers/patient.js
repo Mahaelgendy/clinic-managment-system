@@ -14,11 +14,25 @@ const sortPatients = (data,query)=>{
     let order = query.order ||"asc";
     let orderValue = order ==="asc"? 1:-1
 
+    if (sortBy=='fullName' || sortBy == 'fullname'){
+        data.sort((a, b) => {
+            if (a.userData.fullName < b.userData.fullName) {
+                return -1*  orderValue
+            }
+            if (a.userData.fullName > b.userData.fullName) {
+                return 1*  orderValue
+            }
+            return 0;
+        });
+    }
     
-    return data.sort((a,b)=>{
-        if(a[sortBy]<b[sortBy]) return -1*orderValue;
-        if(a[sortBy]>b[sortBy]) return 1*orderValue;
-    });
+    else
+    {    
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+        });
+    }
 };
 
 
@@ -127,4 +141,17 @@ module.exports.getPatientByID = (request, response, next)=>{
                     })
                     .catch((error)=>next(error));
 
+};
+module.exports.getPatientByEmail = (request, response, next)=>{
+    const email = request.params.email;
+
+    userSchema.findOne({email:email})
+                .then((userData)=>{
+                    patientSchema.findOne({patientData:userData._id})
+                    .populate({path:"patientData"})
+                    .then((data)=>{
+                        response.status(200).json(data);
+                    })
+                })
+                 .catch((error)=>next(error));
 };

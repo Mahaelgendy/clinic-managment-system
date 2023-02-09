@@ -8,7 +8,8 @@ const authenticationMW=require("./../Middlewares/Authorization")
 
 router.route("/invoice")
     //.all(authenticationMW.isAdmin)
-    .get(authenticationMW.isEmployeeOrAdmin,
+    .get(
+        authenticationMW.isEmployeeOrAdmin,
         controller.getAllInvoices)
     .post(
         authenticationMW.isEmployee,
