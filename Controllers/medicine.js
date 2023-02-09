@@ -2,205 +2,178 @@
 const { request, response } = require('express');
 const mongoose = require('mongoose');
 require('./../Models/medicineModel');
+require ("../Models/userModel");
+require("../Models/doctorModel")
 const MedicineSchema = mongoose.model('medicines');
-
-//Post new medicine
+const usersSchema = mongoose.model('users');
+const doctorSchema = mongoose.model('doctors')
 exports.addMedicine = async(request,response , next)=>{
     const {name , company , speciality , description}= request.body;
+    
     const medicineFound = await MedicineSchema.findOne({speciality:speciality , medicineName:name});
     if(medicineFound){
         return response.status(400).json({message:"Medicine is already exist"});
     }
-    const newMedicine = new MedicineSchema({
-        medicineName:name,
-        companyName:company,
-        speciality: speciality,
-        description:description
-    });
+    const doctorspeciality = await doctorSchema.findOne({specialization:speciality , userData:request.id})
+    usersSchema.findOne({_id:request.id})
+        .then((data)=>{
+            if(data.role == "doctor"){
+                if(speciality ==doctorspeciality.specialization ){
+                    console.log("doctor")
+                    const newMedicine = new MedicineSchema({
+                        medicineName:name,
+                        companyName:company,
+                        speciality:doctorspeciality.specialization,
+                        description:description
+                    });
+                    newMedicine.save()
+                            .then(data=>{
+                                response.status(200).json({message:"Medicine Added"});
+                            })
+                            .catch(error=>next(error));
+                }
+                else{
+                    return response.status(401).json({message:"specialization does not match"}); 
+                }
+            }
+            else if(data.role =="admin"){
+                console.log("admin")
+                    const newMedicine = new MedicineSchema({
+                    medicineName:name,
+                    companyName:company,
+                    speciality: speciality,
+                    description:description
+                    });
+                    newMedicine.save()
+                            .then(data=>{
+                                response.status(200).json({message:"Medicine Added"});
+                            })
+                            .catch(error=>next(error));
+            }
+            else{
+                response.status(200).json({message:"you are not authrized"});
+            }
+        })
+        .catch(error=>next(error))
 
-    newMedicine.save()
-               .then(data=>{
-                response.status(200).json({message:"Medicine Added"});
-               })
-               .catch(error=>next(error));
+
 }
 
-exports.getAllMedicinces = (request , response , next)=>{
+
+const sortMedicine = (data,query)=>{
+    let sortBy = query.sortBy||'name';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+    
+    return data.sort((a,b)=>{
+        if(a[sortBy]<b[sortBy]) return -1*orderValue;
+        if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+};
+
+exports.getAllMedicinces =async (request , response , next)=>{
     const query = {};
     if (request.query.speciality) query.speciality = request.query.speciality;
     if (request.query.company) query.companyName = request.query.company;
     if (request.query.id) query._id = Number(request.query.id);
     if (request.query.name) query.medicineName = request.query.name;
 
-
-    MedicineSchema.find(query).sort({name:1})
-    .then(data=>{
-        if(data!=null){
-            response.status(200).json(data);
-        }
-    })
-    .catch(error=>next(error));
+    if(request.role =="admin"){
+        MedicineSchema.find(query)
+        .then(data=>{
+            if(data!=null){
+                sortMedicine(data,request.query);
+                response.status(200).json(data);
+            }
+        })
+        .catch(error=>next(error));
+    }
+    else if(request.role == "doctor"){
+        const doctorspeciality = await doctorSchema.findOne({ userData:request.id})
+        MedicineSchema.find({speciality:doctorspeciality.specialization})
+        .then(data=>{
+            if(data!=null){
+                console.log(data)
+                sortMedicine(data,request.query);
+                response.status(200).json(data);
+            }
+        })
+        .catch(error=>next(error));
+    }
 };
 
-exports.updateMedicines = (request,response,next)=>{
+exports.updateMedicines =async (request,response,next)=>{
     try{
         const query = {};
-        if (request.query.speciality) query.speciality = request.query.speciality;
         if (request.query.id) query._id = Number(request.query.id);
         if (request.query.name) query.medicineName = request.query.name;
 
         const {name , company , speciality , description}= request.body;
 
-        MedicineSchema.updateOne({query},
-            {$set:{
-                medicineName:name,
-                companyName:company,
-                speciality: speciality,
-                description:description
-            }})
-            .then(res=>{
-                response.status(200).json({message:"Medicine updated"});
-            })
-            .catch(err=>next(err));
-            
+        if(request.role =="admin"){
+            MedicineSchema.updateOne({query},
+                {$set:{
+                    medicineName:name,
+                    companyName:company,
+                    speciality: speciality,
+                    description:description
+                }})
+                .then(res=>{
+                    response.status(200).json({message:"Medicine updated"});
+                })
+                .catch(err=>next(err));
+        }
+        else if(request.role == "doctor"){
+            const doctorspeciality = await doctorSchema.findOne({ userData:request.id})
+            MedicineSchema.updateOne({speciality:doctorspeciality.specialization},
+                {$set:{
+                    medicineName:name,
+                    companyName:company,
+                    speciality: doctorspeciality.specialization,
+                    description:description
+                }})
+                .then(res=>{
+                    response.status(200).json({message:"Medicine updated"});
+                })
+                .catch(err=>next(err));
+        
+        }
     }catch(error){
         next(error)
     }
-    
 }
 
-exports.deleteMedicine = (request , response , next)=>{
+exports.deleteMedicine =async (request , response , next)=>{
     try{
         const query = {};
         if (request.query.speciality) query.speciality = request.query.speciality;
         if (request.query.id) query._id = Number(request.query.id);
         if (request.query.name) query.medicineName = request.query.name;
 
-        MedicineSchema.deleteMany(query)
-        .then(data=>{
-            if(data!=null){
-                response.status(200).json({message:"Medicine Deleted"});
-            }
-        })
-        .catch(error=>next(error));
-
-    }catch(err){
-        next(err)
+        if(request.role =="admin"){
+           await MedicineSchema.deleteMany(query)
+                .then(res=>{
+                    response.status(200).json({message:"Medicine deleted"});
+                })
+                .catch(err=>next(err));
+        }
+        else if(request.role == "doctor"){
+            const doctorspeciality = await doctorSchema.findOne({ userData:request.id})
+            query.speciality = doctorspeciality.specialization;
+            console.log(query);
+            MedicineSchema.deleteMany(query)
+                .then(res=>{
+                    response.status(200).json({message:"Medicine deleted for specialization"});
+                })
+                .catch(err=>next(err));
+        
+        }
+    }catch(error){
+        next(error)
     }
     
 };
 
-
-
-
-
-
-
-//===================================================================//
-// //Get medicine by speciality and name
-// exports.getMedicine = (request , response , next)=>{
-//     const speciality = request.params.speciality;
-//     const name = request.params.name;
-//     MedicineSchema.find({speciality:speciality , medicineName:name})
-//     .then(data=>{
-//         if(data!=null){
-//             response.status(200).json(data);
-//         }else{
-//             response.status(400).json({message:"No Medicines Found"});
-//         }
-//     }).catch(error=>next(error));
-// }
-
-// //Get all medicines by speciality
-// exports.getAllMedicine = (request , response , next)=>{
-//     const speciality = request.params.speciality;
-//     MedicineSchema.find({speciality:speciality})
-//     .then(data=>{
-//         if(data!=null){
-//             response.status(200).json(data);
-//         }else{
-//             response.status(400).json({message:"No Medicines Found in this Speciality"});
-//         }
-//     }).catch(error=>next(error));
-// }
-
-// //Get medicine by id
-// exports.getMedicineById = (request , response , next)=>{
-//     const id = request.params.id;
-//     MedicineSchema.find({_id:id})
-//     .then(data=>{
-//         if(data!=null){
-//             response.status(200).json(data);
-//         }else{
-//             response.status(400).json({message:"No Medicines Found"});
-//         }
-//     }).catch(error=>next(error));
-// }
-
-
-// //Update medicine by speciality and name
-// exports.updateMedicine= async (request , response , next)=>{
-//     try{
-//         const specialityParam = request.params.speciality;
-//         const nameParam = request.params.name;
-
-//         const {name,company,speciality,description}= request.body;
-
-//         MedicineSchema.updateOne({speciality:specialityParam , medicineName:nameParam},
-//             {$set:{
-//                 medicineName:name,
-//                 companyName:company,
-//                 speciality: speciality,
-//                 description:description
-//             }})
-//             .then(res=>{
-//                 response.status(200).json({message:"Medicine updated"});
-//             })
-//             .catch(err=>next(err));
-
-//     }catch(error){
-//         next(error)
-//     }
-    
-// }
-
-// //Update medicine by id
-// exports.updateMedicineById = async(request , response , next)=>{
-//     try{
-//         const id = request.params.id;
-//         const {name , company , speciality , description}= request.body;
-//         MedicineSchema.findByIdAndUpdate({_id:id},
-//             {$set:{
-//                 medicineName:name,
-//                 companyName:company,
-//                 speciality: speciality,
-//                 description:description
-//             }})
-//             .then(res=>{
-//                 response.status(200).json({message:"Medicine updated"});
-//             })
-//             .catch(err=>next(err));
-
-//     }catch(error){
-//         next(error)
-//     }
-
-// }
-
-// //Delete medicine by id
-// exports.deleteMediciteById = (request , response , next)=>{
-//     try{
-//         const id = request.params.id
-//         MedicineSchema.findByIdAndDelete({_id:id})
-//         .then(result=>{
-//             response.status(200).json({message:"Medicine Deleted"});
-//         })
-//         .catch(error=>next(error));
-
-//     }catch(err){
-//         next(err)
-//     }
-// }
 
 
 

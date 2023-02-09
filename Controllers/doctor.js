@@ -9,20 +9,64 @@ require('../Models/doctorModel');
 const UserSchema = mongoose.model('users');
 const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
-
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+const sortDoctor = (data,query)=>{
+    let sortBy = query.sortBy||'price';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+    console.log(orderValue);
+
+    if (sortBy=='fullName' || sortBy == 'fullname'){
+        data.sort((a, b) => {
+            if (a.userData.fullName < b.userData.fullName) {
+                return -1*orderValue
+            }
+            if (a.userData.fullName > b.userData.fullName) {
+                return 1*orderValue
+            }
+            return 0;
+        });
+    }
+    else{
+        return data.sort((a,b)=>{
+            if(a[sortBy]<b[sortBy]) return -1*orderValue;
+            if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+}
+
+}
+
 exports.getAllDoctors=(request , response , next)=>{
+
     const query = {};
-    if (request.query.specialization) query.clinic_id = request.query.specialization;
-    
+    if (request.query.specialization) query.specialization = request.query.specialization;
+    if (request.query.price) query.price = request.query.price;
+
     DoctorSchema.find(query)
     .populate({path:'userData'})
     .then(data=>{
-        response.status(200).json(data);
+        sortDoctor(data, request.query)
+        response.status(200).json({data});
     })
     .catch(error=>next(error));
+}
+
+exports.getDoctorByEmail=(request , response , next)=>{
+    const email = request.params.email;
+    
+    UserSchema.findOne({email:email})
+    .then(data=>{
+        DoctorSchema.findOne({userData:data._id})
+        .populate({path:"userData"})
+        .then(result=>{
+            response.status(200).json(result);
+        })
+    })
+    .catch(err=>next(err))
+   
+
 }
 
 exports.getDoctorById = (request , response , next)=>{
@@ -49,15 +93,22 @@ exports.getDoctorById = (request , response , next)=>{
     .catch(error=>next(error));
 }
 
-exports.addDoctor = async (request , response , next)=>{
-    const emailExist = await UserSchema.findOne({email:request.body.email});
 
+exports.addDoctor = async (request , response , next)=>{
+
+    const emailExist = await UserSchema.findOne({email:request.body.email});
+    
     if(emailExist){
-        return response.status(400).json({message:"User is already exist"});
+        return response.status(400).json({message:"Email is already used"});
     }
 
-    const {fullName,password,email,age,gender,address,role, specialization , price } = request.body;
+    const diplicatName = await UserSchema.findOne({fullName:request.body.fullName , role:request.body.role})
+    if(diplicatName){
+        return response.status(400).json({message:"This name is already used, please choose another name"});
+    }
 
+    const {fullName,password,email,age,gender,address, specialization , price } = request.body;
+    const role = 'doctor'
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
 
@@ -69,7 +120,7 @@ exports.addDoctor = async (request , response , next)=>{
         gender:gender,
         address:address,
         role:role,
-        image:request.file.path
+        image: request.file.path
     });
     
    
@@ -95,10 +146,10 @@ exports.addDoctor = async (request , response , next)=>{
     }
 }
 
-exports.deleteDoctor = (request , response , next)=>{
+
+exports.deleteDoctorById = (request , response , next)=>{
     try{
         const doctorId = request.params.id;
-        
         DoctorSchema.findById({_id:doctorId})
         .then(data=>{
             UserSchema.findByIdAndDelete({_id:data.userData})
@@ -119,14 +170,22 @@ exports.deleteDoctor = (request , response , next)=>{
     }
 }
 
-//Update Doctor by id
-exports.updateDoctor = async (request , response , next)=>{
-    try{
-        const doctorId = request.params.id;
-        const {fullName,password,email,age,gender,address,role,specialization,price, image} = request.body;
 
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(password, salt);
+exports.updateDoctorById = async (request , response , next)=>{
+    try{
+
+        const doctorId = request.params.id;
+
+        const emailExist = await UserSchema.findOne({email:request.body.email});
+        if(emailExist){
+            return response.status(400).json({message:"Email is already used"});
+        }
+        const duplicateName = await UserSchema.findOne({fullName:request.body.fullName})
+        if(duplicateName){
+            return response.status(400).json({message:"This name is already used, please choose another name"});
+        }
+
+        const {fullName,email,age,address,specialization,price} = request.body;
 
 
         const doctor = await DoctorSchema.updateOne({_id:doctorId},
@@ -139,12 +198,9 @@ exports.updateDoctor = async (request , response , next)=>{
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
             {$set:{
                 fullName:fullName,
-                password:hash,
                 email:email,
                 age:age,
-                gender:gender,
                 address:address,
-                role:role,
                 image:request.file.path
             }});
 
@@ -153,4 +209,41 @@ exports.updateDoctor = async (request , response , next)=>{
         next(error)
     }
 }
+
+exports.updateDoctorByEmail = async (request , response , next)=>{
+    try{
+
+        const emailExist = await UserSchema.findOne({email:request.body.email});
+        if(emailExist){
+            return response.status(400).json({message:"Email is already used"});
+        }
+        const duplicateName = await UserSchema.findOne({fullName:request.body.fullName})
+        if(duplicateName){
+            return response.status(400).json({message:"This name is already used, please choose another name"});
+        }
+        const emailparam = request.params.email;
+        const {fullName,email,age,address,specialization,price} = request.body;
+        
+        const user = await UserSchema.updateOne({email:emailparam},
+            {$set:{
+                fullName:fullName,
+                email:email,
+                age:age,
+                address:address,
+                image:request.file.path
+            }});
+
+        const doctor = await DoctorSchema.findOneAndUpdate({userData:user._id},
+            {$set:{
+                specialization:specialization,
+                price:price
+            }});
+
+            response.status(200).json({message:"Doctor Updated"})
+    }catch(error){
+        next(error)
+    }
+}
+
+
 

@@ -1,146 +1,92 @@
+
+const stripe = require('stripe')('sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn');
+
 const { response,request } = require("express");
 
-const stripe = require("stripe")("sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn");
-
-module.exports.payment=async ()=>{
-   // console.log(request.query);
- await stripe.tokens.create({
+module.exports.payment=async (request , response,next )=>{
+   await stripe.token.create({
         card: {
         number: '4242424242424242',
         exp_month: 	03,
         exp_year: 2030,
         cvc: '737'
-        }
-    }, async function(err, token) {
-        if (err) {
-            // handle the error
-            console.log(err);
-           // return err
-        } else {
-            // send the token in the request body
-            //console.log(token);
-            let y = token.id;
-           // console.log(token.id);
-            console.log(2)
-                await stripe.charges.create({
-                    amount: 2000,
-                    currency: "usd",
-                    description: "An example charge",
-                    source: token.id
-                }, async function (error, charge) {
-                    return charge.id
-                if (error) {
-                    //console.log("outttt")
-                    // console.log(error)
-                    // return error
-                    next(new Error({message:"transaction is not completed"}));
-                }
-                if (charge) {
-                    // console.log("inn")
-                      console.log("charge id::"+charge.id)
-                    //var transaction_id = charge.id
-                   // request.body.trans = charge.id;
-                    //request.trans = charge.id;
-                    // x = charge.id;
-                   // response.status(201).json(request.trans)
+    }
+    })//.then( (res , response)=>{
 
-                  // console.log("request.trans::" + request.trans)
-                  //hghg= charge.id
-                    //next()
-                    return charge.id
-                }
+    //     let param ={
+    //         amount: 2000,
+    //         currency: "usd",
+    //         description: "An example charge",
+    //         source: token.id
+    //     }
+    //      stripe.charges.create(param, function (error, charge) {
+    //     if (error) {
+    //         console.log("outttt")
+    //         console.log(error)
+    //         next(new Error({message:"transaction is not completed"}));
+    //     }
+    //     if (charge) {
+    //         console.log("charge id::"+charge.id)
+    //         var transaction_id = charge.id
+    //          return charge.id
+    //    }})
+    // })
+    // .then(data =>
+    //     console.log(data)
+    // )
+    .catch(err =>
+        console.log(err))
+    
+    // async function(err, token) {
+    //     if (err) {
+    //         // handle the error
+    //         console.log(err);
+    //        // return err
+    //     } else {
+    //         // send the token in the request body
+    //         //console.log(token);
+    //         let y = token.id
+    //        // console.log(token.id);
 
-            })
-        }
-  });
-    // return x
+    //     }
+    //}
 }
 
 
 
-/*
- module.exports.payment=function createToken(){ 
-            stripe.tokens.create({
-                card: {
-                number: '4242424242424242',
-                exp_month: 	03,
-                exp_year: 2030,
-                cvc: '737'
-                }
-            }, async function(err, token) {
-                if (err) {
-                    // handle the error
-                    console.log(err);
-                   // return err
-                } else {
-                    // send the token in the request body
-                    //console.log(token);
-                    let y = token.id
-                    console.log(token.id);
-                     await stripe.charges.create({
-                            amount: 2000,
-                            currency: "usd",
-                            description: "An example charge",
-                            source: token.id
-                     }, function (error, charge) {
-                                    if (error) {
-                                        console.log("outttt")
-                                       // console.log(error)
-                                        return error
-                                    }
-                                    if (charge) {
-                                        console.log("inn")
-                                      //  console.log(charge)
-                                        var transaction_id = charge.id
-                                          console.log(transaction_id)
-                                        return transaction_id
-                                    }
-                                    else {
-                                        console.log("wrong")
-                                        return err
-                                    }
-                                }
-                        )
-                    
-                }
-            });
-}*/
 
-// var x=createToken();
-// console.log(x);
+// exports.createToken=(request , response )=>{
+//    // console.log(request.query);
+//     stripe.tokens.create({
+//         card: {
+//         number: '4242424242424242',
+//         exp_month: 	03,
+//         exp_year: 2030,
+//         cvc: '737'
+//         }
+//     }, async function(err, token) {
+//         if (err) {
+//             // handle the error
+//             console.log(err);
+//            // return err
+//         } else {
+//              await stripe.charges.create({
+//                     amount: 2000,
+//                     currency: "usd",
+//                     description: "An example charge",
+//                     source: token.id
+//              }, function (error, charge) {
+//                 if (error) {
+//                     next(new Error({message:"trensaction is not completed"}));
+//                 }
+//                 if (charge) {
+//                     response.body.x = charge.id;
+//                     response.status(201).json(response.body.x)
+//                 }
 
+//             })
+//         }
+//     }).then(res=>
+//         console.log("token is "+'charge.id'));
+// }
 
-
-// var chargeCustomer=async function(){
-//     try {
-//       let {res} = await stripe.charges.create({
-//         amount: 2000,
-//         currency: "usd",
-//         description: "An example charge",
-//         source: "tok_1MYvu7L4FZm4LCWYs0LV52CI"
-//       }, function (charge, error) {
-//           if (error) {
-//               console.log(error)
-//           }
-//           if (charge) {
-//             console.log("write")
-//               console.log(charge)
-//           }
-//           else {
-//               console.log("wrong")
-//           }
-//       }
-//       );
-//         console.log("in")
-//         console.log(res)
-//         console.log(JSON.stringify(res))
-
-//       //res.json({res});
-//     } catch (err) {
-//         console.log("out")
-//         console.log(err)
-//       //res.status(500).end();
-//     }
-// };
-  
-// chargeCustomer();

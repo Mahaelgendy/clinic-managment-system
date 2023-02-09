@@ -71,6 +71,7 @@ exports.getScheduleById = (request, response, next) => {
         })
         .catch((error) => next(error));
 };
+
 exports.newSchedule = async(request, response, next) => {
     const doctorExist=await DoctorSchema.findOne({_id:request.body.doctor_id})
     const clinicExist=await clinicSchema.findOne({_id:request.body.clinic_id})
@@ -100,13 +101,8 @@ exports.updateSchedule = async (request, response, next) => {
         console.log("true, doctor")
         await DoctorSchema.findOne({ "userData": request.id })
         .then(data => {
-            // console.log("yes")
-            // console.log(data)
-            // console.log(data._id)
             let DOCID = data._id
-            // console.log(DOCID)
-            // console.log(request.id)
-
+            
             SchedulaSchema.updateOne({
                     _id: request.params.id,
                      doc_id:DOCID 
@@ -139,6 +135,7 @@ exports.updateSchedule = async (request, response, next) => {
             throw new Error("doctor not found");
     })
     }
+    
     else if (request.role == 'admin') {
         console.log("true, admin")
         SchedulaSchema.updateOne({
