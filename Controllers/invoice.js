@@ -116,109 +116,15 @@ exports.addInvoice = async(request, response, next) => {
         time: dateTimeMW.getTime(new Date()),
 
     });
-
-
-    
-   await newInvoice.save()
-        .then(async (result )=> {
-            let paymentMethod = request.body.paymentMethod;
-            if (paymentMethod == 'Credit Card') {
-
-                console.log("credit")
-                let charge= await paymentMw.payment();
-
-                await console.log("after")
-                // response.status(201).json(result);
-            }
-            else {
-                console.log("cash")
-            }
+       
+    newInvoice.save()
+        .then(result => {
+            response.status(201).json(result);
         })
-        .then(async res=>
-            {
-                console.log(res)
-            })
         .catch(error => next(error));
 };
 
 
-
-
-
-
-
-
-// exports.addInvoice = async(request, response, next) => {
-//     const doctorExist=await DoctorSchema.findOne({_id:request.body.doctorId})
-//     const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
-//     const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
-//     const patientExist = await patientSchema.findOne({ _id: request.body.patientId })
-//     const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
-//     const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
-    //const transactionid = await paymentMw.createToken();
-    // console.log(transactionid);
-
-//     stripe.tokens.create({
-//         card: {
-//         number: '4242424242424242',
-//         exp_month: 	03,
-//         exp_year: 2030,
-//         cvc: '737'
-//         }
-//     }, async function(err, token) {
-//         if (err) {
-//             // handle the error
-//             console.log(err);
-//            // return err
-//         } else {
-//              await stripe.charges.create({
-//                     amount: 2000,
-//                     currency: "usd",
-//                     description: "An example charge",
-//                     source: token.id
-//              }, function (error, charge) {
-//                 if (error) {
-//                     next(new Error({message:"trensaction is not completed"}));
-//                 }
-//                 if (charge) {
-//                     response.trans = charge.id;
-//                     //response.status(201).json(response.body)
-//                 }
-//             }).then(() =>console.log(response.body))
-//         }
-//     }).then((res, response) =>
-//     {
-//         console.log(res);
-//         console.log(response);
-//     })
-
-//     if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
-//         return response.status(400).json({message:"Check your data "})
-//     }
-
-//     let newInvoice = new invoiceSchema({
-//         clinic_id: request.body.clinicId,
-//         service_id: request.body.serviceId,
-//         doctor_id: request.body.doctorId,
-//         patient_id: request.body.patientId,
-//         employee_id: request.body.employeeId,
-//         appointment_id: request.body.appointmentId,
-//         paymentMethod: request.body.paymentMethod,
-//         paymentStatus: request.body.paymentStatus,
-//         totalCost: request.body.totalCost,
-//         actualPaid: request.body.actualPaid,
-//         date: dateTimeMW.getDateFormat(new Date()),
-//         time: dateTimeMW.getTime(new Date()),
-
-//     });
-    
-//     newInvoice.save()
-//         .then(result => {
-//             response.status(201).json(result);
-//         })
-//         .catch(error => next(error));
-
-// };
 exports.updateInvoice = (request, response, next) => {
     invoiceSchema.updateOne({ _id: request.params.id },
         {
