@@ -14,7 +14,6 @@ router.route("/invoice")
         authenticationMW.isEmployeeOrAdmin,
         controller.getAllInvoices)
     .post(
-     //   payment.createToken,
         authenticationMW.isEmployee,
         invoiceValidation.bodyValidation,
         errorValidator,
