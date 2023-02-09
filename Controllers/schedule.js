@@ -14,37 +14,59 @@ exports.getAllSchedules = (request, response, next) => {
     if (request.query.doctorId) query.doc_id = Number(request.query.doctorId);
     if (request.query.date) query.date = request.query.date;
 
-    SchedulaSchema.find(query)
+   
+        SchedulaSchema.find(query)
         .populate({
-            path: "doc_id", select: "userData", model: "doctors",
-            populate: { path: "userData", select: "fullName", model: "users" }
+            path: 'doc_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: 'fullName', model: 'users'}
         })
-        .populate({ path: "clinic_id",select:" clinicName" })
-        .then(data => {
-            if (data != null) {
-                response.status(200).json(data);
+        .populate({ path: "clinic_id", select: " clinicName" })
 
-            } else {
-                response.json({ message: "Schema not Found" });
-            }
-        })
-        .catch((error) => next(error));
+        .then(data => {
+                if(request.role == 'doctor'){
+                    const filteredData = data.filter(schedule => {
+                    return schedule.doc_id.userData._id.toString() === request.id;})
+                    //invoiceMW.sortInvoice(filteredData,request.query);
+                    response.status(200).json(filteredData);
+                }
+                else if (request.role == 'admin') {
+                    console.log("true, admin")
+                    response.status(200).json(data);
+                }
+                else{
+                    response.json({message:"You aren't authourized to see this data"});
+                }
+            })
+         .catch((error) => next(error));
+
 };
 
 exports.getScheduleById = (request, response, next) => {
 
-    SchedulaSchema.find({_id:request.params.id})
+    SchedulaSchema.findOne({_id:request.params.id})
         .populate({
-            path: "doc_id", select: "userData", model: "doctors",
-            populate: { path: "userData", select: "fullName", model: "users" }
+            path: "doc_id", select: { userData:1,_id:0}, model: "doctors",
+            populate: { path: "userData", select: { fullName:1,_id:1 }, model: "users" }
         })
         .populate({ path: "clinic_id",select:" clinicName" })
         .then(data => {
             if (data != null) {
-                response.status(200).json(data);
+                if ((request.role == 'doctor') &&(data.doc_id.userData._id==request.id)) {
+                    console.log("true, doctor")
+                    response.status(200).json(data);
+                }
+                else if (request.role == 'admin') {
+                    console.log("true, admin")
+                    response.status(200).json(data);
+                }
+                else{
+                    response.json({message:"You aren't authourized to see this data"});
+                }
             }
-            else {
-                response.json({ message: "Schema not Found" });
+            else if(data == null) {
+            response.json({message:"Id is not Found"});
             }
         })
         .catch((error) => next(error));
@@ -73,30 +95,102 @@ exports.newSchedule = async(request, response, next) => {
         .catch(error => next(error));
 };
 
-exports.updateSchedule = (request, response, next) => {
-    SchedulaSchema.updateOne({ _id: request.params.id},
-        {
-            $set: {
-                clinic_id: request.body.clinic_Id,
-                doc_id: request.body.doctor_Id,
-                date: request.body.date,
-                from: dateTimeMW.getTimeFromString(request.body.from),
-                to: dateTimeMW.getTimeFromString(request.body.to),
-                duration_in_minutes: request.body.duration,
-            }
-        }
-    ).then(result => {
-        if (result.modifiedCount == 1) {
-            response.status(201).json({ message: "Schedule updated" })
-        }
-        else
-            throw new Error("Schedule not found");
+
+exports.updateSchedule = async (request, response, next) => {
+    if (request.role == 'doctor') {
+        console.log("true, doctor")
+        await DoctorSchema.findOne({ "userData": request.id })
+        .then(data => {
+            let DOCID = data._id
+            
+            SchedulaSchema.updateOne({
+                    _id: request.params.id,
+                     doc_id:DOCID 
+                },
+                    {
+                        $set: {
+                            clinic_id: request.body.clinic_Id,
+                            date: request.body.date,
+                            from: dateTimeMW.getTimeFromString(request.body.from),
+                            to: dateTimeMW.getTimeFromString(request.body.to),
+                            duration_in_minutes: request.body.duration,
+                        }
+                    }
+                ).then(result => {
+                    console.log(result)
+                   
+                    if (result.modifiedCount==1) {
+                        response.status(201).json({ message: "Schedule updated" })
+                    }
+                    else if (result.modifiedCount==0) {
+                        response.status(201).json({ message: "You haven't changed any data" })
+                    }
+                    else
+                        throw new Error("Schedule not found");
+                    })
+                .catch(error => next(error));
+
         })
+        .catch(err => {
+            throw new Error("doctor not found");
+    })
+    }
+    
+    else if (request.role == 'admin') {
+        console.log("true, admin")
+        SchedulaSchema.updateOne({
+            _id: request.params.id,
+        },
+            {
+                $set: {
+                    clinic_id: request.body.clinic_Id,
+                    doc_id: request.body.doctor_Id,
+                    date: request.body.date,
+                    from: dateTimeMW.getTimeFromString(request.body.from),
+                    to: dateTimeMW.getTimeFromString(request.body.to),
+                    duration_in_minutes: request.body.duration,
+                }
+            }
+        ).then(result => {
+            console.log(result)
+           
+            if (result.modifiedCount==1) {
+                response.status(201).json({ message: "Schedule updated" })
+            }
+           else if (result.modifiedCount==0) {
+                response.status(201).json({ message: "You haven't changed any data" })
+            }
+            else
+                throw new Error("Schedule not found");
+            })
         .catch(error => next(error));
+    }
+
 }
 
-exports.deleteSchedule = (request, response, next) => {
-    SchedulaSchema.deleteOne({ _id: request.params.id})
+exports.deleteScheduleById =async (request, response, next) => {
+    if (request.role == 'doctor') {
+        await DoctorSchema.findOne({ "userData": request.id })
+            .then(data => {
+
+                let DOCID = data._id
+
+                SchedulaSchema.deleteOne({ _id: request.params.id, doc_id: DOCID })
+                    .then((result) => {
+                        if (result.deletedCount == 1) {
+                            response.status(201).json({ message: " Schedule deleted" })
+                        }
+                        else
+                            throw new Error("Schedule not found");
+                    })
+                    .catch((error) => next(error));
+            })
+            .catch(err => {
+                throw new Error("doctor not found");
+            })
+    }
+    else if (request.role == 'admin') {
+        SchedulaSchema.deleteOne({ _id: request.params.id})
         .then((result) => {
             if (result.deletedCount == 1) {
                 response.status(201).json({ message: " Schedule deleted" })
@@ -105,9 +199,11 @@ exports.deleteSchedule = (request, response, next) => {
                 throw new Error("Schedule not found");
         })
         .catch((error) => next(error));
+    }
+   
 };
 
-exports.deleteSchedule = (request, response, next) => {
+exports.deleteScheduleByFilter = (request, response, next) => {
     const query = {};
     if (request.query.clinicId) query.clinic_id = Number(request.query.clinicId);
     if (request.query.doctorId) query.doc_id = Number(request.query.doctorId);

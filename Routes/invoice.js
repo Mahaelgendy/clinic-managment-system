@@ -19,7 +19,9 @@ router.route("/invoice")
         errorValidator,
         controller.addInvoice
     )
-    .delete(controller.deleteInvoiceByFilter);
+    .delete(
+        authenticationMW.isAdmin,
+        controller.deleteInvoiceByFilter);
     
         
 router.route("/invoice/:id")
@@ -48,5 +50,7 @@ router.route("/invoice/:id")
 //     .post(payment.createToken)
 
  router.route("/displayinvoice/:id")
-        .get(controller.displayInvoiceById)
+     .get(
+         authenticationMW.isEmployeeOrAdmin,
+         controller.displayInvoiceById)
  module.exports= router;

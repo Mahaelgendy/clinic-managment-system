@@ -1,12 +1,12 @@
 const { request, response } = require("express");
-//const stripe = require("stripe");
+
 const mongoose = require("mongoose");
 const stripe = require("stripe")("sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn");
 
 require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const invoiceMW = require("./../middlewares/invoiceMW")
-//const onlinePayment=require("./../Middlewares/payment")
+
 
 const invoiceSchema = mongoose.model("invoices");
 const DoctorSchema = mongoose.model('doctors');
