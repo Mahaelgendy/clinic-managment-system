@@ -11,13 +11,11 @@ router.route('/medicines')
         authenticationMW.isDoctorOrAdmin,
         controller.getAllMedicinces)
     .post(
-        // authenticationMW.isDoctor,
         authenticationMW.isDoctorOrAdmin,
         medicineValidation.bodyValidation,
         validator,
         controller.addMedicine)
     .patch(
-        // authenticationMW.isDoctor,
         authenticationMW.isDoctorOrAdmin,
         medicineValidation.bodyValidation,
         validator,

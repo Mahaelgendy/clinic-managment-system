@@ -68,6 +68,7 @@ exports.getDoctorByEmail=(request , response , next)=>{
    
 
 }
+
 exports.getDoctorById = (request , response , next)=>{
     DoctorSchema.findById({_id:request.params.id})
     .populate({path:'userData'})
@@ -134,7 +135,8 @@ exports.addDoctor = async (request , response , next)=>{
     }
 }
 
-exports.deleteDoctor = (request , response , next)=>{
+
+exports.deleteDoctorById = (request , response , next)=>{
     try{
         const doctorId = request.params.id;
         DoctorSchema.findById({_id:doctorId})
