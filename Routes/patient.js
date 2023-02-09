@@ -40,11 +40,11 @@ router.route("/patients/:id")
                 validator,
                 controller.updatePatient)
 
-                router.route("/patients/email/:email")
-                .get(
-                        authenticationMW.isPatientOrAdmin,
-                        userValidation.userEmailValidation,
-                        validator,
-                        controller.getPatientByEmail)
+router.route("/patients/email/:email")
+        .get(
+                authenticationMW.isPatientOrAdmin,
+                userValidation.userEmailValidation,
+                validator,
+                controller.getPatientByEmail)
 
 module.exports = router;

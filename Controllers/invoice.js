@@ -1,12 +1,12 @@
 const { request, response } = require("express");
-//const stripe = require("stripe");
+
 const mongoose = require("mongoose");
 const stripe = require("stripe")("sk_test_51MYW00L4FZm4LCWYTDkVw2JR6AYkNpcMdotgqSLDCdbiSeaCIz51U1QrcOT3dKepTfgjIZbSzdT3gwIjFa0mdG2W00X1uRIqgn");
 
-const invoiceMW=require('../Models/invoiceModel');
+require('../Models/invoiceModel');
 const dateTimeMW = require("./../middlewares/dateTimeMW")
 const invoiceMW = require("./../middlewares/invoiceMW")
-//const onlinePayment=require("./../Middlewares/payment")
+
 
 const invoiceSchema = mongoose.model("invoices");
 const DoctorSchema = mongoose.model('doctors');
@@ -123,14 +123,8 @@ module.exports.addInvoice = async(request, response, next) => {
     const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
     const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
 
-    // if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
-    //     return response.status(400).json({message:"Check your data "})
-    // }
-
-    function totalCost() {
-       // console.log(doctorExist.price) 
-        //console.log(serviceExist.salary)
-      return doctorExist.price+serviceExist.salary
+    if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
+        return response.status(400).json({message:"Check your data "})
     }
 
     function totalCost() {
