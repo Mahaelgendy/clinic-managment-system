@@ -15,6 +15,7 @@ const invoiceSchema = new mongoose.Schema({
     actualPaid: { type: Number, required: true },
     date:{type:String , required:false},
     time:{type:String , required:false},
+    transaction_id:{type:String},
 
 }, { _id: false }
 )
