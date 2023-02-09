@@ -206,20 +206,23 @@ module.exports.getEmployeeByID = (request, response, next)=>{
 };
 
 module.exports.getEmployeeByEmail = (request, response, next)=>{
-   
     const email = request.params.email;
 
-    employeeSchema.findOne({email:email}).populate({path:"employeeData",select:{fullName:1}})
-                  .then((data)=>{
-                        if(data!=null)
-                        {
-                            response.status(200).json(data);
-                        }
-                        else
-                        {
-                            response.json({message:"Employee not Found"});
-                        }
-                  })
+    userSchema.findOne({email:email})
+                .then((userData)=>{
+                    employeeSchema.findOne({employeeData:userData._id})
+                                    .populate({path:"employeeData"})
+                                        .then((data)=>{
+                                            if(data!=null)
+                                            {
+                                                response.status(200).json(data);
+                                            }
+                                            else
+                                            {
+                                                response.json({message:"Employee not Found"});
+                                            }
+                                        })
+                })
                   .catch(error=>next(error));
 };
 

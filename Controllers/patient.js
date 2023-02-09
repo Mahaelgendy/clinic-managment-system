@@ -142,3 +142,16 @@ module.exports.getPatientByID = (request, response, next)=>{
                     .catch((error)=>next(error));
 
 };
+module.exports.getPatientByEmail = (request, response, next)=>{
+    const email = request.params.email;
+
+    userSchema.findOne({email:email})
+                .then((userData)=>{
+                    patientSchema.findOne({patientData:userData._id})
+                    .populate({path:"patientData"})
+                    .then((data)=>{
+                        response.status(200).json(data);
+                    })
+                })
+                 .catch((error)=>next(error));
+};
