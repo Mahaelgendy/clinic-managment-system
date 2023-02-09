@@ -70,6 +70,18 @@ module.exports.changePassword =async (request, response, next)=>{
     }
 };
 
+const sortUsers = (data,query)=>{
+    let sortBy = query.sortBy||'fullName';
+    let order = query.order ||"asc";
+    let orderValue = order ==="asc"? 1:-1
+
+
+    return data.sort((a,b)=>{
+        if(a[sortBy]<b[sortBy]) return -1*orderValue;
+        if(a[sortBy]>b[sortBy]) return 1*orderValue;
+    });
+};
+
 exports.getAllUsers = (request , response , next)=>{
  
     const query = {};
@@ -87,6 +99,7 @@ exports.getAllUsers = (request , response , next)=>{
     })
     .catch(error=>next(error));
 };
+
 
 exports.deleteUsers = (request , response , next)=>{
     try{
@@ -111,7 +124,6 @@ exports.deleteUsers = (request , response , next)=>{
     }
     
 };
-
 
 exports.updateUser = (request,response,next)=>{
     try{

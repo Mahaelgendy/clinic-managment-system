@@ -4,6 +4,7 @@ const validator = require("./../Middlewares/errorValidation");
 const registerValidation = require("./../Middlewares/userMW");
 const router = express.Router();
 const upload = require("./../Middlewares/uploadImageMW")
+
 router.route("/login")
        .post(controller.login);
 

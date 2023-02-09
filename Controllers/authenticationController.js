@@ -29,7 +29,7 @@ module.exports.signUp = async(request, response , next)=>{
         gender:gender,
         address:address,
         role:role,
-        // image:request.file.path
+        image:request.file.path
     });
 
     user.save()
