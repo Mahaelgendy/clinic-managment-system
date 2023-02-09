@@ -2,15 +2,15 @@ const {body , param} = require("express-validator")
 const { jsPDF } = require("jspdf");
 
 module.exports.bodyValidation = [
-    body("doctorId").isInt().withMessage("Doctor ID must be Numeric and required"),
-    body("patientId").isInt().withMessage("Patient ID must be Numeric and required"),
+    body("doctorId").isInt().withMessage("Doctor ID must be Numeric and required").optional(),
+    body("patientId").isInt().withMessage("Patient ID must be Numeric and required").optional(),
     body("employeeId").isInt().optional().withMessage("Employee ID must be Numeric and required"),
-    body("appointmentId").isInt().withMessage("Appointment ID must be Numeric and required"),
-    body("clinicId").isInt().withMessage("ClinicID must be Numeric and required"),
-    body("paymentMethod").isIn(["Cash","Credit Card"]).notEmpty().withMessage("Payment method should be Either Cash or Credit card"),
-    body("paymentStatus").isIn(["Total amount","Partial with insurance"]).notEmpty().withMessage("Payment status should be Either Total amount or Partial with insurance"),
-    body("totalCost").isInt().notEmpty().withMessage("Total cost must be Numeric and required"),
-    body("actualPaid").isInt().notEmpty().withMessage("Actual paid money must be Numeric and required"),
+    body("appointmentId").isInt().withMessage("Appointment ID must be Numeric and required").optional(),
+    body("clinicId").isInt().withMessage("ClinicID must be Numeric and required").optional(),
+    body("paymentMethod").isIn(["Cash","Credit Card"]).withMessage("Payment method should be Either Cash or Credit card").optional(),
+    body("paymentStatus").isIn(["Total amount","Partial with insurance"]).withMessage("Payment status should be Either Total amount or Partial with insurance").optional(),
+    body("totalCost").isInt().withMessage("Total cost must be Numeric and required").optional(),
+    body("actualPaid").isInt().withMessage("Actual paid money must be Numeric and required").optional(),
 ]
 
 module.exports.paramValidation = [
@@ -87,8 +87,9 @@ module.exports.sortInvoice = (data,query)=>{
 
 module.exports.generateInvoicePDF =(invoice)=>{
     // Initialize the PDF document
-    let parientAddress =invoice.patient_id != null ? invoice.patient_id.userData != null ? invoice.patient_id.userData.address: "" : ""
-    let patientDate = invoice.patient_id != null ? invoice.patient_id.userData != null ? invoice.patient_id.userData : "" : "";
+    console.log(invoice)
+    let parientAddress =invoice.patient_id != null ? invoice.patient_id.patientData != null ? invoice.patient_id.patientData.address: "" : ""
+    let patientDate = invoice.patient_id != null ? invoice.patient_id.patientData != null ? invoice.patient_id.patientData : "" : "";
     const doc = new jsPDF();
 
     doc.setFont("helvetica","bold");

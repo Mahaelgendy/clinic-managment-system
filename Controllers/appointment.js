@@ -1,11 +1,16 @@
 const mongoose = require("mongoose");
 require("./../Models/appointmentModel");
 require("./../Models/doctorModel");
+require("./../Models/employeeModel");
 
 const appointmentSchema = mongoose.model("appointments");
 const doctorSchema = mongoose.model("doctors");
+const employeeSchema = mongoose.model('employees');
+
+
 const dateTimeMW = require("./../middlewares/dateTimeMW")
-const appointmentMW = require("./../middlewares/appointmentMW")
+const appointmentMW = require("./../middlewares/appointmentMW");
+const e = require("express");
 
 
 
@@ -84,16 +89,16 @@ module.exports.getAppointmentbyId = (request , response , next)=>{
         })
         .then(data=>{
             if(data!=null){
-                if (request.role == 'doctor' && (data.doctor_id.userData == request.id)) {
+                if (request.role == 'doctor' && (data.doctor_id.userData._id == request.id)) {
                     response.status(200).json(data);
                 }
                 else if (request.role == 'admin') {
                     response.status(200).json(data);
                 }
-                else if(request.role == 'employee' && (data.employee_id.employeeData == request.id)){
+                else if(request.role == 'employee' && (data.employee_id.employeeData._id == request.id)){
                     response.status(200).json(data);
                 }
-                else if(request.role == 'patient' && (data.patient_id.patientData == request.id)){
+                else if(request.role == 'patient' && (data.patient_id.patientData._id == request.id)){
                     response.status(200).json(data);
                 }
                 else{
@@ -107,59 +112,59 @@ module.exports.getAppointmentbyId = (request , response , next)=>{
 };
 module.exports.getAppointmentbyDoctorId = async(request , response , next)=>{
     let doctor= await doctorSchema.findById({_id:request.params.id}).populate({path: 'userData', select: 'fullName', model: 'users'});
-
-    if(request.role == 'doctor' && doctor.userData._id.toString() != request.id){
-        response.json({message:"You aren't authourized to see this data"});
-    }
-    else{
-        appointmentSchema.find({doctor_id : request.params.id})
-            .populate({ path: "clinic_id" ,select: 'clinicName'})
-            .populate({
-                path: 'doctor_id',
-                select: 'userData',
-                model: 'doctors',
-                populate: {path: 'userData', select: 'fullName', model: 'users'}
-            })
-            .populate({ 
-                path: "patient_id" ,
-                select: 'patientData',
-                model: 'patients',
-                populate: {path: 'patientData', select: 'fullName', model: 'users'}
-            })
-            .populate({
-                path: "employee_id" ,
-                select: 'employeeData',
-                model: 'employees',
-                populate: {path: 'employeeData', select: 'fullName', model: 'users'}
-            })
-            .then(data=>{
-                if(data!=null){
-                    console.log(data);
-                    if (request.role == 'doctor') {
-                        const filteredData = data.filter(appointment => {
-                            return appointment.doctor_id.userData._id.toString() === request.id;})
-                        response.status(200).json(filteredData);
-                    }
-                    else if (request.role == 'admin') {
-                        response.status(200).json(data);
-                    }
-                    else if(request.role == 'employee'){
-                        const filteredData = data.filter(appointment => {
-                            if(appointment.employee_id != null)
-                                return appointment.employee_id.employeeData._id.toString() === request.id;
-                            else
-                                return false;
-                        })
-                        response.status(200).json(filteredData);
-                    }
-                    else{
-                        response.json({message:"You aren't authourized to see this data"});
-                    }
-                }else{
-                    response.json({message:"Id not Found"});
-                }
-            })
-            .catch((error)=>next(error));
+    if(request.role == 'doctor'){
+        if(doctor == null ||  doctor.userData._id != request.id)
+            response.json({message:"You aren't authourized to see this data"});
+        else{
+                appointmentSchema.find({doctor_id : request.params.id})
+                    .populate({ path: "clinic_id" ,select: 'clinicName'})
+                    .populate({
+                        path: 'doctor_id',
+                        select: 'userData',
+                        model: 'doctors',
+                        populate: {path: 'userData', select: 'fullName', model: 'users'}
+                    })
+                    .populate({ 
+                        path: "patient_id" ,
+                        select: 'patientData',
+                        model: 'patients',
+                        populate: {path: 'patientData', select: 'fullName', model: 'users'}
+                    })
+                    .populate({
+                        path: "employee_id" ,
+                        select: 'employeeData',
+                        model: 'employees',
+                        populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+                    })
+                    .then(data=>{
+                        if(data!=null){
+                            console.log(data);
+                            if (request.role == 'doctor') {
+                                const filteredData = data.filter(appointment => {
+                                    return appointment.doctor_id.userData._id.toString() === request.id;})
+                                response.status(200).json(filteredData);
+                            }
+                            else if (request.role == 'admin') {
+                                response.status(200).json(data);
+                            }
+                            else if(request.role == 'employee'){
+                                const filteredData = data.filter(appointment => {
+                                    if(appointment.employee_id != null)
+                                        return appointment.employee_id.employeeData._id.toString() === request.id;
+                                    else
+                                        return false;
+                                })
+                                response.status(200).json(filteredData);
+                            }
+                            else{
+                                response.json({message:"You aren't authourized to see this data"});
+                            }
+                        }else{
+                            response.json({message:"Id not Found"});
+                        }
+                    })
+                    .catch((error)=>next(error));
+        }
     }
 };
 module.exports.getAppointmentbyClinicId = (request , response , next)=>{
@@ -195,6 +200,7 @@ module.exports.getAppointmentbyClinicId = (request , response , next)=>{
 };
 
 module.exports.addAppointment=async(request , response , next)=>{
+
     let appointmentDate = request.body.date;
     let startOfAppointment = request.body.from;
     let doctorId =request.body.doctorId;
@@ -202,20 +208,18 @@ module.exports.addAppointment=async(request , response , next)=>{
     let patientId = request.body.patientId;
     let employeeId = request.body.employeeId;
 
-    if (await appointmentMW.checkAllUsersAvailability(doctorId, clinicId, patientId, employeeId)){
+    if (await appointmentMW.checkAllUsersAvailability(doctorId, clinicId, patientId)){
         let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
         
         if (endOfAppointment != null){
     
             let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(null,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
-            console.log('isfree',isFree)
-    
             if(isFree){
                 let newAppointment = new appointmentSchema({
                     clinic_id: clinicId,
                     doctor_id:doctorId,
                     patient_id: request.body.patientId,
-                    employee_id: request.body.employeeId,
+                    employee_id:null,
                     date: appointmentDate,
                     from: dateTimeMW.getTimeFromString(startOfAppointment),
                     to : dateTimeMW.getTimeFromString(endOfAppointment),
@@ -223,9 +227,20 @@ module.exports.addAppointment=async(request , response , next)=>{
                     reservation_method:request.body.reservationMethod
                     }
                 );
+                if(request.body.reservationMethod == "Offline"){
+                    let employee = await employeeSchema.findById(employeeId);
+                    if(employee != null){
+                        newAppointment.employee_id= request.body.employeeId;
+                    }
+                    else{
+                        let error = new Error("There is No employee that id ");
+                        error.status=401;
+                        next(error);
+                    }
+                }
                 newAppointment.save()
                 .then(result=>{
-                    response.status(201).json(result);
+                    response.status(201).json({message:"appointment added"});
                     appointmentMW.sendMailToTheDoctor(doctorId,appointmentDate,startOfAppointment);
                 })
                 .catch(error => next(error));
@@ -245,46 +260,48 @@ module.exports.addAppointment=async(request , response , next)=>{
     }
     else{
         let error = new Error("There is No Doctor or patient or employee or clinic with that id ");
-                error.status=401;
-                next(error);
+        error.status=401;
+        next(error);
     }
 };
 
-module.exports.updateAppointment=async (request , response , next)=>{
-    
+module.exports.updateAppointment=async(request , response , next)=>{
+
     let appointmentDate = request.body.date;
     let startOfAppointment = request.body.from;
-    let doctorId =request.body.doctorId;
-    let clinicId = request.body.clinicId;
-    let patientId = request.body.patientId;
-    let employeeId = request.body.employeeId;
     let appointmentId = request.params.id;
 
-    if (await appointmentMW.checkAllUsersAvailability(doctorId, clinicId, patientId, employeeId)){
-        
+    let currentAppointment = await appointmentSchema.findById({_id : appointmentId})
+                        .populate({ 
+                            path: "patient_id" ,
+                            select: 'patientData',
+                            model: 'patients',
+                            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+                        });
+
+    let doctorId =currentAppointment.doctor_id;
+    let clinicId = currentAppointment.clinic_id;
+
+    if((request.role == 'patient' && currentAppointment.patient_id.patientData._id == request.id)|| request.role == 'employee'){
         let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
         if (endOfAppointment != null){
     
             let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(appointmentId,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
             console.log('isfree',isFree)
             if(isFree){
-                appointmentSchema.updateOne({
+                await appointmentSchema.updateOne({
                     _id : appointmentId
                 },
                 {
                     $set:{ 
-                        clinic_id: clinicId,
-                        doctor_id:doctorId,
-                        patient_id: request.body.patientId,
-                        employee_id: request.body.employeeId,
                         date: appointmentDate,
-                        From:dateTimeMW.getTimeFromString(startOfAppointment),
-                        to : dateTimeMW.getTimeFromString(endOfAppointment),
+                        from:dateTimeMW.getTimeFromString(startOfAppointment),
+                        to: dateTimeMW.getTimeFromString(endOfAppointment),
                         status: request.body.status,
                         reservation_method:request.body.reservationMethod
                     }
                 }).then(result=>{
-                    response.status(201).json(result);
+                    response.status(201).json({message:"appointment updated"});
                 })
                 .catch(error => next(error));
             }
@@ -299,20 +316,33 @@ module.exports.updateAppointment=async (request , response , next)=>{
                 error.status=401;
                 next(error);
         } 
+    }else{
+        response.json({message:"You aren't authourized to see this data"});
     }
-    else{
-        let error = new Error("There is No Doctor or patient or employee or clinic with that id ");
-                error.status=401;
-                next(error);
-    }
+
 };
 
-module.exports.deleteAppointmentById = (request , respose , next)=>{
-    appointmentSchema.deleteOne({_id : request.params.id})
-        .then((data)=>{
-            respose.status(200).json(data);
-        })
-        .catch((error)=>next(error));
+module.exports.deleteAppointmentById = async (request , response , next)=>{
+    let appointmentId =request.params.id
+    let currentAppointment = await appointmentSchema.findById({_id : appointmentId})
+                        .populate({ 
+                            path: "patient_id" ,
+                            select: 'patientData',
+                            model: 'patients',
+                            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+                        });
+    console.log(currentAppointment,request.id)
+    
+    if((request.role == 'patient' && currentAppointment.patient_id.patientData._id == request.id )|| request.role == 'employee'){
+        appointmentSchema.deleteOne({_id : appointmentId})
+            .then((data)=>{
+                response.status(200).json({message:"deleted"});
+            })
+            .catch((error)=>next(error));
+    }
+    else{
+        response.json({message:"You aren't authourized to see this data"});
+    }
 };
 
 module.exports.deleteAppointmentByFilter = (request , respose , next)=>{

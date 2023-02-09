@@ -11,12 +11,12 @@ router.route("/appointments")
                 controller.getAllAppointments)
         
         .post(
-                authenticationMW.isPatientOrAdmin,
+                authenticationMW.isEmployeeOrPatient,
                 appointmentValidation.appointmentBodyValidation,
                 errorValidator,
                 controller.addAppointment)
         .delete(
-                authenticationMW.isStaff,
+                authenticationMW.isAdmin,
                 controller.deleteAppointmentByFilter);
 
 router.route("/appointments/:id")
@@ -27,13 +27,13 @@ router.route("/appointments/:id")
                 controller.getAppointmentbyId
                 )
         .delete(
-                authenticationMW.isStaff,
+                authenticationMW.isEmployeeOrPatient,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 controller.deleteAppointmentById
                 )
         .patch(
-                authenticationMW.isEmployeeOrAdmin,
+                authenticationMW.isEmployeeOrPatient,
                 appointmentValidation.idParamValidation,
                 errorValidator,
                 appointmentValidation.appointmentBodyValidation,

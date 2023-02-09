@@ -5,10 +5,18 @@ const mongoose = require('mongoose');
 
 require('../Models/userModel');
 require('../Models/doctorModel');
+<<<<<<< HEAD
 r
 const UserSchema = mongoose.model('users');
 const DoctorSchema = mongoose.model('doctors');
 const SchedulaSchema= mongoose.model('schedules');
+=======
+require('../Models/clinicModel')
+const UserSchema = mongoose.model('users');
+const DoctorSchema = mongoose.model('doctors');
+const SchedulaSchema= mongoose.model('schedules');
+const serviceSchema = mongoose.model("services")
+>>>>>>> b117ca6f061cd8ef7e29401bb6ac446d6f45c846
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -157,10 +165,17 @@ exports.deleteDoctorById = (request , response , next)=>{
             .then(()=>{
                 SchedulaSchema.deleteMany({doc_id:doctorId})
                 .then(()=>{
+<<<<<<< HEAD
 
                     DoctorSchema.findByIdAndDelete({_id:doctorId})
+=======
+                    serviceSchema.deleteMany({doctor_id:doctorId})
+>>>>>>> b117ca6f061cd8ef7e29401bb6ac446d6f45c846
                     .then(()=>{
-                        response.status(200).json({message:"Doctor deleted"});
+                        DoctorSchema.findByIdAndDelete({_id:doctorId})
+                        .then(()=>{
+                            response.status(200).json({message:"Doctor deleted"});
+                        })
                     })
                 })
                 
@@ -176,31 +191,39 @@ exports.deleteDoctorById = (request , response , next)=>{
 exports.updateDoctorById = async (request , response , next)=>{
     try{
 
+<<<<<<< HEAD
         const emailExist = await UserSchema.findOne({email:request.body.email});
         if(emailExist){
             return response.status(400).json({message:"Email is already used"});
         }
         const duplicateName = await UserSchema.findOne({fullName:request.body.fullName})
+=======
+        const doctorId = request.params.id;
+
+        const duplicateName = await UserSchema.findOne({fullName:request.body.fullName});
+>>>>>>> b117ca6f061cd8ef7e29401bb6ac446d6f45c846
         if(duplicateName){
             return response.status(400).json({message:"This name is already used, please choose another name"});
         }
+        const {fullName,age,address,specialization,price} = request.body;
 
+<<<<<<< HEAD
         const doctorId = request.params.id;
 
         const {fullName,email,age,address,specialization,price} = request.body;
 
 
+=======
+>>>>>>> b117ca6f061cd8ef7e29401bb6ac446d6f45c846
         const doctor = await DoctorSchema.findByIdAndUpdate({_id:doctorId},
             {$set:{
                 specialization:specialization,
                 price:price
             }});
             
-
         const user = await UserSchema.findByIdAndUpdate({_id:doctor.userData},
             {$set:{
                 fullName:fullName,
-                email:email,
                 age:age,
                 address:address,
                 image:request.file.path
@@ -226,7 +249,11 @@ exports.updateDoctorByEmail = async (request , response , next)=>{
         const emailparam = request.params.email;
         const {fullName,email,age,address,specialization,price} = request.body;
         
+<<<<<<< HEAD
         const user = await UserSchema.findByIdAndUpdate({email:emailparam},
+=======
+        const user = await UserSchema.findOneAndUpdate({email:emailparam},
+>>>>>>> b117ca6f061cd8ef7e29401bb6ac446d6f45c846
             {$set:{
                 fullName:fullName,
                 email:email,

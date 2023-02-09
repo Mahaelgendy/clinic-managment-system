@@ -7,22 +7,25 @@ const authenticationMW=require("./../Middlewares/Authorization")
 const router = express.Router();
 
 router.route("/service")
-    .get(authenticationMW.anyUser,
+    .get(
+        authenticationMW.anyUser,
         controller.agetAllServices)
-    .post(authenticationMW.isDoctorOrAdmin,
+    .post(authenticationMW.isAdmin,
         validator.serviceValidation,
         error,
         controller.addservice)
-    .delete(controller.deleteByFilter);
+    .delete(
+        authenticationMW.isAdmin,
+        controller.deleteByFilter);
     
 router.route("/service/:id")
     .get(authenticationMW.anyUser,
         controller.getServiceById)
     .delete(
-        authenticationMW.isDoctorOrAdmin,
+        authenticationMW.isAdmin,
         controller.deleteserviceById)
     .patch(
-        authenticationMW.isDoctorOrAdmin,
+        authenticationMW.isAdmin,
         validator.serviceValidation,
         error,
         controller.updateservice)

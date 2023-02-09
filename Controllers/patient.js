@@ -49,7 +49,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
     const skip =(page - 1) * limit;
 
 
-    patientSchema.find().populate({path:'patientData',select:{fullName:1,age:1,gender:1}}).skip(skip).limit(limit)
+    patientSchema.find(query).populate({path:'patientData',select:{fullName:1,age:1,gender:1}}).skip(skip).limit(limit)
                         .then((data)=>{
                            let ptientsAfterSort = sortPatients(data,request.query)
                             response.status(200).json(ptientsAfterSort);

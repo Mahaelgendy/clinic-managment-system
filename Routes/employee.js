@@ -17,7 +17,7 @@ router.route("/employees")
         controller.getAllEmployees)
     .post(  
             authenticationMW.isAdmin,
-            upload.single("profile"),
+            upload.single("image"),
             employeeValidation.employeevalidation,
             validator,
             controller.addEmployee)
@@ -42,7 +42,7 @@ router.route("/employees/:id")
             controller.deleteEmployeeByID)
     .patch(  
             authenticationMW.isEmployeeOrAdmin,
-            upload.single("profile"),
+            upload.single("image"),
             employeeValidation.paramvalidation,
             validator,
             controller.updateEmployee)
