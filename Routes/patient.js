@@ -45,7 +45,6 @@ router.route("/patients/:id")
                         authenticationMW.isPatientOrAdmin,
                         userValidation.userEmailValidation,
                         validator,
-                        controller.getPatientByEmail
-                )
+                        controller.getPatientByEmail)
 
 module.exports = router;

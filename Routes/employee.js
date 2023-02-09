@@ -52,7 +52,6 @@ router.route("/employees/email/:email")
                 authenticationMW.isEmployeeOrAdmin,
                 userValidation.userEmailValidation,
                 validator,
-                controller.getEmployeeByEmail
-        )
+                controller.getEmployeeByEmail)
 
 module.exports = router;
