@@ -111,7 +111,7 @@ exports.updateMedicines =async (request,response,next)=>{
         const {name , company , speciality , description}= request.body;
 
         if(request.role =="admin"){
-            MedicineSchema.updateOne({query},
+            MedicineSchema.updateOne(query,
                 {$set:{
                     medicineName:name,
                     companyName:company,
