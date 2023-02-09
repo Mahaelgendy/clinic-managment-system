@@ -13,7 +13,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const sortDoctor = (data,query)=>{
-    let sortBy = query.sortBy||'date';
+    let sortBy = query.sortBy||'price';
     let order = query.order ||"asc";
     let orderValue = order ==="asc"? 1:-1
     console.log(orderValue);
