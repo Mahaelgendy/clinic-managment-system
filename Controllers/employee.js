@@ -58,46 +58,6 @@ module.exports.getAllEmployees = async (request,response,next)=>{
                             .catch((error)=>next(error));
 };
 
-
-// module.exports.addEmployee = (request, response, next)=>{
-//     userSchema.findOne({email:request.body.email})
-//               .then((data)=>{
-//                 if(data!=null)
-//                 { 
-//                     employeeSchema.find({}).populate({path:"employeeData"})
-//                                     .findOne({employeeData:data._id})
-//                                     .then((employee)=>{
-
-//                                         if(employee == null)
-//                                         {
-//                                             let newEmployee=new employeeSchema({
-//                                                 salary:request.body.employeeSalary,
-//                                                 phone:request.body.employeePhone,
-//                                                 position:request.body.employeePosition,
-//                                                 employeeData:data._id,
-//                                                 clinicId:request.body.clinic_Id
-//                                             });
-//                                             newEmployee.save()
-//                                             .then(result=>{
-//                                                 response.status(201).json({message:"added new Employee is done"});
-//                                             })
-//                                             .catch(error=>next(error))
-//                                         }
-//                                         else
-//                                         {
-//                                             response.status(404).json({message:"This employee already exsists"})
-//                                         }
-//                                     })
-
-//                 }
-//                 else
-//                 {
-//                     response.status(404).json({message:"This Email does not exsist or role does not employee"})
-//                 }
-//               })
-//               .catch(error=>next(error))
-// };
-
 module.exports.addEmployee =async (request, response, next)=>{
     let employeeExists = await userSchema.findOne({email:request.body.email});
 
