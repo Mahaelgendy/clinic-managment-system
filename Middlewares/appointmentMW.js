@@ -51,6 +51,7 @@ module.exports.getEndOfAppointment=async(clinicId,doctorId,appointmentDate,start
         return null;
       }
 }
+
 module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,appointmentDate,startOfAppointment ,endOfAppointment)=>{
     try {
         let doctorSchedule = await scheduleSchema.findOne({doc_id : doctorId , date: appointmentDate, clinic_id : clinicId })
@@ -81,6 +82,7 @@ module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,
         return null;
       }
 }
+
 module.exports.checkAllUsersAvailability=async(doctorId,clinicId,patientId)=>{
     let doctor = await doctorSchema.findById(doctorId);
     let clinic = await clinicSchema.findById(clinicId);
@@ -92,6 +94,7 @@ module.exports.checkAllUsersAvailability=async(doctorId,clinicId,patientId)=>{
     else
         return false
 }
+
 module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
     console.log("send MAil")
     doctorSchema.findById({_id: doctorId}).populate({path:'userData'})
@@ -124,6 +127,7 @@ module.exports.sendMailToTheDoctor=(doctorId,appointmentDate,appointmentTime)=>{
     })
     .catch(error=>next(error));  
 }
+
 module.exports.sortAppointment = (data,query)=>{
     let sortBy = query.sortBy||'date';
     let order = query.order ||"asc";
@@ -168,7 +172,8 @@ module.exports.sortAppointment = (data,query)=>{
             if(a[sortBy]>b[sortBy]) return 1*orderValue;
         });
     }
-};
+}
+
 module.exports.getTheQueryToFindWith=(request)=> {
     const query = {};
 
@@ -188,9 +193,11 @@ module.exports.getTheQueryToFindWith=(request)=> {
         query.reservation_method = request.query.reservationMethod;
     return query;
 }
+
 function checkIsTimeInEmployeeShift(startOfAppointment , endOfAppointment , startOfShift , endOfShift){
     return startOfAppointment >= startOfShift && endOfAppointment <= endOfShift
 }
+
 async function checkIfTimeOverLapWithAnotherAppointmentInSameDay(appointmentId,clinicId,doctorId,startOfAppointment, endOfAppintment,appointmentDate){
     try{
         let allAppointments= await appointmentSchema.find({doctor_id : doctorId , date:appointmentDate , clinic_id:clinicId , _id: {$ne: appointmentId}})

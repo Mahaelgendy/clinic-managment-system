@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 
 const saltRounds = 10;
 
+
 module.exports.changePassword =async (request, response, next)=>{
 
     try
@@ -154,6 +155,8 @@ exports.updateUser = (request,response,next)=>{
     }
     
 }
+
+
 
 
 

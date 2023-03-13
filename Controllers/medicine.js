@@ -8,6 +8,8 @@ const MedicineSchema = mongoose.model('medicines');
 const usersSchema = mongoose.model('users');
 const doctorSchema = mongoose.model('doctors')
 
+
+
 exports.addMedicine = async(request,response , next)=>{
     const {name , company , speciality , description}= request.body;
     

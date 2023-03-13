@@ -26,6 +26,7 @@ module.exports.getTimeFromString=(timeAsSting)=>{
     date.setHours(hours, minuts, seconds);
     return date;
 }
+
 module.exports.getDateTimeForSpecificDay=(time , dateAsString)=>{
     let day = new Date(dateAsString);
     time = new Date(time);
