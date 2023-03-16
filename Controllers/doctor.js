@@ -46,7 +46,10 @@ exports.getAllDoctors=(request , response , next)=>{
     if (request.query.specialization) query.specialization = request.query.specialization;
     if (request.query.price) query.price = request.query.price;
 
-    DoctorSchema.find(query)
+    const page = request.query.page *1 || 1;
+    const limit = request.query.limit *1 || 3;
+    const skip = (page-1) * limit;
+    DoctorSchema.find(query).limit(limit).skip(skip)
     .populate({path:'userData'})
     .then(data=>{
         sortDoctor(data, request.query)
