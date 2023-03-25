@@ -95,7 +95,7 @@ exports.getAllUsers = (request , response , next)=>{
     .then(data=>{
         if(data!=null){
             userAfterSort= sortUsers(data, request.query)
-            response.status(200).json({userAfterSort});
+            response.status(200).json(userAfterSort);
         }
     })
     .catch(error=>next(error));

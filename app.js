@@ -2,8 +2,10 @@ const express=require("express");
 const mongoose = require('mongoose');
 const  morgan = require('morgan');
 const path = require("path");
+const cors = require('cors');
 
 const server=express();
+server.use(cors());
 const bodyParser =require("body-parser")
 const appointmentRoutes = require("./Routes/appointment");
 const clinicRoutes = require("./Routes/clinic");
@@ -19,6 +21,7 @@ const userRoutes = require("./Routes/user");
 const reportRoutes = require("./Routes/report");
 const authenticationRouter = require("./Routes/authentication");
 const authenticationMW = require ("./Middlewares/authenticationMW");
+
 
 require("dotenv").config();
 
@@ -42,8 +45,8 @@ server.use(morgan('combined'));
 server.use(express.json());
 
 //routes
-server.use(authenticationRouter);
-server.use(authenticationMW);
+//server.use(authenticationRouter);
+//server.use(authenticationMW);
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)
