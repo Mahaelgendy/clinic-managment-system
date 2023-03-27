@@ -45,7 +45,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
     if(request.query.weight) query.weight = Number(request.query.weight);
     
     const page = request.query.page *1 || 1;
-    const limit = request.query.limit *1 || 3;
+    const limit = request.query.limit *1 || 5;
     const skip =(page - 1) * limit;
 
 

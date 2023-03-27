@@ -3,46 +3,46 @@ const express = require("express");
 const controller = require ("../Controllers/patient");
 const patientValidation = require("./../Middlewares/patientMW");
 const validator = require("./../Middlewares/errorValidation");
-const authenticationMW=require("./../Middlewares/Authorization");
+//const authenticationMW=require("./../Middlewares/Authorization");
 const userValidation = require("./../Middlewares/userMW");
 
 const router= express.Router();
 
 router.route("/patients")
         .get(
-                authenticationMW.isDoctorOrAdmin,
+                //authenticationMW.isDoctorOrAdmin,
                 controller.getAllPatients)
         .post(
-                authenticationMW.isDoctorOrAdmin,
+                //authenticationMW.isDoctorOrAdmin,
                 patientValidation.patientvalidation,
                 validator,
                 controller.addPatient)
         .delete(
-                authenticationMW.isAdmin,
+                //authenticationMW.isAdmin,
                 patientValidation.patientvalidation,
                 validator,
                 controller.deletePatients);
 
 router.route("/patients/:id")
         .get(
-                authenticationMW.isDoctorOrAdminOrPatient,
+                //authenticationMW.isDoctorOrAdminOrPatient,
                 patientValidation.paramvalidation,
                 validator,
                 controller.getPatientByID)
         .delete(
-                authenticationMW.isDoctorOrAdmin,
+               // authenticationMW.isDoctorOrAdmin,
                 patientValidation.paramvalidation,
                 validator,
                 controller.deletePatientById)
         .patch(
-                authenticationMW.isDoctor,
+                //authenticationMW.isDoctor,
                 patientValidation.paramvalidation,
                 validator,
                 controller.updatePatient)
 
 router.route("/patients/email/:email")
         .get(
-                authenticationMW.isPatientOrAdmin,
+                //authenticationMW.isPatientOrAdmin,
                 userValidation.userEmailValidation,
                 validator,
                 controller.getPatientByEmail)

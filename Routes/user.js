@@ -12,13 +12,13 @@ const upload = require("./../Middlewares/uploadImageMW");
 
 
 router.route("/users")
-    .get(authenticationMW.isAdmin,
+    .get(//authenticationMW.isAdmin,
         controller.getAllUsers)
     .delete(
-        authenticationMW.isAdmin,
+        //authenticationMW.isAdmin,
         controller.deleteUsers)
     .patch(
-        authenticationMW.isAdmin,
+      //  authenticationMW.isAdmin,
         upload.single("image"),
         userValidation.userbodyValidation,
         validator,
