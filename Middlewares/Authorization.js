@@ -4,6 +4,8 @@ const authenticationMW=require("./../Middlewares/authenticationMW")
 
 
 module.exports.isAdmin=(request, response, next)=> {
+    console.log("request")
+
     if (request.role == 'admin')
     {
         console.log(request.role)
@@ -73,6 +75,7 @@ module.exports.isPatientOrDoctor=(request, response, next)=> {
 }
 
 module.exports.isDoctorOrAdminOrPatient=(request, response, next)=> {
+    console.log("Here")
     if ((request.role == 'doctor')||(request.role == 'admin')||(request.role == 'patient'))
     {
         next();

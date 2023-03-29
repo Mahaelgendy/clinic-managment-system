@@ -7,13 +7,14 @@ const scheduleValidation = require("../Middlewares/scheduleMW")
 const authenticationMW=require("./../Middlewares/Authorization")
 
 router.route("/schedule/:id")
-    .get(authenticationMW.isDoctorOrAdmin,
+    .get(
+        // authenticationMW.isDoctorOrAdmin,
         scheduleValidation.paramValidation,
         errorValidator,
         controller.getScheduleById
     )
     .patch(
-        authenticationMW.isDoctorOrAdmin,
+        // authenticationMW.isDoctorOrAdmin,
         scheduleValidation.paramValidation,
         errorValidator,
         scheduleValidation.bodyValidation,
@@ -21,7 +22,7 @@ router.route("/schedule/:id")
         controller.updateSchedule
     )
     .delete(
-        authenticationMW.isDoctorOrAdmin,
+        // authenticationMW.isDoctorOrAdmin,
         scheduleValidation.paramValidation,
         errorValidator,
         controller.deleteScheduleById
@@ -29,7 +30,7 @@ router.route("/schedule/:id")
             
 router.route("/schedule")
     .post(
-        authenticationMW.isDoctorOrAdmin,
+        // authenticationMW.isDoctorOrAdmin,
         scheduleValidation.bodyValidation,
         errorValidator,
         controller.newSchedule
@@ -37,7 +38,8 @@ router.route("/schedule")
     .delete(
         controller.deleteScheduleByFilter
     )
-    .get(authenticationMW.isDoctorOrAdmin,
+    .get(
+        // authenticationMW.isDoctorOrAdmin,
         controller.getAllSchedules)
 
 module.exports= router;

@@ -8,7 +8,8 @@ const express = require('express');
 const router = express.Router();
 
 router.route("/prescriptions")
-    .get(authenticationMW.isDoctorOrAdminOrPatient,
+    .get(
+        // authenticationMW.isDoctorOrAdminOrPatient,
         controller.getAllPrescriptions)
     .post(
         authenticationMW.isDoctor,

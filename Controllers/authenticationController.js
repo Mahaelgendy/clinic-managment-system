@@ -16,7 +16,8 @@ module.exports.signUp = async(request, response , next)=>{
         return response.status(400).json({message:"Email is already Used"});
     }
 
-    const {fullName,password,email,age,gender,address,role } = request.body;
+    console.log(request.body)
+    const {fullName,password,email,age,gender,address,role, phone} = request.body;
 
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
@@ -29,11 +30,13 @@ module.exports.signUp = async(request, response , next)=>{
         gender:gender,
         address:address,
         role:role,
-        image:request.file.path
+        phone:phone,
+        // image:request.file.originalname
     });
 
     user.save()
         .then(result=>{
+            console.log(result);
             response.status(200).json({message:"User added"});
         })
         .catch(err=>next(err));
@@ -58,7 +61,7 @@ module.exports.login=(async(request,response,next)=>{
 
                 if(true && user.role=="admin")
                 {
-                    response.status(200).json({message:"Admin",token});
+                    response.status(200).json({message:"admin",token});
 
                 }
                 else if (true && user.role =="doctor")

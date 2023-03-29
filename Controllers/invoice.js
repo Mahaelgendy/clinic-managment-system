@@ -64,6 +64,7 @@ module.exports.getAllInvoices = (request, response, next) => {
 
 
 module.exports.getInvoiceById = (request, response, next) => {
+   
     invoiceSchema.findById({ _id: request.params.id })
         .populate({
             path: "doctor_id",
@@ -88,36 +89,38 @@ module.exports.getInvoiceById = (request, response, next) => {
         .populate({path: "service_id", select: { name: 1, _id: 0 } })
         
         .then((data) => {
-            if (data != null) {
-                console.log(data)
-                if ((request.role == 'employee') && (request.id == data.employee_id.employeeData._id)) {
-                    console.log("true, employee")
+            // if (data != null) {
+            //     console.log(data)
+            //     if ((request.role == 'employee') && (request.id == data.employee_id.employeeData._id)) {
+            //         console.log("true, employee")
+            //         response.status(200).json(data);
+            //     }
+            //     else if (request.role == 'admin') {
+            //         console.log("true, admin")
+            console.log(data)
                     response.status(200).json(data);
-                }
-                else if (request.role == 'admin') {
-                    console.log("true, admin")
-                    response.status(200).json(data);
-                }
-                else{
-                    response.json({message:"You aren't authourized to see this data"});
-                }
-            }
+            //     }
+            //     else{
+            //         response.json({message:"You aren't authourized to see this data"});
+            //     }
+            // }
 
-            else  {
-                console.log("null")
-                response.json({message:"Id doesn't exist"});
-            }
+            // else  {
+            //     console.log("null")
+            //     response.json({message:"Id doesn't exist"});
+            // }
         })
         .catch(error => next(error));
 };
 
 module.exports.addInvoice = async(request, response, next) => {
-    const doctorExist=await DoctorSchema.findOne({_id:request.body.doctorId})
-    const clinicExist=await clinicSchema.findOne({_id:request.body.clinicId})
-    const serviceExist=await serviceSchema.findOne({_id:request.body.serviceId})
-    const patientExist = await patientSchema.findOne({ _id: request.body.patientId })
-    const employeeExist=await employeeSchema.findOne({_id:request.body.employeeId})
-    const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointmentId })
+    const doctorExist=await DoctorSchema.findOne({_id:request.body.doctor_id})
+    const clinicExist=await clinicSchema.findOne({_id:request.body.clinic_id})
+    const serviceExist=await serviceSchema.findOne({_id:request.body.service_id})
+    const patientExist = await patientSchema.findOne({ _id: request.body.patient_id })
+    const employeeExist=await employeeSchema.findOne({_id:request.body.employee_id})
+    const appointmentExist = await appointmentSchema.findOne({ _id: request.body.appointment_id })
+
 
     if ((!doctorExist)||(!clinicExist)||(!serviceExist)||(!patientExist)||(!employeeExist)||(!appointmentExist)) {
         return response.status(400).json({message:"Check your data "})
@@ -126,17 +129,18 @@ module.exports.addInvoice = async(request, response, next) => {
     function totalCost() {
       return doctorExist.price+serviceExist.salary
     }
+    console.log(request.body);
 
     let newInvoice = new invoiceSchema({
-        clinic_id: request.body.clinicId,
-        service_id: request.body.serviceId,
-        doctor_id: request.body.doctorId,
-        patient_id: request.body.patientId,
-        employee_id: request.body.employeeId,
-        appointment_id: request.body.appointmentId,
+        clinic_id: request.body.clinic_id,
+        service_id: request.body.service_id,
+        doctor_id: request.body.doctor_id,
+        patient_id: request.body.patient_id,
+        employee_id: request.body.employee_id,
+        appointment_id: request.body.appointment_id,
         paymentMethod: request.body.paymentMethod,
         paymentStatus: request.body.paymentStatus,
-        totalCost: totalCost(),
+        totalCost: request.body.totalCost,
         actualPaid: request.body.actualPaid,
         date: dateTimeMW.getDateFormat(new Date()),
         time: dateTimeMW.getTime(new Date()),
@@ -188,14 +192,14 @@ module.exports.addInvoice = async(request, response, next) => {
 
 module.exports.updateInvoice = async (request, response, next) => {
    
-    await employeeSchema.findOne({ "employeeData": request.id })
-        .then(data => {
-            console.log(data._id)
-            let EMPID = data._id
-            console.log("emp" + EMPID)
+    // await employeeSchema.findOne({ "employeeData": request.body.id })
+    //     .then(data => {
+    //         console.log(data._id)
+    //         let EMPID = data._id
+    //         console.log("emp" + EMPID)
             invoiceSchema.findOneAndUpdate({
                 _id: request.params.id,
-                employee_id: EMPID
+                // employee_id: EMPID
             },
                 {
                     $set: {
@@ -203,7 +207,7 @@ module.exports.updateInvoice = async (request, response, next) => {
                         doctor_id: request.body.doctorId,
                         service_id: request.body.serviceId,
                         patient_id: request.body.patientId,
-                        // employee_id: request.body.employeeId,
+                        employee_id: request.body.employeeId,
                         appointment_id: request.body.appointmentId,
                         paymentMethod: request.body.paymentMethod,
                         paymentStatus: request.body.paymentStatus,
@@ -220,49 +224,47 @@ module.exports.updateInvoice = async (request, response, next) => {
                 }
                 else if(result==null)
                     throw new Error("Invoice not found");
-            })
-                
-                .catch(error => next(error));
+            }).catch(error => next(error));
 
-        })
-        .catch(err => {
-            throw new Error("employee not found");
-        })
+        // })
+        // .catch(err => {
+        //     throw new Error("employee not found");
+        // })
 };
 
 module.exports.deleteInvoice = (request, response, next) => {
 
-    if (request.role == 'admin') {
+    // if (request.role == 'admin') {
         invoiceSchema.deleteOne({ _id: request.params.id })
             .then((result) => {
             
-                if (result.deletedCount == 1) {
+                // if (result.deletedCount == 1) {
                     response.status(201).json({ message: " Invoice deleted" })
-                }
-                else
-                    throw new Error("Invoice not found");
+                //}
+                // else
+                //     throw new Error("Invoice not found");
             })
             .catch((error) => next(error));
-    }
+   // }
 
-    else if (request.role == "employee") {
-         employeeSchema.findOne({ "employeeData": request.id })
-        .then(data => {
-            let EMPID = data._id
-            invoiceSchema.deleteOne({ _id: request.params.id, employee_id: EMPID })
-                .then((result) => {
-                    if (result.deletedCount == 1) {
-                        response.status(201).json({ message: " Invoice deleted" })
-                    }
-                    else
-                        throw new Error("Invoice not found");
-                })
-                .catch((error) => next(error));
-        })
-        .catch(err => {
-            throw new Error("Employee not found");
-        })  
-    }
+    // else if (request.role == "employee") {
+    //      employeeSchema.findOne({ "employeeData": request.id })
+    //     .then(data => {
+    //         let EMPID = data._id
+    //         invoiceSchema.deleteOne({ _id: request.params.id, employee_id: EMPID })
+    //             .then((result) => {
+    //                 if (result.deletedCount == 1) {
+    //                     response.status(201).json({ message: " Invoice deleted" })
+    //                 }
+    //                 else
+    //                     throw new Error("Invoice not found");
+    //             })
+    //             .catch((error) => next(error));
+    //     })
+    //     .catch(err => {
+    //         throw new Error("Employee not found");
+    //     })  
+    //  }
 };
   
 module.exports.deleteInvoiceByFilter = (request, response, next) => {

@@ -47,4 +47,9 @@ router.route("/patients/email/:email")
                 validator,
                 controller.getPatientByEmail)
 
+router.route("/patients/fullName/:fullName")
+        .get(
+                controller.getPatientByName
+        )
+
 module.exports = router;

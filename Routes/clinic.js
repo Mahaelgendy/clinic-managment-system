@@ -7,26 +7,26 @@ const router = express.Router();
 
 router.route("/clinic")
     .get(
-        authenticationMW.isAdmin,
+        // authenticationMW.isAdmin,
         controller.getAllClinics)
     .post(
-        authenticationMW.isAdmin,
+        // authenticationMW.isAdmin,
         validator.clinicValidation,
         controller.addClinic);
     
 router.route("/clinic/:id")
-    // .get(
-    //     authenticationMW.anyUser,
-    //     controller.getClinicById)
+    .get(
+        // authenticationMW.anyUser,
+        controller.getClinicById)
     // .delete(
     //     authenticationMW.isAdmin,
     //     controller.deleteClinicById)
-    //.get(controller.getClinicById)
+    // .get(controller.getClinicById)
     .delete(
-        authenticationMW.isAdmin,
+        // authenticationMW.isAdmin,
         controller.deleteClinicById)
     .patch(
-        authenticationMW.isAdmin,
+        // authenticationMW.isAdmin,
         validator.clinicValidation,
         controller.updateClinic)
 

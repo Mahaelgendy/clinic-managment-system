@@ -38,34 +38,35 @@ module.exports.getAllAppointments = (request , response , next)=>{
             populate: {path: 'employeeData', select: 'fullName', model: 'users'}
         })
         .then((data)=>{
-            if (request.role == 'doctor') {
-                const filteredData = data.filter(appointment => {
-                    return appointment.doctor_id.userData._id.toString() === request.id;})
-                appointmentMW.sortAppointment(filteredData,request.query);
-                response.status(200).json(filteredData);
-            }
-            else if (request.role == 'admin') {
-                appointmentMW.sortAppointment(data,request.query);
+            // if (request.role == 'doctor') {
+            //     const filteredData = data.filter(appointment => {
+            //         return appointment.doctor_id.userData._id.toString() === request.id;})
+            //     appointmentMW.sortAppointment(filteredData,request.query);
+            //     response.status(200).json(filteredData);
+            // }
+            // else if (request.role == 'admin') {
+                // appointmentMW.sortAppointment(data,request.query);
                 response.status(200).json(data);
-            }
-            else if(request.role == 'employee'){
-                const filteredData = data.filter(appointment => {
-                    return appointment.employee_id.employeeData._id.toString() === request.id;})
-                appointmentMW.sortAppointment(filteredData,request.query);
-                response.status(200).json(filteredData);
-            }
-            else if(request.role == 'patient' ){
-                const filteredData = data.filter(appointment => {
-                    return appointment.patient_id.patientData._id.toString() === request.id;})
-                appointmentMW.sortAppointment(filteredData,request.query);
-                response.status(200).json(filteredData);
-            }
-            else{
-                response.json({message:"You aren't authourized to see this data"});
-            }
+            // }
+            // else if(request.role == 'employee'){
+            //     const filteredData = data.filter(appointment => {
+            //         return appointment.employee_id.employeeData._id.toString() === request.id;})
+            //     appointmentMW.sortAppointment(filteredData,request.query);
+            //     response.status(200).json(filteredData);
+            // }
+            // else if(request.role == 'patient' ){
+            //     const filteredData = data.filter(appointment => {
+            //         return appointment.patient_id.patientData._id.toString() === request.id;})
+            //     appointmentMW.sortAppointment(filteredData,request.query);
+            //     response.status(200).json(filteredData);
+            // }
+            // else{
+            //     response.json({message:"You aren't authourized to see this data"});
+            // }
         })
         .catch((error)=>next(error));
 };
+
 module.exports.getAppointmentbyId = (request , response , next)=>{
     appointmentSchema.findById({_id : request.params.id})
         .populate({ path: "clinic_id" ,select: 'clinicName'})
@@ -110,6 +111,7 @@ module.exports.getAppointmentbyId = (request , response , next)=>{
         })
         .catch((error)=>next(error));
 };
+
 module.exports.getAppointmentbyDoctorId = async(request , response , next)=>{
     let doctor= await doctorSchema.findById({_id:request.params.id}).populate({path: 'userData', select: 'fullName', model: 'users'});
     if(request.role == 'doctor'){
@@ -167,6 +169,7 @@ module.exports.getAppointmentbyDoctorId = async(request , response , next)=>{
         }
     }
 };
+
 module.exports.getAppointmentbyClinicId = (request , response , next)=>{
     
     appointmentSchema.find({clinic_id : request.params.id})

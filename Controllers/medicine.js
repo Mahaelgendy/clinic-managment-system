@@ -11,9 +11,9 @@ const doctorSchema = mongoose.model('doctors')
 
 
 exports.addMedicine = async(request,response , next)=>{
-    const {name , company , speciality , description}= request.body;
+    const {medicineName , companyName , speciality , description}= request.body;
     
-    const medicineFound = await MedicineSchema.findOne({speciality:speciality , medicineName:name});
+    const medicineFound = await MedicineSchema.findOne({speciality:speciality , medicineName:medicineName});
     if(medicineFound){
         return response.status(400).json({message:"Medicine is already exist"});
     }
@@ -24,8 +24,8 @@ exports.addMedicine = async(request,response , next)=>{
                 if(speciality ==doctorspeciality.specialization ){
                     console.log("doctor")
                     const newMedicine = new MedicineSchema({
-                        medicineName:name,
-                        companyName:company,
+                        medicineName:medicineName,
+                        companyName:companyName,
                         speciality:doctorspeciality.specialization,
                         description:description
                     });
@@ -42,8 +42,8 @@ exports.addMedicine = async(request,response , next)=>{
             else if(data.role =="admin"){
                 console.log("admin")
                     const newMedicine = new MedicineSchema({
-                    medicineName:name,
-                    companyName:company,
+                    medicineName:medicineName,
+                    companyName:companyName,
                     speciality: speciality,
                     description:description
                     });
@@ -113,13 +113,13 @@ exports.updateMedicines =async (request,response,next)=>{
         if (request.query.id) query._id = Number(request.query.id);
         if (request.query.name) query.medicineName = request.query.name;
 
-        const {name , company , speciality , description}= request.body;
+        const {medicineName , companyName , speciality , description}= request.body;
 
         if(request.role =="admin"){
             MedicineSchema.updateOne(query,
                 {$set:{
-                    medicineName:name,
-                    companyName:company,
+                    medicineName:medicineName,
+                    companyName:companyName,
                     speciality: speciality,
                     description:description
                 }})
@@ -132,8 +132,8 @@ exports.updateMedicines =async (request,response,next)=>{
             const doctorspeciality = await doctorSchema.findOne({ userData:request.id})
             MedicineSchema.updateOne({speciality:doctorspeciality.specialization},
                 {$set:{
-                    medicineName:name,
-                    companyName:company,
+                    medicineName:medicineName,
+                    companyName:companyName,
                     speciality: doctorspeciality.specialization,
                     description:description
                 }})

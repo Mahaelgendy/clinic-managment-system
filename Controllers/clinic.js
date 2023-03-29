@@ -16,18 +16,18 @@ exports.getAllClinics = (request , response, next)=>{
     .catch(error=>next(error));
 }
 
-// exports.getClinicById = (request, response ,next)=>{
+exports.getClinicById = (request, response ,next)=>{
     
-//     clinicSchema.findOne({_id:request.params.id})
-//     .then(data => {
-//         if(data != null){
-//             response.status(201).json({data})
-//         }else {
-//             next(new Error({message:"Id is not exist"}));
-//         }
-//     })
-//     .catch(error => next(error));
-// }
+    clinicSchema.findOne({_id:request.params.id})
+    .then(data => {
+        if(data != null){
+            response.status(201).json(data)
+        }else {
+            next(new Error({message:"Id is not exist"}));
+        }
+    })
+    .catch(error => next(error));
+}
 
 exports.addClinic =(request, response, next)=>{
     let newClinic = new clinicSchema({

@@ -52,7 +52,7 @@ exports.getServiceById = (request, response ,next)=>{
     })
     .then(data => {
         if(data != null){
-            response.status(201).json({data})
+            response.status(201).json(data)
         }else {
             response.status(404).json({message:"Id is not exist"})
         }

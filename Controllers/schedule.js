@@ -25,19 +25,19 @@ exports.getAllSchedules = (request, response, next) => {
         .populate({ path: "clinic_id", select: " clinicName" })
 
         .then(data => {
-                if(request.role == 'doctor'){
-                    const filteredData = data.filter(schedule => {
-                    return schedule.doc_id.userData._id.toString() === request.id;})
-                    //invoiceMW.sortInvoice(filteredData,request.query);
-                    response.status(200).json(filteredData);
-                }
-                else if (request.role == 'admin') {
-                    console.log("true, admin")
+                // if(request.role == 'doctor'){
+                //     const filteredData = data.filter(schedule => {
+                //     return schedule.doc_id.userData._id.toString() === request.id;})
+                //     //invoiceMW.sortInvoice(filteredData,request.query);
+                //     response.status(200).json(filteredData);
+                // }
+                // else if (request.role == 'admin') {
+                //     console.log("true, admin")
                     response.status(200).json(data);
-                }
-                else{
-                    response.json({message:"You aren't authourized to see this data"});
-                }
+                // }
+                // else{
+                //     response.json({message:"You aren't authourized to see this data"});
+                // }
             })
          .catch((error) => next(error));
 

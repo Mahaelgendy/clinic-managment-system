@@ -17,7 +17,7 @@ router.route("/employees")
         controller.getAllEmployees)
     .post(  
             authenticationMW.isAdmin,
-            upload.single("image"),
+        //     upload.single("image"),
             employeeValidation.employeevalidation,
             validator,
             controller.addEmployee)
@@ -42,7 +42,7 @@ router.route("/employees/:id")
             controller.deleteEmployeeByID)
     .patch(  
             authenticationMW.isEmployeeOrAdmin,
-            upload.single("image"),
+        //     upload.single("image"),
             employeeValidation.paramvalidation,
             validator,
             controller.updateEmployee)
@@ -53,5 +53,10 @@ router.route("/employees/email/:email")
                 userValidation.userEmailValidation,
                 validator,
                 controller.getEmployeeByEmail)
+
+router.route("/employees/fullName/:fullName")
+        .get(
+                controller.getEmployeeByName
+        )              
 
 module.exports = router;

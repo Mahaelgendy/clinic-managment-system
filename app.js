@@ -22,6 +22,8 @@ const authenticationMW = require ("./Middlewares/authenticationMW");
 
 require("dotenv").config();
 
+const cors = require('cors');
+server.use(cors());
 let port=process.env.PORT||8080;
 
 mongoose.set('strictQuery', true);
@@ -40,6 +42,13 @@ mongoose.connect(process.env.DB_URL)
 
 server.use(morgan('combined'));
 server.use(express.json());
+
+server.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+  });
 
 //routes
 server.use(authenticationRouter);

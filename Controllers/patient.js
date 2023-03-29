@@ -59,6 +59,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
 
 
 module.exports.addPatient = (request, response, next)=>{
+
  userSchema.findOne({email:request.body.email})
             .then((data)=>{
                 if(data!=null && data.role === "patient")
@@ -133,12 +134,15 @@ module.exports.deletePatients = (request, response, next)=>{
 
 
 module.exports.getPatientByID = (request, response, next)=>{
+    console.log("*********************")
+    console.log(request.id)
     patientSchema.findOne({_id:request.params.id})
                     .populate({path:"patientData"})
                     .then((data)=>{
+                        console.log(data);
                         if (data != null) {
                             console.log(data.patientData._id)
-                            if (request.role == 'patient' && (data.patientData._id == request.id)) {
+                            if (request.role == 'patient' && (data?.patientData?._id == request.id)) {
                                 console.log("true, patient")
                                 response.status(200).json(data);
                             }
@@ -161,6 +165,7 @@ module.exports.getPatientByID = (request, response, next)=>{
                     .catch((error)=>next(error));
 
 };
+
 module.exports.getPatientByEmail = (request, response, next)=>{
     const email = request.params.email;
 
@@ -174,3 +179,18 @@ module.exports.getPatientByEmail = (request, response, next)=>{
                 })
                  .catch((error)=>next(error));
 };
+
+module.exports.getPatientByName = (request, response , next)=>{
+    const fullName = request.params.fullName;
+    console.log("Hello")
+    userSchema.findOne({fullName:fullName})
+    .then(res=>{
+        console.log(res);
+        patientSchema.findOne({patientData:res._id})
+        .populate({path:"patientData"})
+            .then((data)=>{
+                response.status(200).json(data);
+            })
+    })
+    .catch(err=>next(err))
+}

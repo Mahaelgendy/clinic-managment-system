@@ -61,6 +61,8 @@ module.exports.getAllEmployees = async (request,response,next)=>{
 module.exports.addEmployee =async (request, response, next)=>{
     let employeeExists = await userSchema.findOne({email:request.body.email});
 
+    
+    
     if(employeeExists)
     {
         return response.status(400).json({message:"Employee  already exists"});
@@ -83,17 +85,17 @@ module.exports.addEmployee =async (request, response, next)=>{
             gender:request.body.gender,
             address:request.body.address,
             role:empRole,
-            image:request.file.path
+            // image:request.file.path
         });
         user.save()
             .then((result)=>{
                     console.log(result);
                 const newEmployee = new employeeSchema({
                     employeeData:result._id,
-                    salary:request.body.employeeSalary,
-                    phone:request.body.employeePhone,
-                    position:request.body.employeePosition,
-                    clinicId:request.body.clinic_Id,
+                    salary:request.body.salary,
+                    phone:request.body.phone,
+                    position:request.body.position,
+                    clinicId:request.body.clinicId,
                 });
                 newEmployee.save()
                             .then(()=>{
@@ -199,17 +201,32 @@ module.exports.getEmployeeByEmail = (request, response, next)=>{
                   .catch(error=>next(error));
 };
 
+exports.getEmployeeByName = (request, response , next)=>{
+    const fullName = request.params.fullName;
+    
+    userSchema.findOne({fullName:fullName})
+    .then(res=>{
+        console.log(res);
+        employeeSchema.findOne({employeeData:res._id})
+        .populate({path:"employeeData"})
+            .then((data)=>{
+                response.status(200).json(data);
+            })
+    })
+    .catch(err=>next(err))
+}
+
 module.exports.updateEmployee = (request, response, next)=>{
         employeeSchema.findByIdAndUpdate({
             _id:request.params.id
         },
         {
             $set:{
-                salary:request.body.employeeSalary,
-                phone:request.body.employeePhone,
-                position:request.body.employeePosition,
-                clinicId:request.body.clinic_Id,
-                image:request.file.path
+                salary:request.body.salary,
+                phone:request.body.phone,
+                position:request.body.position,
+                clinicId:request.body.clinicId,
+                // image:request.file.path
             }
         }).then(result=>{
             response.status(200).json({message:"updated"});
