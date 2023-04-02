@@ -8,26 +8,26 @@ const router = express.Router();
 
 router.route("/service")
     .get(
-        // authenticationMW.anyUser,
+        authenticationMW.anyUser,
         controller.agetAllServices)
     .post(
-        // authenticationMW.isAdmin,
+        authenticationMW.isAdmin,
         validator.serviceValidation,
         error,
         controller.addservice)
     .delete(
-        // authenticationMW.isAdmin,
+        authenticationMW.isAdmin,
         controller.deleteByFilter);
     
 router.route("/service/:id")
     .get(
-        // authenticationMW.anyUser,
+        authenticationMW.anyUser,
         controller.getServiceById)
     .delete(
-        // authenticationMW.isAdmin,
+        authenticationMW.isAdmin,
         controller.deleteserviceById)
     .patch(
-        // authenticationMW.isAdmin,
+        authenticationMW.isAdmin,
         validator.serviceValidation,
         error,
         controller.updateservice)

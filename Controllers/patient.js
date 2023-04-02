@@ -43,6 +43,7 @@ module.exports.getAllPatients = async (request, response, next)=>{
     if(request.query.hasInsurance) query.hasInsurance = request.query.hasInsurance;
     if(request.query.patientId) query._id = Number(request.query.patientId);
     if(request.query.weight) query.weight = Number(request.query.weight);
+    if(request.query.patientData) query.patientData =request.query.patientData;
     
     const page = request.query.page *1 || 1;
     const limit = request.query.limit *1 || 3;
@@ -134,8 +135,6 @@ module.exports.deletePatients = (request, response, next)=>{
 
 
 module.exports.getPatientByID = (request, response, next)=>{
-    console.log("*********************")
-    console.log(request.id)
     patientSchema.findOne({_id:request.params.id})
                     .populate({path:"patientData"})
                     .then((data)=>{
