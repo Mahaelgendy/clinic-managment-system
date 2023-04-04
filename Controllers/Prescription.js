@@ -289,7 +289,7 @@ const prescriptionMW = require("../Middlewares/PrescriptionMW");
 exports.getAllPrescriptions =async (request , response, next)=>{
     const query = prescriptionMW.getQueryToFindWith(request);
     console.log(request.role)
-   if(request.role=="admin"){
+    if(request.role=="admin"){
         prescriptionSchema.find(query)
         .populate({path:"doctor_id", select:{"specialization":1, "price":1} ,populate:{path:"userData",select:{"fullName":1}}})
         .populate({path:"patient_id" ,populate:{path:"patientData", select:{"fullName":1 , "age" :1 ,"gender":1}}})
@@ -400,29 +400,29 @@ exports.addPrescription =async (request, response, next)=>{
 
 exports.deleteAllPrescription = async (request , response ) =>{
     const query = prescriptionMW.getQueryToFindWith(request);
-    //if(request.role =="admin"){
+    if(request.role =="admin"){
         prescriptionSchema.deleteMany(query)
         .then(result=>{
             response.status(200).json({message:"Delete all prescription for doctor"});
         })
         .catch(error=> next(error));
-    //}
-    // else if(request.role=="doctor"){
-    //     let doctor = await doctorSchema.findOne({"userData":request.id},{"_id":1,"userData":1});
-    //     if(doctor != null){
-    //         query.doctor_id = doctor._id;
-    //         prescriptionSchema.deleteMany(query)
-    //         .then(result=>{
-    //             if(result != null){
-    //                 response.status(200).json({message:"Delete all prescription for doctor"});
-    //             }
-    //             else{
-    //                 response.status(200).json({message:"no prescriptions to be deleted"});
-    //             }
-    //         })
-    //         .catch(error=> next(error));
-    //     }
-    // }
+    }
+    else if(request.role=="doctor"){
+        let doctor = await doctorSchema.findOne({"userData":request.id},{"_id":1,"userData":1});
+        if(doctor != null){
+            query.doctor_id = doctor._id;
+            prescriptionSchema.deleteMany(query)
+            .then(result=>{
+                if(result != null){
+                    response.status(200).json({message:"Delete all prescription for doctor"});
+                }
+                else{
+                    response.status(200).json({message:"no prescriptions to be deleted"});
+                }
+            })
+            .catch(error=> next(error));
+        }
+    }
 }
 
 exports.deletePrescriptionById = async (request , response ) =>{

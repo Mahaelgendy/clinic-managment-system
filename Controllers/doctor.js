@@ -345,17 +345,17 @@ exports.getDoctorById = (request , response , next)=>{
     .populate({path:'userData'})
         .then(data => {
             if (data != null) {
-                // if (request.role == 'doctor' && (data.userData._id == request.id)) {
-                //     console.log("true, doctor")
-                //     response.status(200).json(data);
-                // }
-                // else if (request.role == 'admin') {
-                //     console.log("true, admin")
+                if (request.role == 'doctor' && (data.userData._id == request.id)) {
+                    console.log("true, doctor")
                     response.status(200).json(data);
-                // }
-                // else{
-                    // response.json({message:"You aren't authourized to see this data"});
-                // }
+                }
+                else if (request.role == 'admin') {
+                    console.log("true, admin")
+                    response.status(200).json(data);
+                }
+                else{
+                    response.json({message:"You aren't authourized to see this data"});
+                }
             }
             else if(data == null) {
             response.json({message:"Id is not Found"});
