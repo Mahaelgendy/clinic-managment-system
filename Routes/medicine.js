@@ -26,4 +26,10 @@ router.route('/medicines')
         validator,
         controller.updateMedicines)
 
+router.route("/medicines/:id")
+.get(
+        // authenticationMW.isDoctorOrAdmin,
+        validator,
+        controller.getById
+        )
 module.exports = router

@@ -104,6 +104,36 @@ exports.getAllMedicinces =async (request , response , next)=>{
         .catch(error=>next(error));
     }
 };
+exports.getById =async (request , response , next)=>{
+    if(request.role =="admin"){
+        MedicineSchema.findById(request.params.id)
+        .then(data=>{
+            if(data!=null){
+                response.status(200).json(data);
+            }
+        })
+        .catch(error=>next(error));
+    }
+    else if(request.role == "doctor"){
+        const doctorspeciality = await doctorSchema.findOne({ userData:request.id})
+        MedicineSchema.find({speciality:doctorspeciality.specialization})
+        .then(data=>{
+            if(data!=null){
+                console.log(data)
+                response.status(200).json(data);
+            }
+        })
+        .catch(error=>next(error));
+    }else{
+        MedicineSchema.findById(request.params.id)
+        .then(data=>{
+            if(data!=null){
+                response.status(200).json(data);
+            }
+        })
+        .catch(error=>next(error));
+    }
+};
 
 exports.updateMedicines =async (request,response,next)=>{
     try{
