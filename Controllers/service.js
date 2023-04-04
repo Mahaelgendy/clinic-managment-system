@@ -109,7 +109,7 @@ exports.updateservice = (request,response , next)=>
             name:request.body.name,
             salary:request.body.salary,
             doctor_id :request.body.doctor_id,
-            clinin_id:request.body.clinin_id
+            clinic_id:request.body.clinin_id
         }})
         .then(result=>{
             response.status(200).json({message:"updated"});

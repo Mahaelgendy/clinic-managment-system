@@ -73,7 +73,7 @@ exports.getScheduleById = (request, response, next) => {
 };
 
 exports.newSchedule = async(request, response, next) => {
-    const doctorExist=await DoctorSchema.findOne({_id:request.body.doctor_id})
+    const doctorExist=await DoctorSchema.findOne({_id:request.body.doc_id})
     const clinicExist=await clinicSchema.findOne({_id:request.body.clinic_id})
 
     if ((!doctorExist)||(!clinicExist)) {
@@ -81,12 +81,12 @@ exports.newSchedule = async(request, response, next) => {
     }
     
     const schedule = new SchedulaSchema({
-        doc_id: request.body.doctor_id,
+        doc_id: request.body.doc_id,
         clinic_id: request.body.clinic_id,
         date: request.body.date,
         from: dateTimeMW.getTimeFromString(request.body.from),
         to: dateTimeMW.getTimeFromString(request.body.to),
-        duration_in_minutes: request.body.duration,
+        duration_in_minutes: request.body.duration_in_minutes,
     })
     schedule.save()
         .then(result => { 
@@ -143,12 +143,12 @@ exports.updateSchedule = async (request, response, next) => {
         },
             {
                 $set: {
+                    doc_id: request.body.doc_id,
                     clinic_id: request.body.clinic_Id,
-                    doc_id: request.body.doctor_Id,
                     date: request.body.date,
                     from: dateTimeMW.getTimeFromString(request.body.from),
                     to: dateTimeMW.getTimeFromString(request.body.to),
-                    duration_in_minutes: request.body.duration,
+                    duration_in_minutes: request.body.duration_in_minutes,
                 }
             }
         ).then(result => {

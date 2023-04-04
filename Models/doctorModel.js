@@ -7,8 +7,8 @@ const AutoIncreament = require('mongoose-sequence')(mongoose)
 
 const scheduleSchema = new mongoose.Schema({
     _id:{type:Number},
-    clinic_id:{type:Number , ref:'clinics' , required:true},
     doc_id:{type:Number , ref:'doctors' , required:true},
+    clinic_id:{type:Number , ref:'clinics' , required:true},
     date:{type:String , required:true},
     from:{type:Date , required:true},
     to :{type:Date , required:true},
