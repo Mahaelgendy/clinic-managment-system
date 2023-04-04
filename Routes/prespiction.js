@@ -4,12 +4,12 @@ const errorValidation = require("../Middlewares/errorValidation")
 const authenticationMW=require("./../Middlewares/Authorization")
 const express = require('express');
 
-// const validator = require("../Middlewares/")
+//const validator = require("../Middlewares/")
 const router = express.Router();
 
 router.route("/prescriptions")
     .get(
-        // authenticationMW.isDoctorOrAdminOrPatient,
+         authenticationMW.isDoctorOrAdminOrPatient,
         controller.getAllPrescriptions)
     .post(
         authenticationMW.isDoctor,
