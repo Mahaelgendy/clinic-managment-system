@@ -66,12 +66,12 @@ module.exports.addPatient = (request, response, next)=>{
                 if(data!=null && data.role === "patient")
                 {
                     let newPatient=new patientSchema({
-                        status:request.body.patientStatus,
-                        history:request.body.patientHistory,
-                        height:request.body.patientHeight,
-                        weight:request.body.patientWeight,
-                        hasInsurance:request.body.patientHasInsurance,
-                        phone:request.body.patientPhone,
+                        status:request.body.status,
+                        history:request.body.history,
+                        height:request.body.height,
+                        weight:request.body.weight,
+                        hasInsurance:request.body.hasInsurance,
+                        phone:request.body.phone,
                         patientData:data._id
                     });
                     newPatient.save()
@@ -96,12 +96,12 @@ module.exports.updatePatient = (request, response, next)=>{
     },
     {
         $set:{
-            status:request.body.patientStatus,
-            history:request.body.patientHistory,
-            height:request.body.patientHeight,
-            weight:request.body.patientWeight,
-            hasInsurance:request.body.patientHasInsurance,
-            phone:request.body.patientPhone,
+            status:request.body.status,
+            history:request.body.history,
+            height:request.body.height,
+            weight:request.body.weight,
+            hasInsurance:request.body.hasInsurance,
+            phone:request.body.phone,
         }
     }).then(result=>{
         response.status(200).json({message:"updated"});
@@ -138,14 +138,13 @@ module.exports.getPatientByID = (request, response, next)=>{
     patientSchema.findOne({_id:request.params.id})
                     .populate({path:"patientData"})
                     .then((data)=>{
-                        console.log(data);
                         if (data != null) {
                             console.log(data.patientData._id)
-                            if (request.role == 'patient' && (data?.patientData?._id == request.id)) {
+                            if (request.role == 'patient' && (data.patientData._id == request.id)) {
                                 console.log("true, patient")
                                 response.status(200).json(data);
                             }
-                            else if (request.role == 'doctor') {
+                             if (request.role == 'doctor') {
                                 console.log("true, doctor")
                                 response.status(200).json(data);
                             }
@@ -178,6 +177,7 @@ module.exports.getPatientByEmail = (request, response, next)=>{
                 })
                  .catch((error)=>next(error));
 };
+
 
 module.exports.getPatientByName = (request, response , next)=>{
     const fullName = request.params.fullName;
