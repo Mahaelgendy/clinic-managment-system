@@ -37,7 +37,9 @@ exports.addClinic =(request, response, next)=>{
     console.log(newClinic)
     newClinic.save()
         .then(result =>{
-            response.status(201).json({Message:"new clinic Add"});
+            //response.status(201).json({Message:"new clinic Add"});
+            response.status(201).json(result);
+
         })
         .catch(error => next(error));
 }
