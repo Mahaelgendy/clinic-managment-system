@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
-
 const controller = require('./../Controllers/invoice')
 const errorValidator = require("./../Middlewares/errorValidation");
 const invoiceValidation = require("../Middlewares/invoiceMW")
