@@ -35,7 +35,7 @@ router.route("/patients/:id")
                 validator,
                 controller.deletePatientById)
         .patch(
-                authenticationMW.isDoctor,
+                authenticationMW.isDoctorOrAdmin,
                 patientValidation.paramvalidation,
                 validator,
                 controller.updatePatient)

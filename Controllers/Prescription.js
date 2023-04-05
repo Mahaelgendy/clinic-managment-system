@@ -358,10 +358,10 @@ exports.getPrescriptionById =async (request, response ,next)=>{
                     response.status(201).json(data)
                 }
                 else if((data.patient_id.patientData._id == request.id) && (request.role =="patient")){
-                    response.status(201).json({data})
+                    response.status(201).json(data)
                 }
                 else if ((request.role =="admin")){
-                    response.status(201).json({data})
+                    response.status(201).json(data)
                 }else{
                     response.status(201).json({"massage":"not Atherized"});
                 }
