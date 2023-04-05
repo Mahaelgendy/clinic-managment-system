@@ -56,5 +56,5 @@ router.route("/clinicAppointment/:id")
                 errorValidator,
                 controller.getAppointmentbyClinicId
         );
-        
+router.route("/appointmentsByDate").get(controller.getAppointmentsByDate)
  module.exports= router;

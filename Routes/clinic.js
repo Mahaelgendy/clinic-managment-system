@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.route("/clinic")
     .get(
-        authenticationMW.isEmployeeOrAdmin,
+        authenticationMW.anyUser,
         controller.getAllClinics)
     .post(
         authenticationMW.isAdmin,
