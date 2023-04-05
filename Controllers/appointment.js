@@ -16,7 +16,7 @@ const e = require("express");
 
 module.exports.getAllAppointments = (request , response , next)=>{
     const query = appointmentMW.getTheQueryToFindWith(request);
-
+    console.log(query);
     appointmentSchema.find(query)
         .populate({ path: "clinic_id" ,select: 'clinicName'})
         .populate({
@@ -38,6 +38,8 @@ module.exports.getAllAppointments = (request , response , next)=>{
             populate: {path: 'employeeData', select: 'fullName', model: 'users'}
         })
         .then((data)=>{
+            console.log(data)
+            console.log(request.role)
             if (request.role == 'doctor') {
                 const filteredData = data.filter(appointment => {
                     return appointment.doctor_id?.userData?._id.toString() === request.id;})
@@ -61,8 +63,39 @@ module.exports.getAllAppointments = (request , response , next)=>{
                 response.status(200).json(filteredData);
             }
             else{
-                response.json({message:"You aren't authourized to see this data"});
+                console.log(data)
+                response.status(200).json(data);
+                // response.json({message:"You aren't authourized to see this data"});
             }
+        })
+        .catch((error)=>next(error));
+};
+
+module.exports.getAppointmentsByDate = (request , response , next)=>{
+    const query = appointmentMW.getTheQueryToFindWith(request);
+
+    appointmentSchema.find(query)
+        .populate({ path: "clinic_id" ,select: 'clinicName'})
+        .populate({
+            path: 'doctor_id',
+            select: 'userData',
+            model: 'doctors',
+            populate: {path: 'userData', select: 'fullName', model: 'users'}
+        })
+        .populate({ 
+            path: "patient_id",
+            select: 'patientData',
+            model: 'patients',
+            populate: {path: 'patientData', select: 'fullName', model: 'users'}
+        })
+        .populate({
+            path: "employee_id",
+            select: 'employeeData',
+            model: 'employees',
+            populate: {path: 'employeeData', select: 'fullName', model: 'users'}
+        })
+        .then((data)=>{
+            response.status(200).json(data);
         })
         .catch((error)=>next(error));
 };
@@ -206,10 +239,10 @@ module.exports.addAppointment=async(request , response , next)=>{
 
     let appointmentDate = request.body.date;
     let startOfAppointment = request.body.from;
-    let doctorId =request.body.doctorId;
-    let clinicId = request.body.clinicId;
-    let patientId = request.body.patientId;
-    let employeeId = request.body.employeeId;
+    let doctorId =request.body.doctor_id;
+    let clinicId = request.body.clinic_id;
+    let patientId = request.body.patient_id;
+    let employeeId = request.body.employee_id;
 
     if (await appointmentMW.checkAllUsersAvailability(doctorId, clinicId, patientId)){
         let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
@@ -217,17 +250,18 @@ module.exports.addAppointment=async(request , response , next)=>{
         if (endOfAppointment != null){
     
             let isFree = await appointmentMW.checkIfThisTimeSlotIsFree(null,clinicId,doctorId, appointmentDate , startOfAppointment, endOfAppointment)
+
             if(isFree){
                 let newAppointment = new appointmentSchema({
                     clinic_id: clinicId,
                     doctor_id:doctorId,
-                    patient_id: request.body.patientId,
+                    patient_id: patientId,
                     employee_id:null,
                     date: appointmentDate,
                     from: dateTimeMW.getTimeFromString(startOfAppointment),
                     to : dateTimeMW.getTimeFromString(endOfAppointment),
                     status: request.body.status,
-                    reservation_method:request.body.reservationMethod
+                    reservation_method:request.body.reservation_method
                     }
                 );
                 if(request.body.reservationMethod == "Offline"){
@@ -271,7 +305,8 @@ module.exports.addAppointment=async(request , response , next)=>{
 module.exports.updateAppointment=async(request , response , next)=>{
 
     let appointmentDate = request.body.date;
-    let startOfAppointment = request.body.from;
+    let startOfAppointment = dateTimeMW.getTime(request.body.from);
+    console.log(startOfAppointment);
     let appointmentId = request.params.id;
 
     let currentAppointment = await appointmentSchema.findById({_id : appointmentId})
@@ -286,6 +321,7 @@ module.exports.updateAppointment=async(request , response , next)=>{
     let clinicId = currentAppointment.clinic_id;
 
     if((request.role == 'patient' && currentAppointment.patient_id.patientData._id == request.id)|| request.role == 'employee'){
+        console.log("here")
         let endOfAppointment = await appointmentMW.getEndOfAppointment(clinicId,doctorId,appointmentDate,startOfAppointment);
         if (endOfAppointment != null){
     
@@ -301,7 +337,7 @@ module.exports.updateAppointment=async(request , response , next)=>{
                         from:dateTimeMW.getTimeFromString(startOfAppointment),
                         to: dateTimeMW.getTimeFromString(endOfAppointment),
                         status: request.body.status,
-                        reservation_method:request.body.reservationMethod
+                        reservation_method:request.body.reservation_method
                     }
                 }).then(result=>{
                     response.status(201).json({message:"appointment updated"});

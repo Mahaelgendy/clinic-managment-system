@@ -23,7 +23,7 @@ exports.appointmentBodyValidation = [
     body("status").isIn(['First Time' , 'Follow Up']).notEmpty().withMessage("Status should be First Time or Follow Up").optional(),
     body("reservationMethod").isIn(['Online' , 'Offline']).notEmpty().withMessage("Reservation method should be Either Online or Offline").optional(),
     body("date").isString().notEmpty().matches(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/).withMessage("Date must be string in format YYYY-MM-DD"),
-    body("from").isString().notEmpty().matches(/^(?:(?:[0-1][0-9]|2[0-3]):[0-5]?[0-9](?::[0-5]?[0-9])?)|(?:[0-9]:[0-5]?[0-9](?::[0-5]?[0-9])?)$/).withMessage("From time must be string in format hh:mm:ss"),
+    // body("from").isString().notEmpty().matches(/^(?:(?:[0-1][0-9]|2[0-3]):[0-5]?[0-9](?::[0-5]?[0-9])?)|(?:[0-9]:[0-5]?[0-9](?::[0-5]?[0-9])?)$/).withMessage("From time must be string in format hh:mm:ss"),
 ]
 exports.idParamValidation = [
     param('id').isInt().withMessage("Id should be interger")
@@ -84,11 +84,11 @@ module.exports.checkIfThisTimeSlotIsFree= async(appointmentId,clinicId,doctorId,
 }
 
 module.exports.checkAllUsersAvailability=async(doctorId,clinicId,patientId)=>{
+    console.log(doctorId)
     let doctor = await doctorSchema.findById(doctorId);
     let clinic = await clinicSchema.findById(clinicId);
     let patient = await patientSchema.findById(patientId);
     // let employee = await employeeSchema.findById(employeeId);
-
     if(doctor != null && clinic!= null && patient != null )
         return true 
     else

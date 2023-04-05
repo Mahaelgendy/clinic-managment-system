@@ -39,7 +39,7 @@ router.route("/schedule")
         controller.deleteScheduleByFilter
     )
     .get(
-        authenticationMW.isDoctorOrAdmin,
+        authenticationMW.anyUser,
         controller.getAllSchedules)
 
 router.route("/doctorSchedule/:id")

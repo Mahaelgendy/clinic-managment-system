@@ -97,7 +97,7 @@ router.route("/doctors/:id")
 
 router.route('/doctors')
     .get(
-        authenticationMW.isEmployeeOrAdmin,
+        authenticationMW.anyUser,
         controller.getAllDoctors)
     
     .post(
