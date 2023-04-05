@@ -42,4 +42,11 @@ router.route("/schedule")
         authenticationMW.isDoctorOrAdmin,
         controller.getAllSchedules)
 
+router.route("/doctorSchedule/:id")
+        .get(
+            //authenticationMW.isDoctorOrAdmin,
+            scheduleValidation.paramValidation,
+            errorValidator,
+            controller.getScheduleByDoctorId
+        );
 module.exports= router;

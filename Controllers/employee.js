@@ -200,6 +200,32 @@ module.exports.getEmployeeByEmail = (request, response, next)=>{
                 })
                   .catch(error=>next(error));
 };
+module.exports.getEmployeeByUserId = (request, response, next)=>{
+    employeeSchema.findOne({employeeData:request.params.id}).populate({path:"employeeData",select:{fullName:1,age:1,gender:1,email:1}})
+    .then((data)=>{
+          if(data!=null)
+          {
+              console.log((request.id ))
+              console.log(data.employeeData._id)
+              if(request.role == "employee" && (data.employeeData._id == request.id) ){
+                  console.log("you are employee , authemticated")
+                  response.status(200).json(data);
+              }
+              else if(request.role == "admin"){
+                  console.log("you are admin , authourized")
+                  response.status(200).json(data);
+              }
+              else{
+                  response.json({message:"You aren't authourized to see this data"});
+              }
+          }
+          else
+          {
+              response.json({message:"Employee not Found"});
+          }
+    })
+    .catch(error=>next(error));
+};
 
 exports.getEmployeeByName = (request, response , next)=>{
     const fullName = request.params.fullName;

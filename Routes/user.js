@@ -13,7 +13,7 @@ const upload = require("./../Middlewares/uploadImageMW");
 
 router.route("/users")
     .get(
-        // authenticationMW.isAdmin,
+        authenticationMW.isAdmin,
         controller.getAllUsers)
     .delete(
         authenticationMW.isAdmin,

@@ -220,19 +220,19 @@ exports.deleteScheduleByFilter = (request, response, next) => {
         .catch((error) => next(error));
 };
 
-// exports.getScheduleByDoctorId = (request, response, next) => {
-//     SchedulaSchema.find({ doctor_id: request.body.id })
-//         .populate({ path: "doc_id" })
-//         .then(data => {
-//             if (data != null) {
-//                 response.status(200).json(data);
+exports.getScheduleByDoctorId = (request, response, next) => {
+    SchedulaSchema.find({ doc_id: request.params.id })
+        .populate({ path: "doc_id" })
+        .then(data => {
+            if (data != null) {
+                response.status(200).json(data);
 
-//             } else {
-//                 response.json({ message: "Doctor Id not Found" });
-//             }
-//         })
-//         .catch((error) => next(error));
-// };
+            } else {
+                response.json({ message: "Doctor Id not Found" });
+            }
+        })
+        .catch((error) => next(error));
+};
 
 // exports.getScheduleByClinicId = (request, response, next) => {
 //     SchedulaSchema.find({clinic_id: request.body.id })
