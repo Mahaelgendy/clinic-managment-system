@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.route("/employees")
     .get(
-        authenticationMW.isAdmin,
+        authenticationMW.isEmployeeOrAdmin,
         controller.getAllEmployees)
     .post(  
             authenticationMW.isAdmin,
@@ -54,6 +54,12 @@ router.route("/employees/email/:email")
                 validator,
                 controller.getEmployeeByEmail)
 
+router.route("/emp/:id")
+.get(
+        // authenticationMW.isEmployeeOrAdmin,
+        validator,
+        controller.getEmployeeByUserId)
+        
 router.route("/employees/fullName/:fullName")
         .get(
                 controller.getEmployeeByName

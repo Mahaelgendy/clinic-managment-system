@@ -51,8 +51,8 @@ server.use((req, res, next) => {
   });
 
 //routes
-//server.use(authenticationRouter);
-//server.use(authenticationMW);
+server.use(authenticationRouter);
+server.use(authenticationMW);
 server.use(appointmentRoutes);
 server.use(clinicRoutes);
 server.use(serviceRoutes)

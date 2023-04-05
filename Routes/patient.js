@@ -10,7 +10,7 @@ const router= express.Router();
 
 router.route("/patients")
         .get(
-                authenticationMW.isDoctorOrAdmin,
+                authenticationMW.anyUser,
                 controller.getAllPatients)
         .post(
                 authenticationMW.isDoctorOrAdmin,
